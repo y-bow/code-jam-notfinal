@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}UPC | Classroom - CS101{% endblock %}
+{% block page_title %}CS101: Introduction to Programming{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.student_dashboard') }}" class="nav-item">
+    <span class="material-symbols-rounded">arrow_back</span>
+    Back to Hub
+</a>
+<a href="#" class="nav-item active">
+    <span class="material-symbols-rounded">class</span>
+    Class Home
+</a>
+<a href="#" class="nav-item">
+    <span class="material-symbols-rounded">assignment</span>
+    Assignments
+</a>
+<a href="#" class="nav-item">
+    <span class="material-symbols-rounded">fact_check</span>
+    Grades & Attendance
+</a>
+<a href="#" class="nav-item">
+    <span class="material-symbols-rounded">folder</span>
+    Resources
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid" style="grid-template-columns: 1fr 300px;">
+    <!-- Main Content Area -->
+    <div class="main-column" style="display: flex; flex-direction: column; gap: 2rem;">
+
+        <!-- Action Banner (Meeting Link) -->
+        <div class="glass-panel gradient-border"
+            style="padding: 1.5rem; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: space-between; background: linear-gradient(to right, rgba(99, 102, 241, 0.1), rgba(20, 184, 166, 0.1));">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div
+                    style="background: var(--danger-color); width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 10px var(--danger-color); animation: pulse 2s infinite;">
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.2rem;">Live Class in Session</h3>
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Join the lecture now via Google
+                        Meet</span>
+                </div>
+            </div>
+            <a href="#"
+                style="background: var(--primary-color); color: white; padding: 0.75rem 1.5rem; border-radius: var(--radius-full); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; transition: transform var(--transition-fast);">
+                <span class="material-symbols-rounded">videocam</span>
+                Join Live Class
+            </a>
+        </div>
+
+        <!-- Assignments & Submissions -->
+        <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-rounded" style="color: var(--warning-color);">assignment</span>
+                    Active Assignments
+                </h3>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Assignment Card -->
+                <div
+                    style="padding: 1.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-main);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                        <div>
+                            <h4 style="margin: 0 0 0.25rem 0; font-size: 1.1rem;">Assignment 1: Python Basics</h4>
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">Points: 100 • Multiple file
+                                upload allowed</span>
+                        </div>
+                        <span
+                            style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Due:
+                            Tomorrow 11:59PM</span>
+                    </div>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">Submit your .py files
+                        for the first 5 exercises. Ensure your code is well commented.</p>
+
+                    <div
+                        style="border: 2px dashed var(--border-color); padding: 1.5rem; text-align: center; border-radius: var(--radius-sm); cursor: pointer; transition: background var(--transition-fast);">
+                        <span class="material-symbols-rounded"
+                            style="font-size: 2rem; color: var(--primary-light);">cloud_upload</span>
+                        <p style="margin: 0.5rem 0 0 0; font-weight: 500;">Click to browse or drag files here</p>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+                        <button
+                            style="background: var(--primary-color); color: white; padding: 0.6rem 1.5rem; border: none; border-radius: var(--radius-md); font-weight: 600; cursor: pointer;">Submit
+                            Work</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Class Announcements -->
+        <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg);">
+            <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                <span class="material-symbols-rounded" style="color: var(--secondary-color);">campaign</span>
+                Class Announcements
+            </h3>
+            <div
+                style="padding: 1rem; border-left: 4px solid var(--primary-color); background: var(--bg-main); border-radius: var(--radius-sm);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="font-weight: 600;">Midterm format changed</span>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Posted 2 days ago</span>
+                </div>
+                <p style="font-size: 0.9rem; margin: 0; color: var(--text-muted);">The midterm will now be open-book,
+                    but you cannot use external internet resources. You are allowed one cheat sheet.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Right Sidebar Info -->
+    <div class="side-column" style="display: flex; flex-direction: column; gap: 2rem;">
+
+        <!-- Class Info Card -->
+        <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg);">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div
+                    style="width: 60px; height: 60px; background: var(--primary-light); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin: 0 auto 0.5rem auto;">
+                    JS
+                </div>
+                <h4 style="margin: 0;">Prof. John Smith</h4>
+                <a href="#" style="font-size: 0.85rem; color: var(--primary-color);"><span
+                        class="material-symbols-rounded" style="font-size: 1rem; vertical-align: middle;">mail</span>
+                    Message</a>
+            </div>
+
+            <div
+                style="display: flex; flex-direction: column; gap: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Office Hours</span>
+                    <span style="font-weight: 500; font-size: 0.9rem;">Mon/Wed 10-12PM</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Room</span>
+                    <span style="font-weight: 500; font-size: 0.9rem;">Building B, 301</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grade & Attendance Stats -->
+        <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg);">
+            <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem;">My Performance</h3>
+
+            <div style="margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="font-size: 0.9rem; font-weight: 500;">Current Grade</span>
+                    <span style="font-weight: bold; color: var(--success-color);">88%</span>
+                </div>
+                <div
+                    style="width: 100%; height: 8px; background: var(--border-color); border-radius: var(--radius-full); overflow: hidden;">
+                    <div
+                        style="width: 88%; height: 100%; background: var(--success-color); border-radius: var(--radius-full);">
+                    </div>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
+                    <span>Class Avg: 76%</span>
+                </div>
+            </div>
+
+            <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="font-size: 0.9rem; font-weight: 500;">Attendance</span>
+                    <span style="font-weight: bold; color: var(--warning-color);">85%</span>
+                </div>
+                <div
+                    style="width: 100%; height: 8px; background: var(--border-color); border-radius: var(--radius-full); overflow: hidden;">
+                    <div
+                        style="width: 85%; height: 100%; background: var(--warning-color); border-radius: var(--radius-full);">
+                    </div>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.5rem;">Present:
+                    17 | Missed: 3</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+
+        70% {
+            box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        }
+    }
+</style>
+{% endblock %}

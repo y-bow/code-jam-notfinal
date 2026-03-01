@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}UPC | Manage CS101{% endblock %}
+{% block page_title %}Manage: CS101 (Intro to Programming){% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.teacher_dashboard') }}" class="nav-item">
+    <span class="material-symbols-rounded">arrow_back</span>
+    Back to Hub
+</a>
+<a href="#" class="nav-item active">
+    <span class="material-symbols-rounded">manage_accounts</span>
+    Students
+</a>
+<a href="#" class="nav-item">
+    <span class="material-symbols-rounded">assignment</span>
+    Assignments
+</a>
+<a href="#" class="nav-item">
+    <span class="material-symbols-rounded">checklist</span>
+    Attendance
+</a>
+<a href="#" class="nav-item">
+    <span class="material-symbols-rounded">campaign</span>
+    Announcements
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg); margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; gap: 2rem;">
+            <div>
+                <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Enrolled</span>
+                <div style="font-size: 1.5rem; font-weight: bold; font-family: var(--font-heading);">45</div>
+            </div>
+            <div>
+                <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Class Avg</span>
+                <div
+                    style="font-size: 1.5rem; font-weight: bold; font-family: var(--font-heading); color: var(--success-color);">
+                    84%</div>
+            </div>
+            <div>
+                <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">At Risk</span>
+                <div
+                    style="font-size: 1.5rem; font-weight: bold; font-family: var(--font-heading); color: var(--danger-color);">
+                    3</div>
+            </div>
+        </div>
+
+        <button
+            style="background: var(--primary-color); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: var(--radius-full); font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+            <span class="material-symbols-rounded">videocam</span>
+            Start Live Class
+        </button>
+    </div>
+</div>
+
+<!-- Student Roster / Grades View -->
+<div class="glass-panel" style="border-radius: var(--radius-lg); overflow: hidden;">
+    <div
+        style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <span class="material-symbols-rounded" style="color: var(--primary-color);">groups</span>
+            Student Roster
+        </h3>
+        <div style="display: flex; gap: 1rem;">
+            <input type="text" placeholder="Search students..."
+                style="padding: 0.5rem 1rem; border-radius: var(--radius-full); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-main);">
+            <button class="icon-btn" style="border: 1px solid var(--border-color);"><span
+                    class="material-symbols-rounded">filter_list</span></button>
+        </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="background: var(--bg-main); border-bottom: 2px solid var(--border-color);">
+                    <th style="padding: 1rem 1.5rem; font-weight: 600; color: var(--text-muted);">Name/ID</th>
+                    <th style="padding: 1rem 1.5rem; font-weight: 600; color: var(--text-muted);">Attendance</th>
+                    <th style="padding: 1rem 1.5rem; font-weight: 600; color: var(--text-muted);">Grade</th>
+                    <th style="padding: 1rem 1.5rem; font-weight: 600; color: var(--text-muted);">Status</th>
+                    <th style="padding: 1rem 1.5rem; font-weight: 600; color: var(--text-muted);">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr
+                    style="border-bottom: 1px solid var(--border-color); transition: background var(--transition-fast);">
+                    <td style="padding: 1rem 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div class="avatar" style="width: 32px; height: 32px; font-size: 0.8rem;">AJ</div>
+                            <div>
+                                <div style="font-weight: 500;">Alex Johnson</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">ID: 2024001</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding: 1rem 1.5rem;">
+                        <span style="color: var(--success-color); font-weight: 500;">95%</span>
+                    </td>
+                    <td style="padding: 1rem 1.5rem;">
+                        <span style="font-weight: 500;">92% (A)</span>
+                    </td>
+                    <td style="padding: 1rem 1.5rem;">
+                        <span
+                            style="background: rgba(16, 185, 129, 0.1); color: var(--success-color); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">Excellent</span>
+                    </td>
+                    <td style="padding: 1rem 1.5rem;">
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="icon-btn" title="View Profile"><span
+                                    class="material-symbols-rounded">visibility</span></button>
+                            <button class="icon-btn" title="Message"><span
+                                    class="material-symbols-rounded">mail</span></button>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr
+                    style="border-bottom: 1px solid var(--border-color); transition: background var(--transition-fast);">
+                    <td style="padding: 1rem 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div class="avatar" style="width: 32px; height: 32px; font-size: 0.8rem;">MG</div>
+                            <div>
+                                <div style="font-weight: 500;">Maria Garcia</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">ID: 2024002</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding: 1rem 1.5rem;">
+                        <span style="color: var(--danger-color); font-weight: 500;">60%</span>
+                    </td>
+                    <td style="padding: 1rem 1.5rem;">
+                        <span style="font-weight: 500;">68% (D)</span>
+                    </td>
+                    <td style="padding: 1rem 1.5rem;">
+                        <span
+                            style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">At
+                            Risk ⚠️</span>
+                    </td>
+                    <td style="padding: 1rem 1.5rem;">
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="icon-btn" title="View Profile"><span
+                                    class="material-symbols-rounded">visibility</span></button>
+                            <button class="icon-btn" title="Message"><span
+                                    class="material-symbols-rounded">mail</span></button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    tbody tr:hover {
+        background-color: var(--bg-glass-hover);
+    }
+</style>
+{% endblock %}

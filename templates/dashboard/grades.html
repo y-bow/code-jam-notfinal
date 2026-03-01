@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Hive | Grades Overview{% endblock %}
+{% block page_title %}Grades Overview{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.student_dashboard') }}" class="nav-item">
+    <span class="material-symbols-rounded">space_dashboard</span>
+    Global Hub
+</a>
+<a href="{{ url_for('dashboard.timetable') }}" class="nav-item">
+    <span class="material-symbols-rounded">calendar_today</span>
+    Timetable
+</a>
+<a href="{{ url_for('dashboard.tasks') }}" class="nav-item">
+    <span class="material-symbols-rounded">task_alt</span>
+    Tasks
+</a>
+<a href="{{ url_for('dashboard.grades') }}" class="nav-item active">
+    <span class="material-symbols-rounded">bar_chart</span>
+    Grades Overview
+</a>
+<a href="{{ url_for('dashboard.announcements') }}" class="nav-item">
+    <span class="material-symbols-rounded">campaign</span>
+    Announcements
+    <span class="badge">2</span>
+</a>
+<a href="{{ url_for('dashboard.messages') }}" class="nav-item">
+    <span class="material-symbols-rounded">forum</span>
+    Messages
+</a>
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; gap: 2rem;">
+    <div class="glass-panel" style="flex: 2; padding: 2rem; border-radius: var(--radius-lg);">
+        <h3 style="margin: 0 0 1.5rem 0; display: flex; align-items: center; gap: 0.5rem;"><span
+                class="material-symbols-rounded">bar_chart</span> Course Grades</h3>
+
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted);">
+                    <th style="padding: 1rem;">Course</th>
+                    <th style="padding: 1rem;">Grade</th>
+                    <th style="padding: 1rem;">Status</th>
+                    <th style="padding: 1rem;">Credits</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 1rem; font-weight: 500;">Introduction to Programming (CS101)</td>
+                    <td style="padding: 1rem; font-weight: 600; color: var(--success-color);">92% (A)</td>
+                    <td style="padding: 1rem;"><span
+                            style="color: var(--success-color); background: rgba(16, 185, 129, 0.1); padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.8rem;">Excellent</span>
+                    </td>
+                    <td style="padding: 1rem;">4</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 1rem; font-weight: 500;">Calculus I (MATH101)</td>
+                    <td style="padding: 1rem; font-weight: 600; color: var(--warning-color);">78% (C+)</td>
+                    <td style="padding: 1rem;"><span
+                            style="color: var(--warning-color); background: rgba(245, 158, 11, 0.1); padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.8rem;">Average</span>
+                    </td>
+                    <td style="padding: 1rem;">4</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 1rem; font-weight: 500;">Physics Mechanics (PHY101)</td>
+                    <td style="padding: 1rem; font-weight: 600;">85% (B)</td>
+                    <td style="padding: 1rem;"><span
+                            style="background: var(--border-color); padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.8rem;">Good</span>
+                    </td>
+                    <td style="padding: 1rem;">3</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="glass-panel"
+        style="flex: 1; padding: 2rem; border-radius: var(--radius-lg); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <h3 style="margin: 0 0 1rem 0; width: 100%; text-align: left;">Current CGPA</h3>
+        <div
+            style="width: 150px; height: 150px; border-radius: 50%; border: 12px solid var(--primary-color); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem;">
+            3.6
+        </div>
+        <p style="color: var(--text-muted); text-align: center;">You are in the top 15% of your class.</p>
+    </div>
+</div>
+{% endblock %}

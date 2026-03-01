@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Hive | Timetable{% endblock %}
+{% block page_title %}My Timetable{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.student_dashboard') }}" class="nav-item">
+    <span class="material-symbols-rounded">space_dashboard</span>
+    Global Hub
+</a>
+<a href="{{ url_for('dashboard.timetable') }}" class="nav-item active">
+    <span class="material-symbols-rounded">calendar_today</span>
+    Timetable
+</a>
+<a href="{{ url_for('dashboard.tasks') }}" class="nav-item">
+    <span class="material-symbols-rounded">task_alt</span>
+    Tasks
+</a>
+<a href="{{ url_for('dashboard.grades') }}" class="nav-item">
+    <span class="material-symbols-rounded">bar_chart</span>
+    Grades Overview
+</a>
+<a href="{{ url_for('dashboard.announcements') }}" class="nav-item">
+    <span class="material-symbols-rounded">campaign</span>
+    Announcements
+    <span class="badge">2</span>
+</a>
+<a href="{{ url_for('dashboard.messages') }}" class="nav-item">
+    <span class="material-symbols-rounded">forum</span>
+    Messages
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="padding: 2rem; border-radius: var(--radius-lg);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h3 style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+            <span class="material-symbols-rounded" style="color: var(--primary-color);">calendar_today</span>
+            Weekly View
+        </h3>
+        <div style="display: flex; gap: 1rem;">
+            <button class="icon-btn theme-toggle"
+                style="background: var(--bg-main); border: 1px solid var(--border-color);"><span
+                    class="material-symbols-rounded">chevron_left</span></button>
+            <span style="display: flex; align-items: center; font-weight: 500;">March 2026</span>
+            <button class="icon-btn theme-toggle"
+                style="background: var(--bg-main); border: 1px solid var(--border-color);"><span
+                    class="material-symbols-rounded">chevron_right</span></button>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; text-align: center;">
+        <div style="font-weight: 600; padding: 1rem; border-bottom: 2px solid var(--primary-color);">Monday</div>
+        <div style="font-weight: 600; padding: 1rem; border-bottom: 2px solid var(--border-color);">Tuesday</div>
+        <div style="font-weight: 600; padding: 1rem; border-bottom: 2px solid var(--border-color);">Wednesday</div>
+        <div style="font-weight: 600; padding: 1rem; border-bottom: 2px solid var(--border-color);">Thursday</div>
+        <div style="font-weight: 600; padding: 1rem; border-bottom: 2px solid var(--border-color);">Friday</div>
+
+        <!-- Time blocks -->
+        <div
+            style="background: var(--bg-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md); text-align: left; min-height: 120px;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; margin-bottom: 0.5rem;">09:00
+                AM - 10:30 AM</div>
+            <div style="font-weight: 600; font-size: 0.9rem; color: var(--primary-color);">Introduction to Programming
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Room 301</div>
+        </div>
+
+        <div></div> <!-- Tuesday empty -->
+
+        <div
+            style="background: var(--bg-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md); text-align: left; min-height: 120px;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; margin-bottom: 0.5rem;">09:00
+                AM - 10:30 AM</div>
+            <div style="font-weight: 600; font-size: 0.9rem; color: var(--primary-color);">Introduction to Programming
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Room 301</div>
+        </div>
+
+        <div
+            style="background: var(--bg-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md); text-align: left; min-height: 120px;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; margin-bottom: 0.5rem;">11:00
+                AM - 12:30 PM</div>
+            <div style="font-weight: 600; font-size: 0.9rem; color: var(--warning-color);">Calculus I</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Room 405</div>
+        </div>
+
+        <div></div> <!-- Friday empty -->
+    </div>
+</div>
+{% endblock %}

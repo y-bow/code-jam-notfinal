@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Hive | Login{% endblock %}
+
+{% block sidebar_links %}{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; height: 80vh;">
+    <div class="glass-panel" style="width: 400px; padding: 2.5rem; border-radius: var(--radius-lg);">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <span class="material-symbols-rounded" style="font-size: 3rem; color: var(--primary-color);">hive</span>
+            <h2 style="margin-top: 1rem;">Welcome to Hive</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Sign in to your dashboard</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div
+            style="padding: 10px; margin-bottom: 15px; border-radius: var(--radius-sm); 
+                        background-color: {% if category == 'danger' %}var(--danger-color){% else %}var(--warning-color){% endif %}; color: white; text-align: center;">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.login') }}"
+            style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label for="email" style="font-size: 0.9rem; font-weight: 500;">College Email</label>
+                <input type="email" id="email" name="email" required
+                    style="padding: 0.75rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); 
+                              background: var(--bg-main); color: var(--text-main); font-family: var(--font-body); font-size: 1rem;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label for="password" style="font-size: 0.9rem; font-weight: 500;">Password</label>
+                <input type="password" id="password" name="password" required
+                    style="padding: 0.75rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); 
+                              background: var(--bg-main); color: var(--text-main); font-family: var(--font-body); font-size: 1rem;">
+            </div>
+
+            <button type="submit" class="gradient-border"
+                style="margin-top: 0.5rem; padding: 0.8rem; background: var(--primary-color); color: white; border: none; 
+                           border-radius: var(--radius-md); font-weight: 600; font-family: var(--font-body); font-size: 1.1rem; cursor: pointer; transition: all var(--transition-fast);">
+                Sign In
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Hide sidebar and topbar on login page */
+    .sidebar,
+    .topbar {
+        display: none !important;
+    }
+
+    .content-wrapper {
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+    }
+
+    button[type="submit"]:hover {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}

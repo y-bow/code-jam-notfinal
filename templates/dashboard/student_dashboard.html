@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}UPC | Student Dashboard{% endblock %}
+{% block page_title %}Hello, {{ session.name }}{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.student_dashboard') }}" class="nav-item active">
+    <span class="material-symbols-rounded">space_dashboard</span>
+    Global Hub
+</a>
+<a href="{{ url_for('dashboard.timetable') }}" class="nav-item">
+    <span class="material-symbols-rounded">calendar_today</span>
+    Timetable
+</a>
+<a href="{{ url_for('dashboard.tasks') }}" class="nav-item">
+    <span class="material-symbols-rounded">task_alt</span>
+    Tasks
+</a>
+<a href="{{ url_for('dashboard.grades') }}" class="nav-item">
+    <span class="material-symbols-rounded">bar_chart</span>
+    Grades Overview
+</a>
+<a href="{{ url_for('dashboard.announcements') }}" class="nav-item">
+    <span class="material-symbols-rounded">campaign</span>
+    Announcements
+    <span class="badge">2</span>
+</a>
+<a href="{{ url_for('dashboard.messages') }}" class="nav-item">
+    <span class="material-symbols-rounded">forum</span>
+    Messages
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Left Column: Timetable & Tasks -->
+    <div class="main-column">
+
+        <!-- Welcome Banner -->
+        <div class="welcome-card glass-panel gradient-border">
+            <h3>Welcome back, {{ session.name.split(' ')[0] }}!</h3>
+            <p>You have 3 upcoming deadlines and 1 pending announcement.</p>
+        </div>
+
+        <!-- Weekly Timetable Preview -->
+        <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg); margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-rounded" style="color: var(--primary-color);">calendar_today</span>
+                    Today's Classes
+                </h3>
+                <a href="#" style="font-size: 0.85rem; font-weight: 500;">View Full Timetable</a>
+            </div>
+
+            <div class="timetable-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Dummy Data for MVP UI layout -->
+                <div
+                    style="display: flex; gap: 1rem; align-items: center; padding: 1rem; border-radius: var(--radius-md); background: var(--bg-main); border-left: 4px solid var(--primary-color);">
+                    <div style="display: flex; flex-direction: column; text-align: right; min-width: 80px;">
+                        <span style="font-weight: 600;">09:00 AM</span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">10:30 AM</span>
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <h4 style="margin: 0;">Introduction to Programming (CS101)</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">Prof. John Smith • Room 301</span>
+                    </div>
+                </div>
+
+                <div
+                    style="display: flex; gap: 1rem; align-items: center; padding: 1rem; border-radius: var(--radius-md); background: var(--bg-main); border-left: 4px solid var(--warning-color);">
+                    <div style="display: flex; flex-direction: column; text-align: right; min-width: 80px;">
+                        <span style="font-weight: 600;">11:00 AM</span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">12:30 PM</span>
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <h4 style="margin: 0;">Calculus I (MATH101)</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">Prof. Sarah Davis • Room 405</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mini To-Do Lists -->
+        <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-rounded"
+                        style="color: var(--secondary-color);">format_list_bulleted</span>
+                    Upcoming Deadlines
+                </h3>
+            </div>
+            <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                <li
+                    style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border-radius: var(--radius-md); background: var(--bg-main);">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary-color);">
+                        <span>CS101 Assignment 1</span>
+                    </div>
+                    <span
+                        style="font-size: 0.8rem; font-weight: 600; color: var(--danger-color); padding: 2px 8px; background: rgba(239, 68, 68, 0.1); border-radius: 20px;">Due
+                        Tomorrow, 11:59PM</span>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Right Column: Analytics & Quick Stats -->
+    <div class="side-column" style="display: flex; flex-direction: column; gap: 2rem;">
+
+        <!-- CGPA Ring Card -->
+        <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg); text-align: center;">
+            <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem; text-align: left;">Overall Progress</h3>
+
+            <div style="position: relative; width: 150px; height: 150px; margin: 0 auto;">
+                <!-- Placeholder for Plotly/SVG Gauge -->
+                <svg viewBox="0 0 36 36" style="width: 100%; height: 100%;">
+                    <path style="fill: none; stroke: var(--bg-main); stroke-width: 3;"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path
+                        style="fill: none; stroke: var(--primary-color); stroke-width: 3; stroke-dasharray: 85, 100; animation: progress 1s ease-out forwards;"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <div
+                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column;">
+                    <span style="font-size: 2rem; font-weight: 700; font-family: var(--font-heading);">8.5</span>
+                    <span
+                        style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">CGPA</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Stats -->
+        <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg);">
+            <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Attendance Overview</h3>
+            <!-- Dummy Plotly chart placeholder -->
+            <div id="attendance-chart"
+                style="height: 200px; background: var(--bg-main); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+                [Plotly Pie Chart Here]
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @keyframes progress {
+        0% {
+            stroke-dasharray: 0, 100;
+        }
+
+        100% {
+            stroke-dasharray: 85, 100;
+        }
+    }
+</style>
+{% endblock %}

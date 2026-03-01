@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Hive | Tasks{% endblock %}
+{% block page_title %}Tasks{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.student_dashboard') }}" class="nav-item">
+    <span class="material-symbols-rounded">space_dashboard</span>
+    Global Hub
+</a>
+<a href="{{ url_for('dashboard.timetable') }}" class="nav-item">
+    <span class="material-symbols-rounded">calendar_today</span>
+    Timetable
+</a>
+<a href="{{ url_for('dashboard.tasks') }}" class="nav-item active">
+    <span class="material-symbols-rounded">task_alt</span>
+    Tasks
+</a>
+<a href="{{ url_for('dashboard.grades') }}" class="nav-item">
+    <span class="material-symbols-rounded">bar_chart</span>
+    Grades Overview
+</a>
+<a href="{{ url_for('dashboard.announcements') }}" class="nav-item">
+    <span class="material-symbols-rounded">campaign</span>
+    Announcements
+    <span class="badge">2</span>
+</a>
+<a href="{{ url_for('dashboard.messages') }}" class="nav-item">
+    <span class="material-symbols-rounded">forum</span>
+    Messages
+</a>
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; gap: 2rem;">
+    <!-- Main Task List -->
+    <div class="glass-panel" style="flex-grow: 1; padding: 2rem; border-radius: var(--radius-lg);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;"><span
+                    class="material-symbols-rounded">task_alt</span> Active Tasks</h3>
+            <button
+                style="background: var(--primary-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: var(--radius-full); cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
+                <span class="material-symbols-rounded" style="font-size: 1rem;">add</span> New Custom Task
+            </button>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-md); border-left: 4px solid var(--danger-color);">
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <input type="checkbox" style="width: 20px; height: 20px; accent-color: var(--primary-color);">
+                    <div>
+                        <h4 style="margin: 0 0 0.25rem 0;">Submit Python Assignment 1</h4>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Course: CS101 • Official
+                            Deadline</span>
+                    </div>
+                </div>
+                <div
+                    style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600; font-size: 0.85rem;">
+                    Due Tomorrow
+                </div>
+            </div>
+
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-md); border-left: 4px solid var(--primary-color);">
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <input type="checkbox" style="width: 20px; height: 20px; accent-color: var(--primary-color);">
+                    <div>
+                        <h4 style="margin: 0 0 0.25rem 0;">Read Chapter 4</h4>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Personal Task</span>
+                    </div>
+                </div>
+                <div style="color: var(--text-muted); font-size: 0.85rem;">
+                    Oct 24
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

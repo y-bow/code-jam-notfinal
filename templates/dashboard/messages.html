@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Hive | Messages{% endblock %}
+{% block page_title %}Messages{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.student_dashboard') }}" class="nav-item">
+    <span class="material-symbols-rounded">space_dashboard</span>
+    Global Hub
+</a>
+<a href="{{ url_for('dashboard.timetable') }}" class="nav-item">
+    <span class="material-symbols-rounded">calendar_today</span>
+    Timetable
+</a>
+<a href="{{ url_for('dashboard.tasks') }}" class="nav-item">
+    <span class="material-symbols-rounded">task_alt</span>
+    Tasks
+</a>
+<a href="{{ url_for('dashboard.grades') }}" class="nav-item">
+    <span class="material-symbols-rounded">bar_chart</span>
+    Grades Overview
+</a>
+<a href="{{ url_for('dashboard.announcements') }}" class="nav-item">
+    <span class="material-symbols-rounded">campaign</span>
+    Announcements
+    <span class="badge">2</span>
+</a>
+<a href="{{ url_for('dashboard.messages') }}" class="nav-item active">
+    <span class="material-symbols-rounded">forum</span>
+    Messages
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="display: flex; height: 75vh; border-radius: var(--radius-lg); overflow: hidden;">
+    <!-- Inbox Sidebar -->
+    <div style="width: 300px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column;">
+        <div
+            style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0;">Inbox</h3>
+            <button class="icon-btn theme-toggle"
+                style="background: var(--bg-main); border: 1px solid var(--border-color);"><span
+                    class="material-symbols-rounded">edit_square</span></button>
+        </div>
+        <div style="overflow-y: auto; flex-grow: 1;">
+            <!-- Thread item -->
+            <div
+                style="padding: 1.25rem; border-bottom: 1px solid var(--border-color); cursor: pointer; background: rgba(37, 99, 235, 0.05); border-left: 3px solid var(--primary-color);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                    <div style="font-weight: 600;">Prof. Smith</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">10:30 AM</div>
+                </div>
+                <div style="font-size: 0.85rem; font-weight: 500; color: var(--text-main); margin-bottom: 0.25rem;">
+                    Question about Assignment</div>
+                <div
+                    style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    Yes, you can use Pandas for data wrangling...</div>
+            </div>
+
+            <!-- Thread item -->
+            <div style="padding: 1.25rem; border-bottom: 1px solid var(--border-color); cursor: pointer;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                    <div style="font-weight: 600;">Study Group: CS101</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Yesterday</div>
+                </div>
+                <div style="font-size: 0.85rem; font-weight: 500; color: var(--text-main); margin-bottom: 0.25rem;">
+                    Project Meeting</div>
+                <div
+                    style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    Are we meeting at the library at 5?</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Chat Area -->
+    <div style="flex-grow: 1; display: flex; flex-direction: column;">
+        <!-- Chat Header -->
+        <div
+            style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02);">
+            <div>
+                <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">Prof. Smith</h3>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Computer Science Dept</span>
+            </div>
+            <span class="material-symbols-rounded" style="color: var(--text-muted); cursor: pointer;">more_vert</span>
+        </div>
+
+        <!-- Message History -->
+        <div style="flex-grow: 1; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem;">
+            <div style="display: flex; justify-content: center;">
+                <div
+                    style="background: var(--bg-main); color: var(--text-muted); padding: 0.25rem 1rem; border-radius: 20px; font-size: 0.75rem; border: 1px solid var(--border-color);">
+                    Today, 9:00 AM</div>
+            </div>
+
+            <!-- Sent message -->
+            <div style="align-self: flex-end; max-width: 70%;">
+                <div
+                    style="background: var(--primary-color); color: white; padding: 1rem; border-radius: 16px 16px 0 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    Hi Professor, I had a quick question regarding the data set for Assignment 1. Are we allowed to use
+                    the Pandas library for the initial data cleaning, or should we build custom parsers?
+                </div>
+                <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem; text-align: right;">09:15
+                    AM - Delivered</div>
+            </div>
+
+            <!-- Received message -->
+            <div style="align-self: flex-start; max-width: 70%;">
+                <div
+                    style="background: var(--bg-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: 16px 16px 16px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    Yes, you can use Pandas for data wrangling. In fact, I encourage it! The focus of this assignment is
+                    on the core logic after perfectly cleaning up the schema.
+                </div>
+                <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem;">10:30 AM</div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div style="padding: 1.5rem; border-top: 1px solid var(--border-color); display: flex; gap: 1rem;">
+            <button class="icon-btn theme-toggle"
+                style="background: var(--bg-main); border: 1px solid var(--border-color);"><span
+                    class="material-symbols-rounded">attach_file</span></button>
+            <input type="text" placeholder="Type your message..."
+                style="flex-grow: 1; padding: 0.75rem 1rem; border-radius: var(--radius-full); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-main); font-family: var(--font-body); outline: none;">
+            <button class="icon-btn theme-toggle"
+                style="background: var(--primary-color); color: white; border: none; height: 42px; width: 42px;"><span
+                    class="material-symbols-rounded">send</span></button>
+        </div>
+    </div>
+</div>
+{% endblock %}
