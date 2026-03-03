@@ -24,14 +24,20 @@ def seed_db():
         teacher2_pw = bcrypt.generate_password_hash('password123').decode('utf-8')
         teacher2_user = User(email='prof.davis@upc.edu', password_hash=teacher2_pw, role='teacher', name='Prof. Sarah Davis')
 
-        # 3 Students
+        # 4 Students
         student1_pw = bcrypt.generate_password_hash('password123').decode('utf-8')
-        student1_user = User(email='alex.j@student.upc.edu', password_hash=student1_pw, role='student', name='Alex Johnson')
+        student1_user = User(email='vaibhav.b-29@scds.saiuniversity.edu.in', password_hash=student1_pw, role='student', name='Vaibhav B')
         
         student2_pw = bcrypt.generate_password_hash('password123').decode('utf-8')
-        student2_user = User(email='maria.g@student.upc.edu', password_hash=student2_pw, role='student', name='Maria Garcia')
+        student2_user = User(email='sharanpranav.a-29@scds.saiuniversity.edu.in', password_hash=student2_pw, role='student', name='Sharanpranav A')
 
-        db.session.add_all([admin, teacher1_user, teacher2_user, student1_user, student2_user])
+        student3_pw = bcrypt.generate_password_hash('password123').decode('utf-8')
+        student3_user = User(email='harshitha.b-29@scds.saiuniversity.edu.in', password_hash=student3_pw, role='student', name='Harshitha B')
+
+        student4_pw = bcrypt.generate_password_hash('password123').decode('utf-8')
+        student4_user = User(email='ruddhima.p-29@scds.saiuniversity.edu.in', password_hash=student4_pw, role='student', name='Ruddhima P')
+
+        db.session.add_all([admin, teacher1_user, teacher2_user, student1_user, student2_user, student3_user, student4_user])
         db.session.commit()
 
         # Seed Teacher Profiles
@@ -41,9 +47,11 @@ def seed_db():
         db.session.commit()
 
         # Seed Student Profiles
-        s1 = Student(user_id=student1_user.id, enrollment_year=2024, major='Computer Science')
-        s2 = Student(user_id=student2_user.id, enrollment_year=2024, major='Data Science')
-        db.session.add_all([s1, s2])
+        s1 = Student(user_id=student1_user.id, enrollment_year=2025, major='Computer Science')
+        s2 = Student(user_id=student2_user.id, enrollment_year=2025, major='Computer Science')
+        s3 = Student(user_id=student3_user.id, enrollment_year=2025, major='Computer Science')
+        s4 = Student(user_id=student4_user.id, enrollment_year=2025, major='Computer Science')
+        db.session.add_all([s1, s2, s3, s4])
         db.session.commit()
 
         # Seed Courses
@@ -53,12 +61,12 @@ def seed_db():
         db.session.add_all([c1, c2, c3])
         db.session.commit()
 
-        # Seed Enrollments
-        e1 = Enrollment(student_id=student1_user.id, course_id=c1.id)
-        e2 = Enrollment(student_id=student1_user.id, course_id=c2.id)
-        e3 = Enrollment(student_id=student2_user.id, course_id=c1.id)
-        e4 = Enrollment(student_id=student2_user.id, course_id=c3.id)
-        db.session.add_all([e1, e2, e3, e4])
+        # Seed Enrollments (all students enrolled in all courses)
+        enrollments = []
+        for student in [student1_user, student2_user, student3_user, student4_user]:
+            for course in [c1, c2, c3]:
+                enrollments.append(Enrollment(student_id=student.id, course_id=course.id))
+        db.session.add_all(enrollments)
         db.session.commit()
 
         print("Database seeded successfully!")

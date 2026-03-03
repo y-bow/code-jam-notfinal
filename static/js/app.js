@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeIcon = themeToggleBtn.querySelector('.material-symbols-rounded');
 
     // Check for saved theme
-    const savedTheme = localStorage.getItem('upc-theme');
+    const savedTheme = localStorage.getItem('hive-theme');
     if (savedTheme) {
         body.className = savedTheme;
         updateThemeIcon(savedTheme);
@@ -13,11 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     themeToggleBtn.addEventListener('click', () => {
         if (body.classList.contains('light-theme')) {
             body.classList.replace('light-theme', 'dark-theme');
-            localStorage.setItem('upc-theme', 'dark-theme');
+            localStorage.setItem('hive-theme', 'dark-theme');
             updateThemeIcon('dark-theme');
         } else {
             body.classList.replace('dark-theme', 'light-theme');
-            localStorage.setItem('upc-theme', 'light-theme');
+            localStorage.setItem('hive-theme', 'light-theme');
             updateThemeIcon('light-theme');
         }
     });

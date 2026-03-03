@@ -33,59 +33,216 @@
 
 {% block content %}
 <div class="glass-panel" style="padding: 2rem; border-radius: var(--radius-lg);">
+    <!-- Header with nav controls -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h3 style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
             <span class="material-symbols-rounded" style="color: var(--primary-color);">calendar_today</span>
             Weekly View
         </h3>
-        <div style="display: flex; gap: 1rem;">
-            <button class="icon-btn theme-toggle"
-                style="background: var(--bg-main); border: 1px solid var(--border-color);"><span
-                    class="material-symbols-rounded">chevron_left</span></button>
-            <span style="display: flex; align-items: center; font-weight: 500;">March 2026</span>
-            <button class="icon-btn theme-toggle"
-                style="background: var(--bg-main); border: 1px solid var(--border-color);"><span
-                    class="material-symbols-rounded">chevron_right</span></button>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <button id="prevMonth" class="icon-btn"
+                style="background: var(--bg-main); border: 1px solid var(--border-color);">
+                <span class="material-symbols-rounded">chevron_left</span>
+            </button>
+            <span id="currentMonthLabel"
+                style="display: flex; align-items: center; font-weight: 600; min-width: 140px; justify-content: center;"></span>
+            <button id="nextMonth" class="icon-btn"
+                style="background: var(--bg-main); border: 1px solid var(--border-color);">
+                <span class="material-symbols-rounded">chevron_right</span>
+            </button>
         </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; text-align: center;">
-        <div style="font-weight: 600; padding: 1rem; border-bottom: 2px solid var(--primary-color);">Monday</div>
-        <div style="font-weight: 600; padding: 1rem; border-bottom: 2px solid var(--border-color);">Tuesday</div>
-        <div style="font-weight: 600; padding: 1rem; border-bottom: 2px solid var(--border-color);">Wednesday</div>
-        <div style="font-weight: 600; padding: 1rem; border-bottom: 2px solid var(--border-color);">Thursday</div>
-        <div style="font-weight: 600; padding: 1rem; border-bottom: 2px solid var(--border-color);">Friday</div>
+    <!-- Week navigation -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <button id="prevWeek" class="icon-btn"
+            style="background: var(--bg-main); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 0.25rem; padding: 0.4rem 0.75rem; font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-body);">
+            <span class="material-symbols-rounded" style="font-size: 18px;">chevron_left</span> Prev Week
+        </button>
+        <span id="weekRangeLabel" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;"></span>
+        <button id="nextWeek" class="icon-btn"
+            style="background: var(--bg-main); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 0.25rem; padding: 0.4rem 0.75rem; font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-body);">
+            Next Week <span class="material-symbols-rounded" style="font-size: 18px;">chevron_right</span>
+        </button>
+    </div>
 
-        <!-- Time blocks -->
-        <div
-            style="background: var(--bg-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md); text-align: left; min-height: 120px;">
-            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; margin-bottom: 0.5rem;">09:00
-                AM - 10:30 AM</div>
-            <div style="font-weight: 600; font-size: 0.9rem; color: var(--primary-color);">Introduction to Programming
-            </div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Room 301</div>
-        </div>
-
-        <div></div> <!-- Tuesday empty -->
-
-        <div
-            style="background: var(--bg-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md); text-align: left; min-height: 120px;">
-            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; margin-bottom: 0.5rem;">09:00
-                AM - 10:30 AM</div>
-            <div style="font-weight: 600; font-size: 0.9rem; color: var(--primary-color);">Introduction to Programming
-            </div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Room 301</div>
-        </div>
-
-        <div
-            style="background: var(--bg-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md); text-align: left; min-height: 120px;">
-            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; margin-bottom: 0.5rem;">11:00
-                AM - 12:30 PM</div>
-            <div style="font-weight: 600; font-size: 0.9rem; color: var(--warning-color);">Calculus I</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Room 405</div>
-        </div>
-
-        <div></div> <!-- Friday empty -->
+    <!-- Timetable grid (generated by JS) -->
+    <div id="timetableGrid"
+        style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; text-align: center;">
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function () {
+        // ─── Sample timetable data ───────────────────────────────────────
+        // Each entry: { day (0=Mon..4=Fri), startTime, endTime, title, room, color (CSS var name) }
+        const schedule = [
+            // Monday
+            { day: 0, startTime: '10:40 AM', endTime: '12:10 PM', title: 'Discrete Mathematics', room: 'AB2 - 203', color: 'var(--primary-color)' },
+            { day: 0, startTime: '02:15 PM', endTime: '03:40 PM', title: 'Indian Constitution and Democracy', room: 'AB2 - 202', color: '#a78bfa' },
+            { day: 0, startTime: '03:50 PM', endTime: '05:15 PM', title: 'Python and Data Structure (LAB)', room: 'Computer Lab - AB1 - First Floor', color: 'var(--accent-color)' },
+
+            // Tuesday
+            { day: 1, startTime: '09:00 AM', endTime: '10:30 AM', title: 'Introduction to Data Structures', room: 'AB1 - 101', color: 'var(--success-color)' },
+            { day: 1, startTime: '12:15 PM', endTime: '01:45 PM', title: 'Environment and Sustainability', room: 'AB1 - Moot Court Hall', color: 'var(--warning-color)' },
+
+            // Wednesday
+            { day: 2, startTime: '09:00 AM', endTime: '10:30 AM', title: 'Discrete Mathematics', room: 'AB2 - 203', color: 'var(--primary-color)' },
+            { day: 2, startTime: '02:15 PM', endTime: '03:40 PM', title: 'Indian Constitution and Democracy', room: 'AB2 - 207', color: '#a78bfa' },
+
+            // Thursday
+            { day: 3, startTime: '09:00 AM', endTime: '10:30 AM', title: 'Programming in Python', room: 'AB2 - 207', color: '#f472b6' },
+            { day: 3, startTime: '12:20 PM', endTime: '01:40 PM', title: 'Python and Data Structure (LAB)', room: 'Computer Lab - AB1 - First Floor', color: 'var(--accent-color)' },
+
+            // Friday
+            { day: 4, startTime: '10:40 AM', endTime: '12:10 PM', title: 'Programming in Python', room: 'AB2 - 202', color: '#f472b6' },
+            { day: 4, startTime: '02:15 PM', endTime: '03:40 PM', title: 'Introduction to Data Structures', room: 'AB2 - 202', color: 'var(--success-color)' },
+            { day: 4, startTime: '03:50 PM', endTime: '05:15 PM', title: 'Environment and Sustainability', room: 'AB2 - 202', color: 'var(--warning-color)' },
+        ];
+
+        const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'];
+
+        // State – current date anchors the view
+        let currentDate = new Date();  // today
+
+        // ─── Helpers ──────────────────────────────────────────────────────
+
+        /** Return the Monday of the week that contains `date`. */
+        function getMonday(date) {
+            const d = new Date(date);
+            const day = d.getDay(); // 0=Sun … 6=Sat
+            const diff = (day === 0 ? -6 : 1) - day; // adjust to Monday
+            d.setDate(d.getDate() + diff);
+            d.setHours(0, 0, 0, 0);
+            return d;
+        }
+
+        function formatShortDate(date) {
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function isSameDay(a, b) {
+            return a.getFullYear() === b.getFullYear() &&
+                a.getMonth() === b.getMonth() &&
+                a.getDate() === b.getDate();
+        }
+
+        // ─── Rendering ────────────────────────────────────────────────────
+
+        function render() {
+            const monday = getMonday(currentDate);
+
+            // Update month label
+            document.getElementById('currentMonthLabel').textContent =
+                monthNames[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
+
+            // Update week range label
+            const friday = new Date(monday);
+            friday.setDate(monday.getDate() + 4);
+            document.getElementById('weekRangeLabel').textContent =
+                formatShortDate(monday) + ' – ' + formatShortDate(friday);
+
+            // Build grid
+            const grid = document.getElementById('timetableGrid');
+            grid.innerHTML = '';
+
+            const today = new Date();
+
+            // Day Headers
+            for (let i = 0; i < 5; i++) {
+                const dayDate = new Date(monday);
+                dayDate.setDate(monday.getDate() + i);
+
+                const isToday = isSameDay(dayDate, today);
+
+                const header = document.createElement('div');
+                header.style.cssText = `font-weight: 600; padding: 1rem; border-bottom: 2px solid ${isToday ? 'var(--primary-color)' : 'var(--border-color)'}; transition: border-color 0.2s ease;`;
+                header.innerHTML = `
+                <div>${dayNames[i]}</div>
+                <div style="font-size: 0.75rem; font-weight: 400; color: var(--text-muted); margin-top: 0.25rem;">
+                    ${dayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </div>`;
+                grid.appendChild(header);
+            }
+
+            // Class blocks per day
+            for (let i = 0; i < 5; i++) {
+                const dayClasses = schedule.filter(c => c.day === i);
+
+                const col = document.createElement('div');
+                col.style.cssText = 'display: flex; flex-direction: column; gap: 0.75rem;';
+
+                if (dayClasses.length === 0) {
+                    const empty = document.createElement('div');
+                    empty.style.cssText = 'min-height: 120px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--text-muted); opacity: 0.5;';
+                    empty.textContent = 'No classes';
+                    col.appendChild(empty);
+                } else {
+                    dayClasses.forEach((cls, idx) => {
+                        const card = document.createElement('div');
+                        card.style.cssText = `
+                        background: var(--bg-main);
+                        border: 1px solid var(--border-color);
+                        padding: 1rem;
+                        border-radius: var(--radius-md);
+                        text-align: left;
+                        min-height: 120px;
+                        transition: transform 0.2s ease, box-shadow 0.2s ease;
+                        cursor: default;
+                        animation: fadeIn 0.4s ease forwards;
+                        animation-delay: ${idx * 0.07}s;
+                        opacity: 0;
+                    `;
+                        card.addEventListener('mouseenter', () => {
+                            card.style.transform = 'translateY(-3px)';
+                            card.style.boxShadow = '0 6px 20px rgba(0,0,0,0.12)';
+                        });
+                        card.addEventListener('mouseleave', () => {
+                            card.style.transform = '';
+                            card.style.boxShadow = '';
+                        });
+
+                        card.innerHTML = `
+                        <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; margin-bottom: 0.5rem;">${cls.startTime} - ${cls.endTime}</div>
+                        <div style="font-weight: 600; font-size: 0.9rem; color: ${cls.color};">${cls.title}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">${cls.room}</div>
+                    `;
+                        col.appendChild(card);
+                    });
+                }
+
+                grid.appendChild(col);
+            }
+        }
+
+        // ─── Navigation Event Listeners ──────────────────────────────────
+
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            render();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            render();
+        });
+
+        document.getElementById('prevWeek').addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() - 7);
+            render();
+        });
+
+        document.getElementById('nextWeek').addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() + 7);
+            render();
+        });
+
+        // ─── Initial render ──────────────────────────────────────────────
+        render();
+    })();
+</script>
 {% endblock %}

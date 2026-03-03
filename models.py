@@ -128,3 +128,13 @@ class Resource(db.Model):
     file_url = db.Column(db.String(500), nullable=False)
     category = db.Column(db.String(50))
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class CustomTask(db.Model):
+    __tablename__ = 'custom_tasks'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    due_date = db.Column(db.Date)
+    is_completed = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
