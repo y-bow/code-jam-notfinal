@@ -50,40 +50,43 @@
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; text-align: center;">
-        <div style="font-weight: 600; padding: 1rem; border-bottom: 2px solid var(--primary-color);">Monday</div>
-        <div style="font-weight: 600; padding: 1rem; border-bottom: 2px solid var(--border-color);">Tuesday</div>
-        <div style="font-weight: 600; padding: 1rem; border-bottom: 2px solid var(--border-color);">Wednesday</div>
-        <div style="font-weight: 600; padding: 1rem; border-bottom: 2px solid var(--border-color);">Thursday</div>
-        <div style="font-weight: 600; padding: 1rem; border-bottom: 2px solid var(--border-color);">Friday</div>
+        <!-- Column Headers -->
+        {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] %}
+        {% for i in range(5) %}
+        <div
+            style="font-weight: 600; padding: 1rem; border-bottom: 2px solid {% if i == current_day %}var(--primary-color){% else %}var(--border-color){% endif %}; {% if i == current_day %}color: var(--primary-color); background-color: rgba(var(--primary-rgb), 0.05); border-radius: var(--radius-md) var(--radius-md) 0 0;{% endif %}">
+            {{ days[i] }}
+        </div>
+        {% endfor %}
 
         <!-- Time blocks -->
+        {% for day_idx in range(5) %}
         <div
-            style="background: var(--bg-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md); text-align: left; min-height: 120px;">
-            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; margin-bottom: 0.5rem;">09:00
-                AM - 10:30 AM</div>
-            <div style="font-weight: 600; font-size: 0.9rem; color: var(--primary-color);">Introduction to Programming
+            style="display: flex; flex-direction: column; gap: 1rem; {% if day_idx == current_day %}background-color: rgba(var(--primary-rgb), 0.05); border-radius: 0 0 var(--radius-md) var(--radius-md); padding-bottom: 1rem;{% endif %}">
+            {% if timetable_data and timetable_data.get(day_idx) %}
+            {% for entry in timetable_data[day_idx] %}
+            <div
+                style="background: var(--bg-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md); text-align: left; position: relative;">
+                <div
+                    style="position: absolute; top: 0; left: 0; bottom: 0; width: 4px; background-color: {{ entry.color }}; border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);">
+                </div>
+                <div
+                    style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; margin-bottom: 0.5rem; padding-left: 0.5rem;">
+                    {{ entry.startTime }} - {{ entry.endTime }}</div>
+                <div style="font-weight: 600; font-size: 0.9rem; color: {{ entry.color }}; padding-left: 0.5rem;">{{
+                    entry.title }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; padding-left: 0.5rem;">{{
+                    entry.room }}</div>
             </div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Room 301</div>
-        </div>
-
-        <div></div> <!-- Tuesday empty -->
-
-        <div
-            style="background: var(--bg-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md); text-align: left; min-height: 120px;">
-            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; margin-bottom: 0.5rem;">09:00
-                AM - 10:30 AM</div>
-            <div style="font-weight: 600; font-size: 0.9rem; color: var(--primary-color);">Introduction to Programming
+            {% endfor %}
+            {% else %}
+            <div
+                style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 2rem 0; border: 1px dashed var(--border-color); border-radius: var(--radius-md);">
+                No classes
             </div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Room 301</div>
+            {% endif %}
         </div>
-
-        <div
-            style="background: var(--bg-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-md); text-align: left; min-height: 120px;">
-            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; margin-bottom: 0.5rem;">11:00
-                AM - 12:30 PM</div>
-            <div style="font-weight: 600; font-size: 0.9rem; color: var(--warning-color);">Calculus I</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Room 405</div>
-        </div>
+        {% endfor %}
 
         <div></div> <!-- Friday empty -->
     </div>
