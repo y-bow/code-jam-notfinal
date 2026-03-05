@@ -42,9 +42,9 @@
                 style="background: var(--bg-main); border: 1px solid var(--border-color);"><span
                     class="material-symbols-rounded">edit_square</span></button>
         </div>
-        <div style="overflow-y: auto; flex-grow: 1;">
+        <div style="overflow-y: auto; flex-grow: 1;" id="threadList">
             <!-- Thread item -->
-            <div
+            <div class="thread-item active" data-thread-id="prof-smith"
                 style="padding: 1.25rem; border-bottom: 1px solid var(--border-color); cursor: pointer; background: rgba(37, 99, 235, 0.05); border-left: 3px solid var(--primary-color);">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
                     <div style="font-weight: 600;">Prof. Smith</div>
@@ -58,7 +58,8 @@
             </div>
 
             <!-- Thread item -->
-            <div style="padding: 1.25rem; border-bottom: 1px solid var(--border-color); cursor: pointer;">
+            <div class="thread-item" data-thread-id="cs101"
+                style="padding: 1.25rem; border-bottom: 1px solid var(--border-color); cursor: pointer;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
                     <div style="font-weight: 600;">Study Group: CS101</div>
                     <div style="font-size: 0.75rem; color: var(--text-muted);">Yesterday</div>
@@ -73,19 +74,28 @@
     </div>
 
     <!-- Active Chat Area -->
-    <div style="flex-grow: 1; display: flex; flex-direction: column;">
+    <div style="flex-grow: 1; display: flex; flex-direction: column;" id="chatArea">
         <!-- Chat Header -->
         <div
             style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02);">
             <div>
-                <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">Prof. Smith</h3>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">Computer Science Dept</span>
+                <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;" id="chatName">Prof. Smith</h3>
+                <span style="font-size: 0.8rem; color: var(--text-muted);" id="chatSubtitle">Computer Science
+                    Dept</span>
             </div>
-            <span class="material-symbols-rounded" style="color: var(--text-muted); cursor: pointer;">more_vert</span>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <button class="icon-btn" id="startMeetingBtn" title="Start Video Meeting"
+                    style="color: var(--primary-color); background: rgba(37, 99, 235, 0.1);">
+                    <span class="material-symbols-rounded">video_call</span>
+                </button>
+                <span class="material-symbols-rounded"
+                    style="color: var(--text-muted); cursor: pointer;">more_vert</span>
+            </div>
         </div>
 
         <!-- Message History -->
-        <div style="flex-grow: 1; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem;">
+        <div style="flex-grow: 1; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem;"
+            id="messageHistory">
             <div style="display: flex; justify-content: center;">
                 <div
                     style="background: var(--bg-main); color: var(--text-muted); padding: 0.25rem 1rem; border-radius: 20px; font-size: 0.75rem; border: 1px solid var(--border-color);">
@@ -119,9 +129,9 @@
             <button class="icon-btn theme-toggle"
                 style="background: var(--bg-main); border: 1px solid var(--border-color);"><span
                     class="material-symbols-rounded">attach_file</span></button>
-            <input type="text" placeholder="Type your message..."
+            <input type="text" placeholder="Type your message..." id="messageInput"
                 style="flex-grow: 1; padding: 0.75rem 1rem; border-radius: var(--radius-full); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-main); font-family: var(--font-body); outline: none;">
-            <button class="icon-btn theme-toggle"
+            <button class="icon-btn theme-toggle" id="sendMessageBtn"
                 style="background: var(--primary-color); color: white; border: none; height: 42px; width: 42px;"><span
                     class="material-symbols-rounded">send</span></button>
         </div>

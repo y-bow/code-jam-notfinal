@@ -77,12 +77,14 @@
 
     <div class="glass-panel"
         style="flex: 1; padding: 2rem; border-radius: var(--radius-lg); display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <h3 style="margin: 0 0 1rem 0; width: 100%; text-align: left;">Current CGPA</h3>
+        <h3 style="margin: 0 0 1rem 0; width: 100%; text-align: left;">Current SGPA</h3>
+        {% set user_sgpa = g.current_user.student_profile.sgpa if g.current_user and g.current_user.student_profile else
+        0.0 %}
         <div
             style="width: 150px; height: 150px; border-radius: 50%; border: 12px solid var(--primary-color); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; margin-bottom: 1rem;">
-            3.6
+            {{ user_sgpa }}
         </div>
-        <p style="color: var(--text-muted); text-align: center;">You are in the top 15% of your class.</p>
+        <p style="color: var(--text-muted); text-align: center;">Semester Grade Point Average</p>
     </div>
 </div>
 {% endblock %}

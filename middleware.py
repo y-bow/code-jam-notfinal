@@ -12,7 +12,7 @@ Usage in routes:
 """
 from functools import wraps
 from flask import session, g, abort, flash, redirect, url_for
-from models import User, ROLE_HIERARCHY
+from models import User, ROLE_HIERARCHY, Message, Announcement
 
 
 def school_scoped(f):
@@ -23,6 +23,7 @@ def school_scoped(f):
     - Loads the full User object into g.current_user.
     - Sets g.school_id from the user's school membership.
     - Ensures the user and their school are active.
+    - Populates notification data (unread messages, recent announcements).
 
     Must be applied BEFORE any role_minimum decorator.
     """
@@ -47,6 +48,13 @@ def school_scoped(f):
 
         g.current_user = user
         g.school_id = user.school_id
+
+        # Notification data
+        g.unread_messages = Message.query.filter_by(recipient_id=user.id, is_read=False).order_by(Message.sent_at.desc()).limit(5).all()
+        g.unread_count = Message.query.filter_by(recipient_id=user.id, is_read=False).count()
+        
+        # Recent announcements for this school
+        g.recent_announcements = Announcement.query.filter_by(school_id=user.school_id).order_by(Announcement.posted_at.desc()).limit(3).all()
 
         return f(*args, **kwargs)
     return decorated_function

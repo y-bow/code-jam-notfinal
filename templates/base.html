@@ -26,6 +26,14 @@
 </head>
 
 <body class="light-theme">
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('hive-theme');
+            if (savedTheme) {
+                document.body.className = savedTheme;
+            }
+        })();
+    </script>
     <div class="app-container">
         <!-- Sidebar Navigation -->
         <aside class="sidebar glass-panel">
@@ -55,11 +63,14 @@
             </nav>
 
             <div class="sidebar-footer">
-                <a href="#" class="nav-item user-profile">
-                    <div class="avatar">U</div>
+                <a href="#" class="nav-item user-profile" id="userProfileBtn">
+                    <div class="avatar">{% if g.current_user %}{{ g.current_user.name[0] | upper }}{% else %}U{% endif
+                        %}</div>
                     <div class="user-info">
-                        <span class="user-name">User Name</span>
-                        <span class="user-role">Student</span>
+                        <span class="user-name">{% if g.current_user %}{{ g.current_user.name }}{% else %}User Name{%
+                            endif %}</span>
+                        <span class="user-role">{% if g.current_user %}{{ g.current_user.role | title }}{% else
+                            %}Student{% endif %}</span>
                     </div>
                 </a>
             </div>
@@ -73,13 +84,76 @@
                 </div>
 
                 <div class="topbar-actions">
-                    <button class="icon-btn theme-toggle">
+                    <button class="icon-btn theme-toggle" title="Toggle Theme">
                         <span class="material-symbols-rounded">dark_mode</span>
                     </button>
-                    <button class="icon-btn notifications">
-                        <span class="material-symbols-rounded">notifications</span>
-                        <span class="badge">3</span>
-                    </button>
+
+                    <div class="notification-wrapper">
+                        <button class="icon-btn notifications" id="notificationBtn">
+                            <span class="material-symbols-rounded">notifications</span>
+                            {% if g.unread_count and g.unread_count > 0 %}
+                            <span class="badge">{{ g.unread_count }}</span>
+                            {% endif %}
+                        </button>
+
+                        <div class="notifications-dropdown glass-panel" id="notificationsDropdown">
+                            <div class="dropdown-header">
+                                <h3>Notifications</h3>
+                                {% if g.unread_count and g.unread_count > 0 %}
+                                <span class="badge-new">{{ g.unread_count }} New</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="dropdown-body">
+                                {% if g.unread_messages or g.recent_announcements %}
+                                <!-- Messages Section -->
+                                {% if g.unread_messages %}
+                                <div class="notification-section">
+                                    <label>Recent Messages</label>
+                                    {% for msg in g.unread_messages %}
+                                    <a href="{{ url_for('dashboard.messages') }}" class="dropdown-item message-item">
+                                        <div class="item-avatar">{{ msg.sender.name[0] | upper }}</div>
+                                        <div class="item-content">
+                                            <p class="item-title">{{ msg.sender.name }}</p>
+                                            <p class="item-desc">{{ msg.body[:40] }}{% if msg.body|length > 40 %}...{%
+                                                endif %}</p>
+                                            <span class="item-time">{{ msg.sent_at.strftime('%I:%M %p') }}</span>
+                                        </div>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+
+                                <!-- Announcements Section -->
+                                {% if g.recent_announcements %}
+                                <div class="notification-section">
+                                    <label>Recent Announcements</label>
+                                    {% for ann in g.recent_announcements %}
+                                    <a href="{{ url_for('dashboard.announcements') }}"
+                                        class="dropdown-item announcement-item">
+                                        <div class="item-icon"><span class="material-symbols-rounded">campaign</span>
+                                        </div>
+                                        <div class="item-content">
+                                            <p class="item-title">{{ ann.title }}</p>
+                                            <span class="item-time">{{ ann.posted_at.strftime('%b %d') }}</span>
+                                        </div>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                {% else %}
+                                <div class="empty-notifications">
+                                    <span class="material-symbols-rounded">notifications_none</span>
+                                    <p>All caught up!</p>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="dropdown-footer">
+                                <a href="{{ url_for('dashboard.announcements') }}">View All</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </header>
 
@@ -93,6 +167,67 @@
                 {% endblock %}
             </div>
         </main>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <span class="close-modal" id="closeProfileBtn">&times;</span>
+            <div class="profile-header">
+                <div class="avatar large-avatar">{% if g.current_user %}{{ g.current_user.name[0] | upper }}{% else
+                    %}U{% endif %}</div>
+                <h2>{% if g.current_user %}{{ g.current_user.name }}{% else %}User Name{% endif %}</h2>
+                <p class="user-role">{% if g.current_user %}{{ g.current_user.role | title }}{% else %}Student{% endif
+                    %}</p>
+            </div>
+
+            <div class="profile-details">
+                {% if g.current_user %}
+                <div class="info-group">
+                    <span class="info-label">Email</span>
+                    <span class="info-value">{{ g.current_user.email }}</span>
+                </div>
+
+                {% if g.current_user.role == 'student' and g.current_user.student_profile %}
+                <div class="info-group">
+                    <span class="info-label">Cumulative GPA (CGPA)</span>
+                    <span class="info-value">{{ g.current_user.student_profile.cgpa }}</span>
+                </div>
+                <div class="info-group">
+                    <span class="info-label">Semester GPA (SGPA)</span>
+                    <span class="info-value">{{ g.current_user.student_profile.sgpa }}</span>
+                </div>
+                <div class="info-group">
+                    <span class="info-label">Major</span>
+                    <span class="info-value">{{ g.current_user.student_profile.major or 'N/A' }}</span>
+                </div>
+                <div class="info-group">
+                    <span class="info-label">Year</span>
+                    <span class="info-value">{{ g.current_user.student_profile.enrollment_year }}</span>
+                </div>
+                {% elif g.current_user.role == 'teacher' and g.current_user.teacher_profile %}
+                <div class="info-group">
+                    <span class="info-label">Department</span>
+                    <span class="info-value">{{ g.current_user.teacher_profile.department }}</span>
+                </div>
+                <div class="info-group">
+                    <span class="info-label">Office Hours</span>
+                    <span class="info-value">{{ g.current_user.teacher_profile.office_hours }}</span>
+                </div>
+                {% endif %}
+
+                <div class="info-group">
+                    <span class="info-label">Joined</span>
+                    <span class="info-value">{{ g.current_user.created_at.strftime('%B %Y') if g.current_user.created_at
+                        else 'N/A' }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="profile-actions">
+                <a href="{{ url_for('auth.logout') }}" class="btn-logout">Log Out</a>
+            </div>
+        </div>
     </div>
 
     <!-- Custom JS -->

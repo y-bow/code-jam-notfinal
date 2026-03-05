@@ -112,6 +112,7 @@ class Student(db.Model):
     section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), nullable=False)
     enrollment_year = db.Column(db.Integer, nullable=False)
     major = db.Column(db.String(100))
+    sgpa = db.Column(db.Float, default=0.0)
     cgpa = db.Column(db.Float, default=0.0)
 
     user = db.relationship('User', backref=db.backref('student_profile', uselist=False))

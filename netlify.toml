@@ -1,0 +1,12 @@
+[build]
+  command = "pip install -r requirements.txt"
+  publish = "static"
+
+[functions]
+  external_node_modules = ["express"]
+  included_files = ["templates/**", "static/**", "models.py", "auth.py", "dashboard.py", "middleware.py", "classroom.py"]
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/app"
+  status = 200

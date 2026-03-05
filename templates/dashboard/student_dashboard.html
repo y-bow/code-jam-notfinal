@@ -49,34 +49,32 @@
                     <span class="material-symbols-rounded" style="color: var(--primary-color);">calendar_today</span>
                     Today's Classes
                 </h3>
-                <a href="#" style="font-size: 0.85rem; font-weight: 500;">View Full Timetable</a>
+                <a href="/dashboard/timetable" style="font-size: 0.85rem; font-weight: 500;">View Full Timetable</a>
             </div>
 
             <div class="timetable-list" style="display: flex; flex-direction: column; gap: 1rem;">
-                <!-- Dummy Data for MVP UI layout -->
+                {% if today_classes %}
+                {% for entry in today_classes %}
                 <div
-                    style="display: flex; gap: 1rem; align-items: center; padding: 1rem; border-radius: var(--radius-md); background: var(--bg-main); border-left: 4px solid var(--primary-color);">
+                    style="display: flex; gap: 1rem; align-items: center; padding: 1rem; border-radius: var(--radius-md); background: var(--bg-main); border-left: 4px solid {{ entry.color }};">
                     <div style="display: flex; flex-direction: column; text-align: right; min-width: 80px;">
-                        <span style="font-weight: 600;">09:00 AM</span>
-                        <span style="font-size: 0.8rem; color: var(--text-muted);">10:30 AM</span>
+                        <span style="font-weight: 600;">{{ entry.startTime }}</span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">{{ entry.endTime }}</span>
                     </div>
                     <div style="flex-grow: 1;">
-                        <h4 style="margin: 0;">Introduction to Programming (CS101)</h4>
-                        <span style="font-size: 0.85rem; color: var(--text-muted);">Prof. John Smith • Room 301</span>
+                        <h4 style="margin: 0;">{{ entry.title }}</h4>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">Room {{ entry.room }}</span>
                     </div>
                 </div>
-
+                {% endfor %}
+                {% else %}
                 <div
-                    style="display: flex; gap: 1rem; align-items: center; padding: 1rem; border-radius: var(--radius-md); background: var(--bg-main); border-left: 4px solid var(--warning-color);">
-                    <div style="display: flex; flex-direction: column; text-align: right; min-width: 80px;">
-                        <span style="font-weight: 600;">11:00 AM</span>
-                        <span style="font-size: 0.8rem; color: var(--text-muted);">12:30 PM</span>
-                    </div>
-                    <div style="flex-grow: 1;">
-                        <h4 style="margin: 0;">Calculus I (MATH101)</h4>
-                        <span style="font-size: 0.85rem; color: var(--text-muted);">Prof. Sarah Davis • Room 405</span>
-                    </div>
+                    style="padding: 2rem; text-align: center; color: var(--text-muted); background: var(--bg-main); border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+                    <span class="material-symbols-rounded"
+                        style="font-size: 2.5rem; margin-bottom: 0.5rem; display: block;">event_busy</span>
+                    No classes scheduled for today.
                 </div>
+                {% endif %}
             </div>
         </div>
 
@@ -112,18 +110,41 @@
         <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg); text-align: center;">
             <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem; text-align: left;">Overall Progress</h3>
 
+            {% set user_cgpa = g.current_user.student_profile.cgpa if g.current_user and g.current_user.student_profile
+            else 0.0 %}
+            {% set cgpa_percentage = (user_cgpa / 10.0) * 100 %}
+
             <div style="position: relative; width: 150px; height: 150px; margin: 0 auto;">
                 <!-- Placeholder for Plotly/SVG Gauge -->
+                <style>
+                    @keyframes progressDynamic {
+                        0% {
+                            stroke-dasharray: 0, 100;
+                        }
+
+                        100% {
+                            stroke-dasharray: {
+                                    {
+                                    cgpa_percentage
+                                }
+                            }
+
+                            ,
+                            100;
+                        }
+                    }
+                </style>
                 <svg viewBox="0 0 36 36" style="width: 100%; height: 100%;">
                     <path style="fill: none; stroke: var(--bg-main); stroke-width: 3;"
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                     <path
-                        style="fill: none; stroke: var(--primary-color); stroke-width: 3; stroke-dasharray: 85, 100; animation: progress 1s ease-out forwards;"
+                        style="fill: none; stroke: var(--primary-color); stroke-width: 3; stroke-dasharray: {{ cgpa_percentage }}, 100; animation: progressDynamic 1s ease-out forwards;"
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                 </svg>
                 <div
                     style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column;">
-                    <span style="font-size: 2rem; font-weight: 700; font-family: var(--font-heading);">8.5</span>
+                    <span style="font-size: 2rem; font-weight: 700; font-family: var(--font-heading);">{{ user_cgpa
+                        }}</span>
                     <span
                         style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">CGPA</span>
                 </div>
@@ -153,16 +174,6 @@
     @media (max-width: 1024px) {
         .dashboard-grid {
             grid-template-columns: 1fr;
-        }
-    }
-
-    @keyframes progress {
-        0% {
-            stroke-dasharray: 0, 100;
-        }
-
-        100% {
-            stroke-dasharray: 85, 100;
         }
     }
 </style>

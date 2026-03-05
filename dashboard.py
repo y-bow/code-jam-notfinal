@@ -12,7 +12,22 @@ dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 @dashboard_bp.route('/student')
 @school_scoped
 def student_dashboard():
-    return render_template('dashboard/student_dashboard.html')
+    user = g.current_user
+    today_classes = []
+    
+    current_day = datetime.now().weekday()
+    if current_day <= 4:  # Monday to Friday
+        if user.student_profile and user.student_profile.section_id:
+            entries = TimetableEntry.query.filter_by(
+                section_id=user.student_profile.section_id,
+                day=current_day
+            ).all()
+            
+            today_classes = [entry.to_dict() for entry in entries]
+            # Sort by time
+            today_classes.sort(key=lambda x: datetime.strptime(x['startTime'], '%I:%M %p').time() if 'AM' in x['startTime'] or 'PM' in x['startTime'] else x['startTime'])
+
+    return render_template('dashboard/student_dashboard.html', today_classes=today_classes)
 
 
 @dashboard_bp.route('/teacher')
