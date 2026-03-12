@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Fees Dashboard - Hive{% endblock %}
+{% block page_title %}Fee Management Dashboard{% endblock %}
+
+{% block content %}
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div
+    style="padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; background: {% if category == 'error' %}rgba(239, 68, 68, 0.1){% else %}rgba(34, 197, 94, 0.1){% endif %}; color: {% if category == 'error' %}var(--danger-color){% else %}var(--success-color){% endif %}; border: 1px solid currentColor;">
+    {{ message }}
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<!-- Overview Stats -->
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="glass-panel"
+        style="padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1rem;">
+        <div
+            style="background: rgba(var(--primary-color-rgb), 0.1); color: var(--primary-color); padding: 1rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <span class="material-symbols-rounded" style="font-size: 32px;">account_balance</span>
+        </div>
+        <div>
+            <div style="color: var(--text-secondary); font-size: 0.9rem;">Total Expected Fees</div>
+            <div style="font-size: 1.5rem; font-weight: 600;">₹{{ "{:,.0f}".format(total_expected) }}</div>
+        </div>
+    </div>
+
+    <div class="glass-panel"
+        style="padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1rem;">
+        <div
+            style="background: rgba(34, 197, 94, 0.1); color: var(--success-color); padding: 1rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <span class="material-symbols-rounded" style="font-size: 32px;">payments</span>
+        </div>
+        <div>
+            <div style="color: var(--text-secondary); font-size: 0.9rem;">Total Reccovered</div>
+            <div style="font-size: 1.5rem; font-weight: 600;">₹{{ "{:,.0f}".format(total_collected) }}</div>
+        </div>
+    </div>
+
+    <div class="glass-panel"
+        style="padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1rem;">
+        <div
+            style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); padding: 1rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <span class="material-symbols-rounded" style="font-size: 32px;">pending_actions</span>
+        </div>
+        <div>
+            <div style="color: var(--text-secondary); font-size: 0.9rem;">Total Outstanding</div>
+            <div style="font-size: 1.5rem; font-weight: 600;">₹{{ "{:,.0f}".format(total_expected - total_collected) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+
+    <!-- Student Fee Table -->
+    <div class="glass-panel" style="padding: 1.5rem; border-radius: 12px;">
+        <h3 style="margin-bottom: 1.5rem; font-weight: 600;">Student Fee Status</h3>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border-color);">
+                        <th style="padding: 1rem 0.5rem; color: var(--text-secondary); font-weight: 500;">Student</th>
+                        <th style="padding: 1rem 0.5rem; color: var(--text-secondary); font-weight: 500;">Email</th>
+                        <th style="padding: 1rem 0.5rem; color: var(--text-secondary); font-weight: 500;">Total Fee</th>
+                        <th style="padding: 1rem 0.5rem; color: var(--text-secondary); font-weight: 500;">Paid</th>
+                        <th style="padding: 1rem 0.5rem; color: var(--text-secondary); font-weight: 500;">Remaining</th>
+                        <th style="padding: 1rem 0.5rem; color: var(--text-secondary); font-weight: 500;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fee in fees %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 1rem 0.5rem; font-weight: 500;">{{ fee.student.name }}</td>
+                        <td style="padding: 1rem 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">{{
+                            fee.student.email }}</td>
+                        <td style="padding: 1rem 0.5rem;">₹{{ "{:,.0f}".format(fee.total_amount) }}</td>
+                        <td style="padding: 1rem 0.5rem; color: var(--success-color);">₹{{
+                            "{:,.0f}".format(fee.amount_paid) }}</td>
+                        <td style="padding: 1rem 0.5rem; color: var(--danger-color);">₹{{
+                            "{:,.0f}".format(fee.remaining_balance) }}</td>
+                        <td style="padding: 1rem 0.5rem;">
+                            {% if fee.payment_status == 'Paid' %}
+                            <span
+                                style="background: rgba(34, 197, 94, 0.1); color: var(--success-color); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">Paid</span>
+                            {% elif fee.payment_status == 'Partially Paid' %}
+                            <span
+                                style="background: rgba(245, 158, 11, 0.1); color: var(--warning-color); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">Partial</span>
+                            {% else %}
+                            <span
+                                style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">Pending</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Offline Payment & Recent Transactions -->
+    <div>
+        <div class="glass-panel" style="padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+            <h3 style="margin-bottom: 1.5rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <span class="material-symbols-rounded">point_of_sale</span> Record Offline Payment
+            </h3>
+            <form action="{{ url_for('fees.record_offline_payment') }}" method="POST">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="student_id"
+                        style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">Select
+                        Student</label>
+                    <select id="student_id" name="student_id" required
+                        style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); color: var(--text-primary); font-family: inherit;">
+                        <option value="">-- Choose Student --</option>
+                        {% for student in students %}
+                        <option value="{{ student.id }}">{{ student.name }} ({{ student.email }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="amount"
+                        style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">Amount
+                        (₹)</label>
+                    <input type="number" id="amount" name="amount" min="1" step="0.01" required
+                        style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); color: var(--text-primary); font-family: inherit;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label for="notes"
+                        style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">Notes
+                        (Optional)</label>
+                    <input type="text" id="notes" name="notes" placeholder="e.g. Cash received by accounts desk"
+                        style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); color: var(--text-primary); font-family: inherit;">
+                </div>
+
+                <button type="submit" class="btn"
+                    style="width: 100%; padding: 0.75rem; background-color: var(--primary-color); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;">
+                    Record Payment
+                </button>
+            </form>
+        </div>
+
+        <div class="glass-panel" style="padding: 1.5rem; border-radius: 12px;">
+            <h3 style="margin-bottom: 1.5rem; font-weight: 600;">Recent Transactions</h3>
+            {% if recent_payments %}
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                {% for p in recent_payments %}
+                <li
+                    style="padding: 1rem 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="font-weight: 500; margin-bottom: 0.25rem;">{{ p.fee.student.name }}</div>
+                        <div
+                            style="font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">
+                            <span class="material-symbols-rounded" style="font-size: 14px;">{{ 'account_balance' if
+                                'Net' in p.payment_method else 'qr_code_scanner' if 'UPI' in p.payment_method else
+                                'payments' }}</span>
+                            {{ p.payment_method }}
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: 600; color: var(--success-color);">+₹{{ "{:,.0f}".format(p.amount) }}
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">{{ p.payment_date.strftime('%b
+                            %d') }}</div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p style="color: var(--text-secondary); font-size: 0.9rem; text-align: center; padding: 1rem 0;">No recent
+                transactions.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

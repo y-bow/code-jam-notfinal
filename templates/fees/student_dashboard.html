@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Fee Payment - Hive{% endblock %}
+{% block page_title %}Fee Payment & Status{% endblock %}
+
+{% block content %}
+<div class="fees-dashboard">
+    <!-- Summary Section -->
+    <div class="summary-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div class="stat-card glass-panel" style="padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <div class="stat-title" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Total Fees</div>
+            <div class="stat-value" style="font-size: 1.8rem; font-weight: 600; color: var(--text-primary);">₹{{ "{:,.0f}".format(fee.total_amount) }}</div>
+        </div>
+        <div class="stat-card glass-panel" style="padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <div class="stat-title" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Amount Paid</div>
+            <div class="stat-value" style="font-size: 1.8rem; font-weight: 600; color: var(--success-color);">₹{{ "{:,.0f}".format(fee.amount_paid) }}</div>
+        </div>
+        <div class="stat-card glass-panel" style="padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <div class="stat-title" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Remaining Balance</div>
+            <div class="stat-value" style="font-size: 1.8rem; font-weight: 600; color: var(--danger-color);">₹{{ "{:,.0f}".format(fee.remaining_balance) }}</div>
+        </div>
+        <div class="stat-card glass-panel" style="padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <div class="stat-title" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Status</div>
+            <div class="stat-value" style="font-size: 1.5rem; font-weight: 600;">
+                {% if fee.payment_status == 'Paid' %}
+                    <span style="color: var(--success-color);">Fully Paid</span>
+                {% elif fee.payment_status == 'Partially Paid' %}
+                    <span style="color: var(--warning-color);">Partially Paid</span>
+                {% else %}
+                    <span style="color: var(--danger-color);">Pending</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+        <!-- Fee Breakdown -->
+        <div class="glass-panel" style="padding: 1.5rem; border-radius: 12px; height: fit-content;">
+            <h3 style="margin-bottom: 1.5rem; font-weight: 600;">Fee Breakdown</h3>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                <li style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                    <span>Tuition Fee</span>
+                    <strong>₹{{ "{:,.0f}".format(fee.tuition_fee) }}</strong>
+                </li>
+                <li style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                    <span>Lab Fee</span>
+                    <strong>₹{{ "{:,.0f}".format(fee.lab_fee) }}</strong>
+                </li>
+                <li style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                    <span>Library Fee</span>
+                    <strong>₹{{ "{:,.0f}".format(fee.library_fee) }}</strong>
+                </li>
+                <li style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                    <span>Exam Fee</span>
+                    <strong>₹{{ "{:,.0f}".format(fee.exam_fee) }}</strong>
+                </li>
+                <li style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                    <span>Other Charges</span>
+                    <strong>₹{{ "{:,.0f}".format(fee.other_charges) }}</strong>
+                </li>
+                <li style="display: flex; justify-content: space-between; padding: 1rem 0 0 0; margin-top: 0.5rem;">
+                    <span style="font-weight: 600;">Due Date</span>
+                    <strong style="color: var(--warning-color);">{{ fee.due_date.strftime('%B %d, %Y') if fee.due_date else 'N/A' }}</strong>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Payment History & Action Section -->
+        <div>
+            {% if fee.remaining_balance > 0 %}
+            <div class="glass-panel" style="padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--danger-color);">
+                <div>
+                    <h3 style="margin-bottom: 0.5rem; font-weight: 600;">Action Required</h3>
+                    <p style="color: var(--text-secondary); margin: 0;">You have a pending balance of ₹{{ "{:,.0f}".format(fee.remaining_balance) }}.</p>
+                </div>
+                <a href="{{ url_for('fees.process_payment') }}" class="btn" style="background-color: var(--primary-color); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 500;">Pay Now</a>
+            </div>
+            {% endif %}
+
+            <div class="glass-panel" style="padding: 1.5rem; border-radius: 12px;">
+                <h3 style="margin-bottom: 1.5rem; font-weight: 600;">Payment History</h3>
+                {% if payments %}
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--border-color);">
+                                <th style="padding: 1rem 0.5rem; color: var(--text-secondary); font-weight: 500;">Date</th>
+                                <th style="padding: 1rem 0.5rem; color: var(--text-secondary); font-weight: 500;">Transaction ID</th>
+                                <th style="padding: 1rem 0.5rem; color: var(--text-secondary); font-weight: 500;">Method</th>
+                                <th style="padding: 1rem 0.5rem; color: var(--text-secondary); font-weight: 500;">Amount</th>
+                                <th style="padding: 1rem 0.5rem; color: var(--text-secondary); font-weight: 500;">Status</th>
+                                <th style="padding: 1rem 0.5rem; color: var(--text-secondary); font-weight: 500;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in payments %}
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 1rem 0.5rem;">{{ p.payment_date.strftime('%d %b %Y') }}</td>
+                                <td style="padding: 1rem 0.5rem; font-family: monospace; color: var(--text-secondary);">{{ p.transaction_id }}</td>
+                                <td style="padding: 1rem 0.5rem;">{{ p.payment_method }}</td>
+                                <td style="padding: 1rem 0.5rem; font-weight: 600;">₹{{ "{:,.0f}".format(p.amount) }}</td>
+                                <td style="padding: 1rem 0.5rem;">
+                                    {% if p.status == 'success' %}
+                                    <span style="background: rgba(34, 197, 94, 0.1); color: var(--success-color); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">Success</span>
+                                    {% elif p.status == 'failed' %}
+                                    <span style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">Failed</span>
+                                    {% else %}
+                                    <span style="background: rgba(245, 158, 11, 0.1); color: var(--warning-color); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td style="padding: 1rem 0.5rem;">
+                                    {% if p.status == 'success' %}
+                                    <a href="{{ url_for('fees.print_receipt', payment_id=p.id) }}" target="_blank" style="color: var(--primary-color); text-decoration: none; display: flex; align-items: center; gap: 4px; font-size: 0.9rem; font-weight: 500;">
+                                        <span class="material-symbols-rounded" style="font-size: 16px;">download</span> Receipt
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                    <span class="material-symbols-rounded" style="font-size: 48px; margin-bottom: 1rem; opacity: 0.5;">receipt_long</span>
+                    <p>No payment history found.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

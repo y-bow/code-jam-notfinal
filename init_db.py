@@ -282,6 +282,40 @@ def seed_db():
             Friendship(user1_id=sharan.id, user2_id=vaibhav.id)
         ])
         db.session.commit()
+        
+        # =====================================================================
+        # 8. FEES
+        # =====================================================================
+        from app.models import Fee, FeePayment
+        
+        # Set up a generic fee structure for the batch
+        due = datetime(2025, 5, 15)
+        students = [vaibhav, sharan, harshitha, riddhima, saiteja, balaaditya, sadhana]
+        fees = []
+        for s in students:
+            fees.append(
+                Fee(
+                    student_id=s.id,
+                    tuition_fee=50000.0,
+                    lab_fee=5000.0,
+                    library_fee=2000.0,
+                    exam_fee=3000.0,
+                    other_charges=1000.0,
+                    due_date=due
+                )
+            )
+        db.session.add_all(fees)
+        db.session.commit()
+        
+        # Add some mock payments
+        payments = [
+            FeePayment(fee_id=fees[0].id, amount=61000.0, payment_method='Net Banking', status='success', transaction_id='TXN982374'), # Vaibhav - fully paid
+            FeePayment(fee_id=fees[1].id, amount=30000.0, payment_method='UPI', status='success', transaction_id='TXN992834'), # Sharan - partially paid
+            FeePayment(fee_id=fees[2].id, amount=61000.0, payment_method='Credit Card', status='success', transaction_id='TXN112233'), # Harshitha - fully paid
+        ]
+        db.session.add_all(payments)
+        db.session.commit()
+
         print("Database seeded successfully!")
 
 if __name__ == '__main__':

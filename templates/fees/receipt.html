@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt - {{ payment.transaction_id }}</title>
+    <!-- Modern Typography: Outfit & Inter -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #1a1a1a;
+            line-height: 1.6;
+            margin: 0;
+            padding: 2rem;
+            background-color: #f3f4f6;
+        }
+
+        .receipt-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 3rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .school-info h1 {
+            font-family: 'Outfit', sans-serif;
+            margin: 0 0 0.5rem 0;
+            color: #111827;
+        }
+
+        .school-info p {
+            margin: 0;
+            color: #6b7280;
+        }
+
+        .receipt-meta {
+            text-align: right;
+        }
+
+        .receipt-meta h2 {
+            margin: 0 0 0.5rem 0;
+            color: #4f46e5;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .detail-section h3 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6b7280;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-label {
+            color: #4b5563;
+        }
+
+        .detail-value {
+            font-weight: 500;
+        }
+
+        .payment-summary {
+            background-color: #f9fafb;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 3rem;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-total {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111827;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .footer {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .btn-print {
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-print:hover {
+            background-color: #4338ca;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+
+            .receipt-container {
+                box-shadow: none;
+                padding: 0;
+            }
+
+            .actions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="receipt-container">
+        <div class="header">
+            <div class="school-info">
+                <h1>{{ student.school.name | default('Sai University') }}</h1>
+                <p>School of Computing and Data Science</p>
+                <p>Chennai, India</p>
+            </div>
+            <div class="receipt-meta">
+                <h2>FEE RECEIPT</h2>
+                <p><strong>Receipt No:</strong> {{ payment.transaction_id }}</p>
+                <p><strong>Date:</strong> {{ payment.payment_date.strftime('%B %d, %Y') }}</p>
+            </div>
+        </div>
+
+        <div class="details-grid">
+            <div class="detail-section">
+                <h3>Student Details</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Name:</span>
+                    <span class="detail-value">{{ student.name }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Email:</span>
+                    <span class="detail-value">{{ student.email }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Role:</span>
+                    <span class="detail-value">{{ student.role | title }}</span>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h3>Payment Information</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Transaction ID:</span>
+                    <span class="detail-value" style="font-family: monospace;">{{ payment.transaction_id }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Payment Method:</span>
+                    <span class="detail-value">{{ payment.payment_method }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value" style="color: #059669; font-weight: 600;">{{ payment.status | upper
+                        }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="payment-summary">
+            <div class="summary-row">
+                <span>Payment Towards</span>
+                <span>Fee Amount Received</span>
+            </div>
+
+            <div class="summary-row summary-total">
+                <span>Total Amount Paid</span>
+                <span>₹{{ "{:,.2f}".format(payment.amount) }}</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>This is a computer-generated receipt and does not require a physical signature.</p>
+            <p>For any queries, please contact the finance department at finance@saiuniversity.edu.in</p>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button class="btn-print" onclick="window.print()">
+            Print / Save as PDF
+        </button>
+    </div>
+
+</body>
+
+</html>
