@@ -39,8 +39,10 @@
         <aside class="sidebar glass-panel">
             <div class="sidebar-header">
                 <div class="logo">
-                    <span class="material-symbols-rounded">school</span>
-                    <h1>Hive</h1>
+                    <img src="{{ url_for('static', filename='images/light_theme.png') }}" alt="Hive Logo"
+                        class="logo-light">
+                    <img src="{{ url_for('static', filename='images/dark_theme.png') }}" alt="Hive Logo"
+                        class="logo-dark">
                 </div>
             </div>
 
@@ -58,6 +60,7 @@
                     <span class="material-symbols-rounded">calendar_today</span>
                     Timetable
                 </a>
+
                 <a href="{{ url_for('dashboard.tasks') }}"
                     class="nav-item {{ 'active' if request.endpoint == 'dashboard.tasks' }}">
                     <span class="material-symbols-rounded">task_alt</span>
@@ -221,22 +224,11 @@
         <div class="modal-content glass-panel">
             <span class="close-modal" id="closeProfileBtn">&times;</span>
             <div class="profile-header">
-                <div class="avatar large-avatar" style="position: relative;">
-                    {% if g.current_user %}{{ g.current_user.name[0] | upper }}{% else %}U{% endif %}
-                    {% if g.current_user and g.current_user.role == 'class_rep' %}
-                    <span class="rep-badge-large" title="Class Representative">👑</span>
-                    {% endif %}
-                </div>
-                <h2>
-                    {% if g.current_user %}{{ g.current_user.name }}{% else %}User Name{% endif %}
-                </h2>
-                <p class="user-role">
-                    {% if g.current_user %}
-                    {{ g.current_user.role | replace('_', ' ') | title }}
-                    {% else %}
-                    Student
-                    {% endif %}
-                </p>
+                <div class="avatar large-avatar">{% if g.current_user %}{{ g.current_user.name[0] | upper }}{% else
+                    %}U{% endif %}</div>
+                <h2>{% if g.current_user %}{{ g.current_user.name }}{% else %}User Name{% endif %}</h2>
+                <p class="user-role">{% if g.current_user %}{{ g.current_user.role | title }}{% else %}Student{% endif
+                    %}</p>
             </div>
 
             <div class="profile-details">

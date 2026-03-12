@@ -15,6 +15,7 @@ ROLE_HIERARCHY = {
     'assistant': 3,
     'timetable_manager': 4,
     'dean': 5,
+    'admin': 10,
     'superadmin': 99,
 }
 
@@ -66,7 +67,7 @@ class Section(db.Model):
 
     # Relationships
     courses = db.relationship('Course', backref='section', lazy='dynamic',
-                               cascade='all, delete-orphan')
+                              cascade='all, delete-orphan')
 
     def __repr__(self):
         return f'<Section {self.code} @ School {self.school_id}>'
@@ -103,6 +104,43 @@ class User(db.Model):
 
     def __repr__(self):
         return f'<User {self.email} ({self.role}) @ School {self.school_id}>'
+
+    # Social Features
+    @property
+    def friends(self):
+        """Returns a list of User objects who are confirmed friends."""
+        f1 = Friendship.query.filter_by(user1_id=self.id).all()
+        f2 = Friendship.query.filter_by(user2_id=self.id).all()
+        friend_ids = [f.user2_id for f in f1] + [f.user1_id for f in f2]
+        if not friend_ids:
+            return []
+        return User.query.filter(User.id.in_(friend_ids)).all()
+
+    @property
+    def pending_requests(self):
+        """Incoming friend requests."""
+        return FriendRequest.query.filter_by(recipient_id=self.id, status='pending').all()
+
+    @property
+    def sent_requests(self):
+        """Outgoing friend requests."""
+        return FriendRequest.query.filter_by(sender_id=self.id, status='pending').all()
+
+    def is_friends_with(self, other_user_id):
+        return Friendship.query.filter(
+            ((Friendship.user1_id == self.id) & (Friendship.user2_id == other_user_id)) |
+            ((Friendship.user1_id == other_user_id) & (Friendship.user2_id == self.id))
+        ).first() is not None
+
+    def has_pending_request_to(self, other_user_id):
+        return FriendRequest.query.filter_by(
+            sender_id=self.id, recipient_id=other_user_id, status='pending'
+        ).first() is not None
+
+    def has_pending_request_from(self, other_user_id):
+        return FriendRequest.query.filter_by(
+            sender_id=other_user_id, recipient_id=self.id, status='pending'
+        ).first() is not None
 
 
 class Student(db.Model):
@@ -147,7 +185,6 @@ class Course(db.Model):
     teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     credits = db.Column(db.Integer, nullable=False)
     max_students = db.Column(db.Integer, default=50)
-    meet_link = db.Column(db.String(500))  # NEW: Google Meet Link
 
     teacher = db.relationship('User', backref=db.backref('taught_courses', lazy='dynamic'))
     enrollments = db.relationship('Enrollment', backref='course', lazy='dynamic',
@@ -313,18 +350,22 @@ class Announcement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True)  # NULL = school-wide
+    section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), nullable=True) # NULL = school-wide
     teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     title = db.Column(db.String(200), nullable=False)
     body = db.Column(db.Text, nullable=False)
     urgent = db.Column(db.Boolean, default=False)
+    category = db.Column(db.String(50), default='general')  # 'general', 'timetable'
     posted_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     course = db.relationship('Course', backref=db.backref('announcements', lazy='dynamic'))
+    section = db.relationship('Section', backref=db.backref('announcements', lazy='dynamic'))
     author = db.relationship('User', backref=db.backref('authored_announcements', lazy='dynamic'))
 
     __table_args__ = (
         db.Index('ix_announcement_school', 'school_id'),
         db.Index('ix_announcement_course', 'course_id'),
+        db.Index('ix_announcement_section', 'section_id'),
     )
 
 
@@ -373,19 +414,6 @@ class CustomTask(db.Model):
     user = db.relationship('User', backref=db.backref('custom_tasks', lazy='dynamic'))
 
 
-class TeacherTodo(db.Model):
-    """Teacher-only personal to-do list."""
-    __tablename__ = 'teacher_todos'
-
-    id = db.Column(db.Integer, primary_key=True)
-    teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    title = db.Column(db.String(200), nullable=False)
-    is_completed = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    teacher = db.relationship('User', backref=db.backref('teacher_todos', lazy='dynamic'))
-
-
 # =============================================================================
 # TIMETABLE
 # =============================================================================
@@ -400,8 +428,13 @@ class TimetableEntry(db.Model):
     start_time = db.Column(db.String(20), nullable=False)  # e.g. '09:00 AM'
     end_time = db.Column(db.String(20), nullable=False)    # e.g. '10:30 AM'
     title = db.Column(db.String(200), nullable=False)      # course/class name
+    teacher = db.Column(db.String(100))                     # teacher name
+    period = db.Column(db.String(50))                      # e.g. 'Period 1'
     room = db.Column(db.String(100), nullable=False)
     color = db.Column(db.String(50), default='var(--primary-color)')
+    status = db.Column(db.String(20), default='active')           # 'active', 'cancelled'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     section = db.relationship('Section', backref=db.backref('timetable_entries', lazy='dynamic'))
 
@@ -412,75 +445,58 @@ class TimetableEntry(db.Model):
     def to_dict(self):
         """Serialize for JSON injection into templates."""
         return {
+            'id': self.id,
             'day': self.day,
             'startTime': self.start_time,
             'endTime': self.end_time,
             'title': self.title,
+            'subject': self.title,
+            'teacher': self.teacher or '',
+            'period': self.period or '',
             'room': self.room,
             'color': self.color,
+            'status': self.status,
         }
 
-
-
 # =============================================================================
-# ROLE EXTENSIONS & SOCIAL
+# ADDITIONAL MODELS (Teacher & Social)
 # =============================================================================
+
+class TeacherTodo(db.Model):
+    __tablename__ = 'teacher_todos'
+    id = db.Column(db.Integer, primary_key=True)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    is_completed = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class TeacherRating(db.Model):
-    """Student ratings for teachers per course."""
     __tablename__ = 'teacher_ratings'
-
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)  # 1-5
+    rating = db.Column(db.Integer, nullable=False)
     review = db.Column(db.Text)
-    is_anonymous = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    __table_args__ = (
-        db.UniqueConstraint('student_id', 'course_id', name='uq_student_course_rating'),
-    )
-
-
 class FriendRequest(db.Model):
-    """Instagram-style follow requests."""
     __tablename__ = 'friend_requests'
-
     id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     recipient_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     status = db.Column(db.String(20), default='pending')  # pending, accepted, declined
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    sender = db.relationship('User', foreign_keys=[sender_id])
-    recipient = db.relationship('User', foreign_keys=[recipient_id])
-
+    sender = db.relationship('User', foreign_keys=[sender_id], backref=db.backref('sent_friend_requests', lazy='dynamic'))
+    recipient = db.relationship('User', foreign_keys=[recipient_id], backref=db.backref('received_friend_requests', lazy='dynamic'))
 
 class Friendship(db.Model):
-    """Accepted friendships."""
     __tablename__ = 'friendships'
-
-    user1_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    user2_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    user1_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user2_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-
-class Block(db.Model):
-    """User blocking system."""
-    __tablename__ = 'blocks'
-
-    blocker_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    blocked_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-
-
-class ClassRep(db.Model):
-    """Association for Class Representatives."""
-    __tablename__ = 'class_reps'
-
-    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), primary_key=True)
-
-    student = db.relationship('User', backref=db.backref('rep_profile', uselist=False))
-    section = db.relationship('Section', backref=db.backref('reps', lazy='dynamic'))
+    user1 = db.relationship('User', foreign_keys=[user1_id])
+    user2 = db.relationship('User', foreign_keys=[user2_id])

@@ -5,46 +5,47 @@
 {% block sidebar_links %}{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: center; align-items: center; height: 80vh;">
-    <div class="glass-panel" style="width: 400px; padding: 2.5rem; border-radius: var(--radius-lg);">
-        <div style="text-align: center; margin-bottom: 2rem;">
-            <span class="material-symbols-rounded" style="font-size: 3rem; color: var(--primary-color);">hive</span>
-            <h2 style="margin-top: 1rem;">Welcome to Hive</h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Sign in to your dashboard</p>
+<div class="login-container">
+    <div class="glass-panel login-card">
+        <div class="login-header">
+            <div class="logo-wrapper"
+                style="background: none; border: none; width: auto; height: auto; display: flex; justify-content: center;">
+                <img src="{{ url_for('static', filename='images/light_theme.png') }}" alt="Hive Logo" class="logo-light"
+                    style="width: 160px; height: auto; margin-bottom: 1rem;">
+                <img src="{{ url_for('static', filename='images/dark_theme.png') }}" alt="Hive Logo" class="logo-dark"
+                    style="width: 160px; height: auto; margin-bottom: 1rem;">
+            </div>
+            <h2>Welcome to Hive</h2>
+            <p>The smartest hive for collaborative learning</p>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
-        <div
-            style="padding: 10px; margin-bottom: 15px; border-radius: var(--radius-sm); 
-                        background-color: {% if category == 'danger' %}var(--danger-color){% else %}var(--warning-color){% endif %}; color: white; text-align: center;">
+        <div class="alert alert-{{ category }}">
+            <span class="material-symbols-rounded">error</span>
             {{ message }}
         </div>
         {% endfor %}
         {% endif %}
         {% endwith %}
 
-        <form method="POST" action="{{ url_for('auth.login') }}"
-            style="display: flex; flex-direction: column; gap: 1.5rem;">
-            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                <label for="email" style="font-size: 0.9rem; font-weight: 500;">College Email</label>
-                <input type="email" id="email" name="email" required
-                    style="padding: 0.75rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); 
-                              background: var(--bg-main); color: var(--text-main); font-family: var(--font-body); font-size: 1rem;">
+        <form method="POST" action="{{ url_for('auth.login') }}" class="login-form">
+            <div class="input-group">
+                <input type="email" id="email" name="email" required placeholder=" ">
+                <label for="email">College Email</label>
+                <span class="material-symbols-rounded">mail</span>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                <label for="password" style="font-size: 0.9rem; font-weight: 500;">Password</label>
-                <input type="password" id="password" name="password" required
-                    style="padding: 0.75rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); 
-                              background: var(--bg-main); color: var(--text-main); font-family: var(--font-body); font-size: 1rem;">
+            <div class="input-group">
+                <input type="password" id="password" name="password" required placeholder=" ">
+                <label for="password">Password</label>
+                <span class="material-symbols-rounded">lock</span>
             </div>
 
-            <button type="submit" class="gradient-border"
-                style="margin-top: 0.5rem; padding: 0.8rem; background: var(--primary-color); color: white; border: none; 
-                           border-radius: var(--radius-md); font-weight: 600; font-family: var(--font-body); font-size: 1.1rem; cursor: pointer; transition: all var(--transition-fast);">
-                Sign In
+            <button type="submit" class="login-btn">
+                <span>Sign In</span>
+                <span class="material-symbols-rounded">arrow_forward</span>
             </button>
         </form>
     </div>
@@ -58,16 +59,172 @@
     }
 
     .content-wrapper {
-        padding: 0;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 100vh;
+        background: var(--bg-main);
     }
 
-    button[type="submit"]:hover {
+    .login-container {
+        width: 100%;
+        max-width: 440px;
+        padding: 20px;
+    }
+
+    .login-card {
+        padding: 3rem 2.5rem;
+        border-radius: var(--radius-lg);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .logo-wrapper {
+        width: 64px;
+        height: 64px;
+        background: rgba(var(--primary-rgb), 0.1);
+        color: var(--primary-color);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+
+    .logo-wrapper .material-symbols-rounded {
+        font-size: 36px;
+    }
+
+    .login-header h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--text-main);
+    }
+
+    .login-header p {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    .login-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .input-group {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .input-group input {
+        padding: 1.25rem 1rem 0.5rem;
+        border-radius: var(--radius-md);
+        border: 1.5px solid var(--border-color);
+        background: var(--bg-glass);
+        color: var(--text-main);
+        font-family: var(--font-body);
+        font-size: 1rem;
+        transition: all var(--transition-fast);
+        outline: none;
+    }
+
+    .input-group label {
+        position: absolute;
+        left: 1rem;
+        top: 0.9rem;
+        color: var(--text-muted);
+        font-size: 1rem;
+        pointer-events: none;
+        transition: all var(--transition-fast);
+    }
+
+    .input-group .material-symbols-rounded {
+        position: absolute;
+        right: 1rem;
+        top: 0.9rem;
+        color: var(--text-muted);
+        font-size: 20px;
+        transition: all var(--transition-fast);
+    }
+
+    /* Floating Label Logic */
+    .input-group input:focus~label,
+    .input-group input:not(:placeholder-shown)~label {
+        top: 0.4rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .input-group input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
+    }
+
+    .input-group input:focus~.material-symbols-rounded {
+        color: var(--primary-color);
+    }
+
+    .login-btn {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+    }
+
+    .login-btn:hover {
         filter: brightness(1.1);
         transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.4);
+    }
+
+    .login-btn .material-symbols-rounded {
+        font-size: 20px;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+        border: 1px solid transparent;
+    }
+
+    .alert-danger {
+        background: rgba(220, 38, 38, 0.1);
+        color: #dc2626;
+        border-color: rgba(220, 38, 38, 0.2);
+    }
+
+    .alert-warning {
+        background: rgba(217, 119, 6, 0.1);
+        color: #d97706;
+        border-color: rgba(217, 119, 6, 0.2);
     }
 </style>
 {% endblock %}

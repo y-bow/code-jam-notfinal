@@ -23,16 +23,41 @@ def create_app():
     db.init_app(app)
     bcrypt.init_app(app)
 
+    @app.template_filter('fix_time')
+    def fix_time_filter(s):
+        return s.replace(" ", "") if s else s
+
+    # Session Security
+    app.config.update(
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax',
+        PERMANENT_SESSION_LIFETIME=1800, # 30 minutes
+    )
+
+    @app.after_request
+    def add_header(response):
+        """
+        Prevent browser caching of sensitive pages to avoid 'account swapping'
+        when multiple users use the same machine/browser.
+        """
+        if 'user_id' in session:
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, public, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
+
     # Register blueprints
     from .routes.auth import auth_bp
     from .routes.dashboard import dashboard_bp
     from .routes.classroom import classroom_bp
     from .routes.messages import messages_bp
+    from .routes.social import social_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(classroom_bp)
     app.register_blueprint(messages_bp)
+    app.register_blueprint(social_bp)
 
     @app.route('/')
     def index():

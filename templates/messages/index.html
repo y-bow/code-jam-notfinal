@@ -15,6 +15,9 @@
                 <button class="tab-btn-p" onclick="switchSideTab(this, 'friends')">
                     <span class="material-symbols-rounded">group</span> Friends
                 </button>
+                <button class="tab-btn-p" onclick="switchSideTab(this, 'search')">
+                    <span class="material-symbols-rounded">person_add</span> Find
+                </button>
             </div>
 
             <div class="search-wrapper">
@@ -60,16 +63,14 @@
                 <div class="friend-req-card">
                     <span class="friend-name">{{ req.sender.name }}</span>
                     <div class="req-actions">
-                        <form action="{{ url_for('messages.respond_request', request_id=req.id, action='accept') }}"
-                            method="POST">
-                            <button class="action-btn accept" title="Accept"><span
-                                    class="material-symbols-rounded">check</span></button>
-                        </form>
-                        <form action="{{ url_for('messages.respond_request', request_id=req.id, action='decline') }}"
-                            method="POST">
-                            <button class="action-btn decline" title="Decline"><span
-                                    class="material-symbols-rounded">close</span></button>
-                        </form>
+                        <button class="action-btn accept" onclick="manageFriendship('accept', {{ req.id }}, this)"
+                            title="Accept">
+                            <span class="material-symbols-rounded">check</span>
+                        </button>
+                        <button class="action-btn decline" onclick="manageFriendship('decline', {{ req.id }}, this)"
+                            title="Decline">
+                            <span class="material-symbols-rounded">close</span>
+                        </button>
                     </div>
                 </div>
                 {% endfor %}
@@ -79,15 +80,21 @@
                 <div class="section-label">Your Friends</div>
                 {% if friends %}
                 {% for f in friends %}
-                <div class="chat-item-premium" onclick="loadChat({{ f.id }}, '{{ f.name }}')">
-                    <div class="avatar-wrapper">
+                <div class="chat-item-premium searchable-friend">
+                    <div class="avatar-wrapper" onclick="loadChat({{ f.id }}, '{{ f.name }}')">
                         <div class="avatar" style="background: var(--secondary-color);">{{ f.name[:1].upper() }}</div>
                         {% if f.role == 'class_rep' %}
                         <span class="rep-mini">👑</span>
                         {% endif %}
                     </div>
-                    <div class="chat-info">
+                    <div class="chat-info" onclick="loadChat({{ f.id }}, '{{ f.name }}')">
                         <span class="chat-name">{{ f.name }}</span>
+                    </div>
+                    <div class="friend-actions">
+                        <button class="action-btn decline" onclick="manageFriendship('unfriend', {{ f.id }}, this)"
+                            title="Unfriend">
+                            <span class="material-symbols-rounded">person_remove</span>
+                        </button>
                     </div>
                 </div>
                 {% endfor %}
@@ -96,6 +103,21 @@
                     <p>No friends yet</p>
                 </div>
                 {% endif %}
+            </div>
+        </div>
+
+        <div id="side-search" class="side-tab-content" style="display: none;">
+            <div class="search-tab-container">
+                <div class="search-box" style="padding: 1rem;">
+                    <input type="text" id="social-search-input" class="glass-input-premium"
+                        placeholder="Enter name or email..." onkeyup="doSocialSearch(this.value)">
+                </div>
+                <div id="social-search-results" class="search-results-mini"
+                    style="padding: 0.5rem; flex: 1; overflow-y: auto;">
+                    <div class="empty-state-mini">
+                        <p>Search for anyone in your school</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -158,7 +180,7 @@
     const currentUserId = {{ g.current_user.id }};
 
     function switchSideTab(btn, tab) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-btn-p').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         document.querySelectorAll('.side-tab-content').forEach(c => c.style.display = 'none');
         document.getElementById('side-' + tab).style.display = 'block';
@@ -231,6 +253,114 @@
 
     // Auto-refresh every 5 seconds
     setInterval(refreshMessages, 5000);
+
+    // Social Search Logic
+    let searchTimeoutId = null;
+    async function doSocialSearch(query) {
+        clearTimeout(searchTimeoutId);
+        const container = document.getElementById('social-search-results');
+
+        if (!query.trim()) {
+            container.innerHTML = '<div class="empty-state-mini"><p>Search for anyone in your school</p></div>';
+            return;
+        }
+
+        searchTimeoutId = setTimeout(async () => {
+            try {
+                const response = await fetch(`/social/search_ajax?q=${encodeURIComponent(query)}`);
+                const results = await response.json();
+
+                if (results.length === 0) {
+                    container.innerHTML = '<div class="empty-state-mini"><p>No users found</p></div>';
+                    return;
+                }
+
+                container.innerHTML = results.map(u => `
+                    <div class="chat-item-premium no-hover" style="cursor: default;">
+                        <div class="avatar-wrapper">
+                            <div class="avatar" style="background: var(--primary-color);">${u.avatar}</div>
+                        </div>
+                        <div class="chat-info">
+                            <span class="chat-name">${u.name}</span>
+                            <span class="chat-meta">${u.email}</span>
+                        </div>
+                        <div class="search-action">
+                            ${getSearchActionBadge(u)}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Search error:', error);
+            }
+        }, 300);
+    }
+
+    function getSearchActionBadge(u) {
+        if (u.is_friend) return `
+            <button class="action-btn decline" onclick="manageFriendship('unfriend', ${u.id}, this)" title="Unfriend">
+                <span class="material-symbols-rounded">person_remove</span>
+            </button>
+        `;
+        if (u.sent_request) return '<span class="badge warning">Pending</span>';
+        if (u.received_request) return '<span class="badge warning">Invited you</span>';
+
+        return `
+            <button class="action-btn accept" onclick="sendSocialRequest(${u.id}, this)" title="Add Friend">
+                <span class="material-symbols-rounded">person_add</span>
+            </button>
+        `;
+    }
+
+    async function sendSocialRequest(userId, btn) {
+        try {
+            const response = await fetch(`/social/request/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                const parent = btn.parentElement;
+                parent.innerHTML = '<span class="badge warning">Pending</span>';
+            } else {
+                alert(data.error || 'Failed to send request');
+            }
+        } catch (error) {
+            console.error('Request error:', error);
+            alert('A network error occurred.');
+        }
+    }
+
+    async function manageFriendship(action, id, btn) {
+        if (action === 'unfriend' && !confirm('Are you sure you want to remove this friend?')) return;
+
+        const url = action === 'unfriend' ? `/social/unfriend/${id}` : `/social/respond/${id}/${action}`;
+        // Note: the respond route in social.py is actually /accept/<id> and /decline/<id>
+        // Let's use the correct social.py routes
+        let finalUrl = `/social/${action}/${id}`;
+
+        try {
+            const response = await fetch(finalUrl, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                // For simplicity, refresh the page or update UI
+                // Refreshing the page is easiest to catch all state changes
+                window.location.reload();
+            } else {
+                alert(data.error || 'Action failed');
+            }
+        } catch (error) {
+            console.error('Action error:', error);
+        }
+    }
 </script>
 
 <style>
@@ -689,6 +819,40 @@
 
     .danger-item:hover {
         background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Social Search Results Styling */
+    .search-results-mini {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .no-hover:hover {
+        background: none !important;
+    }
+
+    .search-action {
+        margin-left: auto;
+    }
+
+    .badge {
+        position: static !important;
+        display: inline-block;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    .badge.success {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+
+    .badge.warning {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
     }
 </style>
 {% endblock %}

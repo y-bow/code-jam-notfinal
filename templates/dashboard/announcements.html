@@ -37,48 +37,53 @@
             class="material-symbols-rounded">campaign</span> Department & Class Announcements</h3>
 
     <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-        <!-- Urgent Announcement -->
-        <div
-            style="background: var(--bg-main); border: 1px solid var(--danger-color); padding: 1.5rem; border-radius: var(--radius-md); position: relative; overflow: hidden;">
-            <div
-                style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--danger-color);">
-            </div>
+        {% for a in announcements %}
+        <div style="background: var(--bg-main); border: 1px solid {% if a.urgent %}var(--danger-color){% else %}var(--border-color){% endif %}; padding: 1.5rem; border-radius: var(--radius-md); position: relative; overflow: hidden;">
+            {% if a.urgent %}
+            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--danger-color);"></div>
+            {% endif %}
+            
             <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                <h4 style="margin: 0; color: var(--danger-color); display: flex; align-items: center; gap: 0.5rem;">
-                    <span class="material-symbols-rounded" style="font-size: 1.2rem;">warning</span> URGENT: Building
-                    Closure
+                <h4 style="margin: 0; color: {% if a.urgent %}var(--danger-color){% elif a.category == 'timetable' %}var(--primary-color){% else %}var(--text-main){% endif %}; display: flex; align-items: center; gap: 0.5rem;">
+                    {% if a.category == 'timetable' %}
+                    <span class="material-symbols-rounded" style="font-size: 1.2rem;">calendar_month</span>
+                    {% elif a.urgent %}
+                    <span class="material-symbols-rounded" style="font-size: 1.2rem;">warning</span>
+                    {% else %}
+                    <span class="material-symbols-rounded" style="font-size: 1.2rem;">info</span>
+                    {% endif %}
+                    {{ a.title }}
                 </h4>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">2 hours ago</span>
+                <div style="text-align: right;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">{{ a.posted_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                    {% if a.section %}<div style="font-size: 0.7rem; color: var(--accent-color); font-weight: 600;">{{ a.section.name }}</div>{% endif %}
+                </div>
             </div>
-            <p style="margin: 0 0 1rem 0; color: var(--text-main);">Due to plumbing issues, the Science block will be
-                closed tomorrow. All PHY101 classes will be shifted online.</p>
-            <div style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted);">Posted by: Administration</div>
-        </div>
-
-        <!-- Normal Announcement -->
-        <div
-            style="background: var(--bg-main); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: var(--radius-md);">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                <h4 style="margin: 0; color: var(--primary-color);">CS101 Midterm Syllabus Update</h4>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">Yesterday</span>
+            
+            <p style="margin: 0 0 1rem 0; color: var(--text-main); line-height: 1.5;">{{ a.body }}</p>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 0.75rem; margin-top: 0.5rem;">
+                <div style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
+                    <span class="material-symbols-rounded" style="font-size: 1rem;">person_edit</span>
+                    Posted by: {{ a.author.name if a.author else 'System' }}
+                </div>
+                {% if a.category == 'timetable' %}
+                <span style="font-size: 0.75rem; background: var(--bg-hover); color: var(--primary-color); padding: 0.2rem 0.6rem; border-radius: 10px; font-weight: 600; display: flex; align-items: center; gap: 0.3rem;">
+                    <span class="material-symbols-rounded" style="font-size: 0.9rem;">event_repeat</span> Timetable Update
+                </span>
+                {% elif a.course %}
+                <span style="font-size: 0.75rem; background: var(--bg-hover); padding: 0.2rem 0.6rem; border-radius: 10px; color: var(--text-muted);">
+                    {{ a.course.code }}
+                </span>
+                {% endif %}
             </div>
-            <p style="margin: 0 0 1rem 0; color: var(--text-main);">The midterm exam will cover Chapters 1 through 5.
-                Chapter 6 has been moved to the final exam. Please review the updated study guide in the resources
-                section.</p>
-            <div style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted);">Posted by: Prof. Smith</div>
         </div>
-
-        <!-- Normal Announcement -->
-        <div
-            style="background: var(--bg-main); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: var(--radius-md); opacity: 0.8;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                <h4 style="margin: 0; color: var(--primary-color);">Career Fair Registration</h4>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">Oct 12</span>
-            </div>
-            <p style="margin: 0 0 1rem 0; color: var(--text-main);">Don't forget to register for the Fall Career Fair!
-                Over 50 tech companies will be present. Bring your resumes.</p>
-            <div style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted);">Posted by: Career Services</div>
+        {% else %}
+        <div style="text-align: center; padding: 4rem; color: var(--text-muted);">
+            <span class="material-symbols-rounded" style="font-size: 3rem; margin-bottom: 1rem;">inbox</span>
+            <p>No announcements found for your institution.</p>
         </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

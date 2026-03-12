@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Hive | Admin Dashboard{% endblock %}
+{% block page_title %}Admin Hub{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.admin_dashboard') }}" class="nav-item active">
+    <span class="material-symbols-rounded">admin_panel_settings</span>
+    Admin Overview
+</a>
+<a href="{{ url_for('dashboard.admin_timetable') }}" class="nav-item">
+    <span class="material-symbols-rounded">calendar_view_week</span>
+    Master Timetable
+</a>
+<a href="{{ url_for('dashboard.announcements') }}" class="nav-item">
+    <span class="material-symbols-rounded">campaign</span>
+    Announcements
+</a>
+<a href="{{ url_for('messages.index') }}" class="nav-item">
+    <span class="material-symbols-rounded">forum</span>
+    Messages
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="glass-panel" style="padding: 1.5rem; text-align: center;">
+        <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Total Students</div>
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary-color);">{{ stats.students }}</div>
+    </div>
+    <div class="glass-panel" style="padding: 1.5rem; text-align: center;">
+        <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Faculty Members</div>
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--accent-color);">{{ stats.teachers }}</div>
+    </div>
+    <div class="glass-panel" style="padding: 1.5rem; text-align: center;">
+        <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Active Sections</div>
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--success-color);">{{ stats.sections }}</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <!-- Recent Announcements -->
+    <div class="glass-panel" style="padding: 2rem;">
+        <h3 style="margin-top: 0; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span class="material-symbols-rounded">campaign</span> Recent Announcements
+        </h3>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for a in announcements %}
+            <div style="padding: 1rem; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                    <strong style="color: var(--primary-color);">{{ a.title }}</strong>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">{{ a.posted_at.strftime('%b %d, %H:%M') }}</span>
+                </div>
+                <p style="margin: 0; font-size: 0.9rem; color: var(--text-main); line-height: 1.4;">{{ a.body }}</p>
+            </div>
+            {% else %}
+            <p style="color: var(--text-muted); text-align: center;">No recent announcements.</p>
+            {% endfor %}
+        </div>
+        <div style="margin-top: 1.5rem; text-align: right;">
+            <a href="{{ url_for('dashboard.announcements') }}" class="glass-button" style="padding: 0.5rem 1rem; font-size: 0.8rem;">View All</a>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="glass-panel" style="padding: 2rem;">
+        <h3 style="margin-top: 0; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span class="material-symbols-rounded">bolt</span> Quick Actions
+        </h3>
+        <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+            <a href="{{ url_for('dashboard.admin_timetable') }}" class="glass-button" style="text-decoration: none; display: flex; align-items: center; gap: 0.75rem; padding: 1rem;">
+                <span class="material-symbols-rounded">event_note</span>
+                Edit Master Timetable
+            </a>
+            <div class="glass-button" style="opacity: 0.6; cursor: not-allowed; display: flex; align-items: center; gap: 0.75rem; padding: 1rem;">
+                <span class="material-symbols-rounded">person_add</span>
+                Onboard New Students (Coming Soon)
+            </div>
+            <div class="glass-button" style="opacity: 0.6; cursor: not-allowed; display: flex; align-items: center; gap: 0.75rem; padding: 1rem;">
+                <span class="material-symbols-rounded">school</span>
+                Manage Course Catalog (Coming Soon)
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

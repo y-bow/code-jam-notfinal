@@ -154,9 +154,29 @@ a {
     -webkit-text-fill-color: transparent;
 }
 
-.sidebar-header .logo .material-symbols-rounded {
-    color: var(--primary-color);
-    font-size: 2rem;
+.sidebar-header .logo {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.sidebar-header .logo img {
+    height: 64px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Logo Theme Switching */
+.logo-dark {
+    display: none;
+}
+
+body.dark-theme .logo-light {
+    display: none;
+}
+
+body.dark-theme .logo-dark {
+    display: block;
 }
 
 .sidebar-nav {

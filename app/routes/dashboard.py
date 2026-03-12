@@ -1,10 +1,10 @@
-from flask import Blueprint, render_template, session, request, redirect, url_for, g
+from flask import Blueprint, render_template, session, request, redirect, url_for, g, flash, abort, jsonify
 from datetime import datetime
 from ..middleware import school_scoped, role_minimum
 from ..models import (
     db, User, Course, Enrollment, Assignment, Submission,
     Section, CustomTask, Announcement, TimetableEntry,
-    TeacherTodo, TeacherRating, Attendance, Grade
+    TeacherTodo, TeacherRating, Attendance, Grade, School
 )
 import pandas as pd
 import plotly.express as px
@@ -12,6 +12,21 @@ import plotly.utils
 import json
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
+
+def format_time_12hr(time_str):
+    """Normalize '10:40 AM' -> '10:40AM' and convert '14:30' -> '2:30PM'."""
+    if not time_str: return ""
+    time_str = time_str.strip()
+    try:
+        # Check if it's 24h format (HH:MM or HH:MM:SS)
+        if ':' in time_str and 'AM' not in time_str.upper() and 'PM' not in time_str.upper():
+            from datetime import datetime
+            t = datetime.strptime(time_str[:5], "%H:%M")
+            # Using lstrip('0') for cross-platform compatibility
+            return t.strftime("%I:%M%p").lstrip('0')
+    except:
+        pass
+    return time_str.replace(" ", "")
 
 
 @dashboard_bp.route('/student')
@@ -30,7 +45,7 @@ def student_dashboard():
             
             today_classes = [entry.to_dict() for entry in entries]
             # Sort by time
-            today_classes.sort(key=lambda x: datetime.strptime(x['startTime'], '%I:%M %p').time() if 'AM' in x['startTime'] or 'PM' in x['startTime'] else x['startTime'])
+            today_classes.sort(key=lambda x: datetime.strptime(x['startTime'].replace(" ", "").upper(), '%I:%M%p').time() if 'AM' in x['startTime'].upper() or 'PM' in x['startTime'].upper() else x['startTime'])
 
     return render_template('dashboard/student_dashboard.html', today_classes=today_classes)
 
@@ -67,7 +82,7 @@ def teacher_dashboard():
             d['studentCount'] = student_count
             today_classes.append(d)
             
-        today_classes.sort(key=lambda x: datetime.strptime(x['startTime'], '%I:%M %p').time() if 'AM' in x['startTime'] or 'PM' in x['startTime'] else x['startTime'])
+        today_classes.sort(key=lambda x: datetime.strptime(x['startTime'].replace(" ", "").upper(), '%I:%M%p').time() if 'AM' in x['startTime'].upper() or 'PM' in x['startTime'].upper() else x['startTime'])
 
     # 2. To-Do List
     tasks = TeacherTodo.query.filter_by(teacher_id=user.id).order_by(TeacherTodo.is_completed, TeacherTodo.created_at.desc()).all()
@@ -113,32 +128,329 @@ def teacher_dashboard():
                                'rating': round(float(avg_rating), 1),
                                'rating_count': total_ratings
                            },
-                           reviews=recent_reviews,
-                           graphs=graphs_json)
+                            reviews=recent_reviews,
+                            graphs=graphs_json)
 
 
-@dashboard_bp.route('/timetable')
+@dashboard_bp.route('/admin')
+@school_scoped
+@role_minimum('admin')
+def admin_dashboard():
+    """Admin Hub: overview of school statistics and quick links."""
+    total_students = User.query.filter_by(school_id=g.school_id, role='student').count()
+    total_teachers = User.query.filter_by(school_id=g.school_id, role='teacher').count()
+    total_sections = Section.query.filter_by(school_id=g.school_id).count()
+    
+    recent_announcements = Announcement.query.filter_by(school_id=g.school_id).order_by(Announcement.posted_at.desc()).limit(5).all()
+    
+    return render_template('dashboard/admin_dashboard.html', 
+                           stats={
+                               'students': total_students,
+                               'teachers': total_teachers,
+                               'sections': total_sections
+                           },
+                           announcements=recent_announcements)
+
+
+@dashboard_bp.route('/admin/timetable', methods=['GET'])
+@school_scoped
+@role_minimum('admin')
+def admin_timetable():
+    """Editable timetable grid for admins."""
+    sections = Section.query.filter_by(school_id=g.school_id).all()
+    selected_section_id = request.args.get('section_id', type=int)
+    
+    # Default to first section if none selected
+    if not selected_section_id and sections:
+        selected_section_id = sections[0].id
+    
+    # Use a list of lists for days (0-4) - safer for Jinja iteration
+    timetable = [[] for _ in range(5)]
+    selected_section = None
+    
+    if selected_section_id:
+        selected_section = Section.query.get(selected_section_id)
+        if selected_section and selected_section.school_id == g.school_id:
+            for day_idx in range(5):
+                entries = TimetableEntry.query.filter_by(
+                    section_id=selected_section_id, 
+                    day=day_idx
+                ).order_by(TimetableEntry.start_time).all()
+                
+                timetable[day_idx] = [e.to_dict() for e in entries]
+                # Map IDs for modal
+                for i, d in enumerate(timetable[day_idx]):
+                    d['id'] = entries[i].id
+            
+            print(f"DEBUG: Loaded {sum(len(d) for d in timetable)} entries for section {selected_section.name}")
+        else:
+            print(f"DEBUG: Section {selected_section_id} not found or school mismatch (G.School: {g.school_id})")
+
+    return render_template('dashboard/admin_timetable.html', 
+                           sections=sections, 
+                           selected_section=selected_section,
+                           timetable=timetable)
+
+
+@dashboard_bp.route('/admin/timetable/debug')
+@school_scoped
+@role_minimum('admin')
+def timetable_debug():
+    """Diagnostic route to confirm data exists in DB."""
+    rows = (TimetableEntry.query
+            .join(Section)
+            .filter(Section.school_id == g.school_id)
+            .all())
+    return jsonify([r.to_dict() for r in rows])
+
+
+@dashboard_bp.route('/admin/timetable/update', methods=['POST'])
+@school_scoped
+@role_minimum('admin')
+def admin_timetable_update():
+    """Update a timetable entry and auto-generate specialized announcements."""
+    entry_id = request.form.get('entry_id', type=int)
+    new_subject = request.form.get('subject')
+    new_teacher = request.form.get('teacher')
+    new_period = request.form.get('period')
+    new_room = request.form.get('room')
+    new_start = format_time_12hr(request.form.get('start_time'))
+    new_end = format_time_12hr(request.form.get('end_time'))
+    
+    entry = TimetableEntry.query.get_or_404(entry_id)
+    if entry.section.school_id != g.school_id:
+        abort(403)
+        
+    old_subject = entry.title
+    old_room = entry.room
+    old_teacher = entry.teacher
+    old_start = entry.start_time
+    old_end = entry.end_time
+    
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    day_name = days[entry.day] if 0 <= entry.day < 5 else "Unspecified Day"
+    
+    # Update times first
+    if new_start: entry.start_time = new_start
+    if new_end: entry.end_time = new_end
+
+    # 1. Subject Change
+    if new_subject and new_subject != old_subject:
+        entry.title = new_subject
+        body = f"📚 Timetable Update ({entry.section.name}): {day_name} {entry.start_time}–{entry.end_time} — '{old_subject}' has been changed to '{new_subject}'."
+        db.session.add(Announcement(school_id=g.school_id, section_id=entry.section_id, teacher_id=g.current_user.id, category='timetable', title="📚 Timetable Update", body=body))
+    
+    # 2. Room Change
+    if new_room and new_room != old_room:
+        entry.room = new_room
+        body = f"🚪 Room Change ({entry.section.name}): {entry.title} on {day_name} {entry.start_time}–{entry.end_time} has moved from {old_room} to {new_room}."
+        db.session.add(Announcement(school_id=g.school_id, section_id=entry.section_id, teacher_id=g.current_user.id, category='timetable', title="🚪 Room Change", body=body))
+
+    # 3. Teacher Change
+    if new_teacher and new_teacher != old_teacher:
+        entry.teacher = new_teacher
+        body = f"👨‍🏫 Teacher Change ({entry.section.name}): {entry.title} on {day_name} will now be taught by {new_teacher} instead of {old_teacher}."
+        db.session.add(Announcement(school_id=g.school_id, section_id=entry.section_id, teacher_id=g.current_user.id, category='timetable', title="👨‍🏫 Teacher Change", body=body))
+
+    entry.period = new_period
+    db.session.commit()
+    
+    flash(f"Timetable updated. Announcement sent to Section {entry.section.name} students.", "success")
+    return redirect(url_for('dashboard.admin_timetable', section_id=entry.section_id))
+
+
+@dashboard_bp.route('/admin/timetable/add', methods=['POST'])
+@school_scoped
+@role_minimum('admin')
+def admin_timetable_add():
+    """Add a new timetable slot and notify students."""
+    section_id = request.form.get('section_id', type=int)
+    day = request.form.get('day', type=int)
+    start_time = format_time_12hr(request.form.get('start_time'))
+    end_time = format_time_12hr(request.form.get('end_time'))
+    subject = request.form.get('subject')
+    teacher = request.form.get('teacher')
+    room = request.form.get('room')
+    period = request.form.get('period')
+    color = request.form.get('color', 'var(--primary-color)')
+
+    section = Section.query.get_or_404(section_id)
+    if section.school_id != g.school_id:
+        abort(403)
+
+    new_entry = TimetableEntry(
+        section_id=section_id,
+        day=day,
+        start_time=start_time,
+        end_time=end_time,
+        title=subject,
+        teacher=teacher,
+        room=room,
+        period=period,
+        color=color,
+        status='active'
+    )
+    db.session.add(new_entry)
+    db.session.commit()
+
+    # Auto-Announcement
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    day_name = days[day] if 0 <= day < 5 else "Unspecified Day"
+    
+    announcement = Announcement(
+        school_id=g.school_id,
+        section_id=section_id,
+        teacher_id=g.current_user.id,
+        category='timetable',
+        title="📌 New Class Added",
+        body=f"📌 New Class ({section.name}): {subject} added on {day_name} from {start_time} to {end_time} in {room} with {teacher}.",
+        posted_at=datetime.utcnow()
+    )
+    db.session.add(announcement)
+    db.session.commit()
+
+    flash(f"Timetable updated. Announcement sent to Section {section.name} students.", "success")
+    return redirect(url_for('dashboard.admin_timetable', section_id=section_id))
+
+
+@dashboard_bp.route('/admin/timetable/cancel', methods=['POST'])
+@school_scoped
+@role_minimum('admin')
+def admin_timetable_cancel():
+    """Cancel a timetable slot (soft delete)."""
+    entry_id = request.form.get('entry_id', type=int)
+    entry = TimetableEntry.query.get_or_404(entry_id)
+    
+    if entry.section.school_id != g.school_id:
+        abort(403)
+
+    entry.status = 'cancelled'
+    db.session.commit()
+
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    day_name = days[entry.day] if 0 <= entry.day < 5 else "Unspecified Day"
+
+    announcement = Announcement(
+        school_id=g.school_id,
+        section_id=entry.section_id,
+        teacher_id=g.current_user.id,
+        category='timetable',
+        title="❌ Class Cancelled",
+        body=f"❌ Class Cancelled (Section {entry.section.name}): {entry.title} on {day_name} ({entry.start_time}–{entry.end_time}) has been cancelled.",
+        posted_at=datetime.utcnow()
+    )
+    db.session.add(announcement)
+    db.session.commit()
+
+    flash(f"Class cancelled. Announcement sent to Section {entry.section.name} students.", "success")
+    return redirect(url_for('dashboard.admin_timetable', section_id=entry.section_id))
+
+
+@dashboard_bp.route('/admin/timetable/restore', methods=['POST'])
+@school_scoped
+@role_minimum('admin')
+def admin_timetable_restore():
+    """Un-cancel a timetable slot."""
+    entry_id = request.form.get('entry_id', type=int)
+    entry = TimetableEntry.query.get_or_404(entry_id)
+    
+    if entry.section.school_id != g.school_id:
+        abort(403)
+
+    entry.status = 'active'
+    db.session.commit()
+
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    day_name = days[entry.day] if 0 <= entry.day < 5 else "Unspecified Day"
+
+    announcement = Announcement(
+        school_id=g.school_id,
+        section_id=entry.section_id,
+        teacher_id=g.current_user.id,
+        category='timetable',
+        title="✅ Class Restored",
+        body=f"✅ Class Restored (Section {entry.section.name}): {entry.title} on {day_name} ({entry.start_time}–{entry.end_time}) is back on schedule.",
+        posted_at=datetime.utcnow()
+    )
+    db.session.add(announcement)
+    db.session.commit()
+
+    flash(f"Class restored. Announcement sent to Section {entry.section.name} students.", "success")
+    return redirect(url_for('dashboard.admin_timetable', section_id=entry.section_id))
+
+
+@dashboard_bp.route('/admin/timetable/delete', methods=['POST'])
+@school_scoped
+@role_minimum('admin')
+def admin_timetable_delete():
+    """Hard delete a timetable slot."""
+    entry_id = request.form.get('entry_id', type=int)
+    entry = TimetableEntry.query.get_or_404(entry_id)
+    
+    if entry.section.school_id != g.school_id:
+        abort(403)
+
+    section_id = entry.section_id
+    section_name = entry.section.name
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    day_name = days[entry.day] if 0 <= entry.day < 5 else "Unspecified Day"
+    info = f"{entry.title} on {day_name} ({entry.start_time}–{entry.end_time})"
+
+    db.session.delete(entry)
+    db.session.commit()
+
+    announcement = Announcement(
+        school_id=g.school_id,
+        section_id=section_id,
+        teacher_id=g.current_user.id,
+        category='timetable',
+        title="🗑️ Class Removed",
+        body=f"🗑️ Class Removed (Section {section_name}): {info} has been permanently removed from the timetable.",
+        posted_at=datetime.utcnow()
+    )
+    db.session.add(announcement)
+    db.session.commit()
+
+    flash(f"Class permanently deleted. Announcement sent to Section {section_name} students.", "success")
+    return redirect(url_for('dashboard.admin_timetable', section_id=section_id))
+
+
+@dashboard_bp.route('/timetable', methods=['GET', 'POST'])
 @school_scoped
 def timetable():
     user = g.current_user
     
     timetable_data = {}
-    if user.student_profile and user.student_profile.section_id:
-        entries = TimetableEntry.query.filter_by(
-            section_id=user.student_profile.section_id
-        ).all()
+    my_section_id = None
+    if user.role == 'student':
+        profile = user.student_profile
+        if profile and profile.section_id:
+            my_section_id = profile.section_id
+    
+    # If student, show their section's timetable
+    if my_section_id:
+        # Mon=0, Sat=5
+        for day_idx in range(6):
+            # Show all classes for student, so they see cancelled ones with strikethrough
+            entries = TimetableEntry.query.filter_by(
+                section_id=my_section_id, 
+                day=day_idx
+            ).order_by(TimetableEntry.start_time).all()
+            
+            timetable_data[day_idx] = [
+                {
+                    'startTime': e.start_time,
+                    'endTime': e.end_time,
+                    'title': e.title,
+                    'room': e.room,
+                    'color': e.color or 'var(--primary-color)',
+                    'status': e.status
+                } for e in entries
+            ]
         
-        # Group by day (0=Monday, 1=Tuesday, ...)
-        for i in range(5):
-            timetable_data[i] = []
-            
-        for entry in entries:
-            # Simple sorting by start_time (assuming standard AM/PM format that sorts OK or we handle it in template)
-            timetable_data[entry.day].append(entry.to_dict())
-            
-        # Optional: Sort entries by time within each day
+        # Sort by actual time correctly
         for day in timetable_data:
-            timetable_data[day].sort(key=lambda x: datetime.strptime(x['startTime'], '%I:%M %p').time() if 'AM' in x['startTime'] or 'PM' in x['startTime'] else x['startTime'])
+            timetable_data[day].sort(key=lambda x: datetime.strptime(x['startTime'].replace(" ", "").upper(), '%I:%M%p').time() if 'AM' in x['startTime'].upper() or 'PM' in x['startTime'].upper() else x['startTime'])
             
     # Calculate current day of week (0=Monday, 6=Sunday)
     current_day = datetime.now().weekday()
@@ -146,7 +458,133 @@ def timetable():
     if current_day > 4:
         current_day = -1
 
-    return render_template('dashboard/timetable.html', timetable_data=timetable_data, current_day=current_day)
+    # Free Slots Logic Integration
+    sections = []
+    my_section = None
+    selected_section = None
+    free_slots_by_day = None
+
+    if user.role == 'student' and my_section_id:
+        my_section = Section.query.get(my_section_id)
+        # Load all sections from all schools
+        sections = Section.query.join(School).order_by(School.name, Section.name).all()
+        
+        if request.method == 'POST':
+            selected_section_id = request.form.get('compare_section_id', type=int)
+            if selected_section_id:
+                selected_section = Section.query.get(selected_section_id)
+                if selected_section:
+                    free_slots_by_day = get_common_free_slots(my_section_id, selected_section_id)
+
+    return render_template('dashboard/timetable.html', 
+                         timetable_data=timetable_data, 
+                         current_day=current_day,
+                         sections=sections,
+                         my_section=my_section,
+                         selected_section=selected_section,
+                         free_slots_by_day=free_slots_by_day)
+
+
+def get_common_free_slots(section_a_id, section_b_id):
+    """
+    Finds continuous common free slots across the 9:00 AM to 5:15 PM day.
+    Merges busy intervals for both sections to find gaps >= 15 mins.
+    """
+    entries_a = TimetableEntry.query.filter_by(section_id=section_a_id).all()
+    entries_b = TimetableEntry.query.filter_by(section_id=section_b_id).all()
+    
+    def to_minutes(t_str):
+        t = datetime.strptime(t_str.strip().replace(" ", "").upper(), "%I:%M%p")
+        return t.hour * 60 + t.minute
+
+    def to_time_str(mins):
+        h = mins // 60
+        m = mins % 60
+        is_pm = h >= 12
+        display_h = h if h <= 12 else h - 12
+        if display_h == 0: display_h = 12
+        ampm = "PM" if is_pm else "AM"
+        return f"{display_h}:{m:02d} {ampm}"
+        
+    DAYS_MAP = {0: 'Monday', 1: 'Tuesday', 2: 'Wednesday', 3: 'Thursday', 4: 'Friday'}
+    DAY_START = 9 * 60       # 09:00 AM
+    DAY_END = 17 * 60 + 15   # 05:15 PM
+    
+    free_slots_by_day = []
+    
+    for day_idx in range(5):
+        busy_intervals = []
+        for e in entries_a + entries_b:
+            if e.day == day_idx:
+                try:
+                    start_m = to_minutes(e.start_time)
+                    end_m = to_minutes(e.end_time)
+                    busy_intervals.append((start_m, end_m))
+                except Exception:
+                    pass
+                    
+        # Merge overlapping intervals
+        busy_intervals.sort(key=lambda x: x[0])
+        merged = []
+        for interval in busy_intervals:
+            if not merged:
+                merged.append([interval[0], interval[1]])
+            else:
+                prev = merged[-1]
+                if interval[0] <= prev[1]:
+                    prev[1] = max(prev[1], interval[1])
+                else:
+                    merged.append([interval[0], interval[1]])
+                    
+        # Find free gaps within DAY_START and DAY_END
+        gaps = []
+        current_time = DAY_START
+        for start, end in merged:
+            clp_ctime = max(current_time, DAY_START)
+            clp_start = min(start, DAY_END)
+            
+            if clp_start > clp_ctime:
+                gap_len = clp_start - clp_ctime
+                if gap_len >= 15:
+                    gaps.append((clp_ctime, clp_start, gap_len))
+            
+            current_time = max(current_time, end)
+            
+        # Check gap after last class until DAY_END
+        clp_ctime = max(current_time, DAY_START)
+        if clp_ctime < DAY_END:
+            gap_len = DAY_END - clp_ctime
+            if gap_len >= 15:
+                gaps.append((clp_ctime, DAY_END, gap_len))
+                
+        if not gaps:
+            free_slots_by_day.append({
+                'day_name': DAYS_MAP[day_idx],
+                'slots': [],
+                'msg': "No common free time",
+                'has_free': False
+            })
+        else:
+            if len(gaps) == 1 and gaps[0][0] == DAY_START and gaps[0][1] == DAY_END:
+                msg = "All day free"
+                has_free = True
+                slots_formatted = []
+            else:
+                msg = ""
+                has_free = True
+                slots_formatted = [
+                    {'text': f"{to_time_str(g[0])} – {to_time_str(g[1])}", 'duration': g[2]} 
+                    for g in gaps
+                ]
+                
+            free_slots_by_day.append({
+                'day_name': DAYS_MAP[day_idx],
+                'slots': slots_formatted,
+                'msg': msg,
+                'has_free': has_free
+            })
+            
+    return free_slots_by_day
 
 
 @dashboard_bp.route('/tasks', methods=['GET', 'POST'])
@@ -256,14 +694,24 @@ def grades():
 @dashboard_bp.route('/announcements')
 @school_scoped
 def announcements():
-    # School-scoped: only announcements from this school
-    school_announcements = (
-        Announcement.query
-        .filter_by(school_id=g.school_id)
-        .order_by(Announcement.posted_at.desc())
-        .all()
-    )
-    return render_template('dashboard/announcements.html', announcements=school_announcements)
+    """School-wide and section-targeted announcements feed."""
+    user = g.current_user
+    my_section_id = None
+    if user.role == 'student':
+        profile = user.student_profile
+        if profile:
+            my_section_id = profile.section_id
+
+    # Filter: school-wide (section_id IS NULL) OR targeted to user's section
+    query = Announcement.query.filter(Announcement.school_id == g.school_id)
+    if my_section_id:
+        query = query.filter(
+            (Announcement.section_id == None) | 
+            (Announcement.section_id == my_section_id)
+        )
+        
+    announcements_list = query.order_by(Announcement.posted_at.desc()).all()
+    return render_template('dashboard/announcements.html', announcements=announcements_list)
 
 
 
