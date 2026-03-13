@@ -2,7 +2,7 @@ from app import create_app
 from app.models import (
     db, User, Student, Teacher, School, Section,
     Course, Enrollment, Announcement, TimetableEntry, bcrypt,
-    TeacherTodo, TeacherRating, FriendRequest, Friendship
+    TeacherTodo, TeacherRating, FriendRequest, Friendship, Internship
 )
 from datetime import datetime
 
@@ -314,6 +314,47 @@ def seed_db():
             FeePayment(fee_id=fees[2].id, amount=61000.0, payment_method='Credit Card', status='success', transaction_id='TXN112233'), # Harshitha - fully paid
         ]
         db.session.add_all(payments)
+        db.session.commit()
+
+        # =====================================================================
+        # 9. INTERNSHIPS
+        # =====================================================================
+        internships = [
+            Internship(
+                company_name='TechNova Solutions',
+                role='Software Developer Intern',
+                location='Remote',
+                duration='3 months',
+                stipend='₹15,000 / month',
+                application_deadline=datetime(2025, 4, 15),
+                description='Join our core engineering team to build scalable microservices. You will work with a modern tech stack including Python, FastAPI, and React.',
+                required_skills='Python, React, basic Git knowledge',
+                application_link='https://technovasolutions.com/careers'
+            ),
+            Internship(
+                company_name='Creative Minds Agency',
+                role='Marketing Intern',
+                location='On-site (Bangalore)',
+                duration='6 months',
+                stipend='₹10,000 / month',
+                application_deadline=datetime(2025, 5, 1),
+                description='Help us plan and execute digital marketing campaigns. Ideal for creative individuals with a passion for social media strategy.',
+                required_skills='SEO, Content Writing, Social Media Management',
+                application_link='https://creativeminds.com/apply'
+            ),
+            Internship(
+                company_name='DataSphere',
+                role='Data Science Intern',
+                location='Hybrid (Chennai)',
+                duration='4 months',
+                stipend='₹20,000 / month',
+                application_deadline=datetime(2025, 3, 30),
+                description='Assist our data scientists in preprocessing large datasets, running EDA, and building foundational machine learning models.',
+                required_skills='Python, Pandas, SQL, Basic ML Concepts',
+                application_link='https://datasphere.io/internships'
+            )
+        ]
+        db.session.add_all(internships)
         db.session.commit()
 
         print("Database seeded successfully!")

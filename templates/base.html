@@ -122,6 +122,14 @@
                 </a>
                 {% endif %}
 
+                <a href="{{ url_for('internships.index') }}"
+                    class="nav-item {{ 'active' if request.endpoint == 'internships.index' }}">
+                    <div class="nav-item-content">
+                        <span class="material-symbols-rounded">work</span>
+                        Internships
+                    </div>
+                </a>
+
                 <a href="{{ url_for('messages.index') }}"
                     class="nav-item {{ 'active' if 'messages' in request.endpoint and 'fees' not in request.endpoint }}">
                     <div class="nav-item-content">

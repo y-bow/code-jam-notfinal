@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Hive | {% if internship %}Edit Internship{% else %}Post Internship{% endif %}{% endblock %}
+{% block page_title %}{% if internship %}Edit Internship{% else %}Post Internship{% endif %}{% endblock %}
+
+{% block content %}
+<div style="max-width: 720px; margin: 0 auto;">
+    <div class="glass-panel" style="padding: 2rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+            <a href="{{ url_for('internships.index') }}"
+                style="display: flex; align-items: center; color: var(--text-muted); text-decoration: none; transition: color 0.2s;">
+                <span class="material-symbols-rounded">arrow_back</span>
+            </a>
+            <h2 style="margin: 0; font-family: 'Outfit', sans-serif;">
+                {% if internship %}Edit Listing{% else %}Post a New Internship{% endif %}
+            </h2>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div style="padding: 0.75rem 1.25rem; margin-bottom: 1rem; border-radius: var(--radius-md);
+                    background: {% if category == 'success' %}var(--success-color){% elif category == 'error' %}var(--danger-color){% else %}var(--primary-color){% endif %}22;
+                    border: 1px solid {% if category == 'success' %}var(--success-color){% elif category == 'error' %}var(--danger-color){% else %}var(--primary-color){% endif %}44;
+                    color: var(--text-main);">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                <div class="form-group">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.4rem;">
+                        Company Name <span style="color: var(--danger-color, #ef4444);">*</span>
+                    </label>
+                    <input type="text" name="company_name" required
+                        value="{{ internship.company_name if internship else '' }}"
+                        placeholder="e.g. TechNova Solutions"
+                        style="width: 100%; padding: 0.6rem 0.9rem; border-radius: var(--radius-md);
+                               border: 1px solid var(--border-color); background: var(--bg-main);
+                               color: var(--text-main); font-size: 0.9rem; box-sizing: border-box;">
+                </div>
+                <div class="form-group">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.4rem;">
+                        Role / Position <span style="color: var(--danger-color, #ef4444);">*</span>
+                    </label>
+                    <input type="text" name="role" required
+                        value="{{ internship.role if internship else '' }}"
+                        placeholder="e.g. Software Developer Intern"
+                        style="width: 100%; padding: 0.6rem 0.9rem; border-radius: var(--radius-md);
+                               border: 1px solid var(--border-color); background: var(--bg-main);
+                               color: var(--text-main); font-size: 0.9rem; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                <div class="form-group">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.4rem;">
+                        Location <span style="color: var(--danger-color, #ef4444);">*</span>
+                    </label>
+                    <input type="text" name="location" required
+                        value="{{ internship.location if internship else '' }}"
+                        placeholder="e.g. Remote / Bangalore"
+                        style="width: 100%; padding: 0.6rem 0.9rem; border-radius: var(--radius-md);
+                               border: 1px solid var(--border-color); background: var(--bg-main);
+                               color: var(--text-main); font-size: 0.9rem; box-sizing: border-box;">
+                </div>
+                <div class="form-group">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.4rem;">
+                        Duration <span style="color: var(--danger-color, #ef4444);">*</span>
+                    </label>
+                    <input type="text" name="duration" required
+                        value="{{ internship.duration if internship else '' }}"
+                        placeholder="e.g. 3 months"
+                        style="width: 100%; padding: 0.6rem 0.9rem; border-radius: var(--radius-md);
+                               border: 1px solid var(--border-color); background: var(--bg-main);
+                               color: var(--text-main); font-size: 0.9rem; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                <div class="form-group">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.4rem;">
+                        Stipend
+                    </label>
+                    <input type="text" name="stipend"
+                        value="{{ internship.stipend if internship and internship.stipend else '' }}"
+                        placeholder="e.g. ₹15,000 / month"
+                        style="width: 100%; padding: 0.6rem 0.9rem; border-radius: var(--radius-md);
+                               border: 1px solid var(--border-color); background: var(--bg-main);
+                               color: var(--text-main); font-size: 0.9rem; box-sizing: border-box;">
+                </div>
+                <div class="form-group">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.4rem;">
+                        Application Deadline
+                    </label>
+                    <input type="date" name="application_deadline"
+                        value="{{ internship.application_deadline.strftime('%Y-%m-%d') if internship and internship.application_deadline else '' }}"
+                        style="width: 100%; padding: 0.6rem 0.9rem; border-radius: var(--radius-md);
+                               border: 1px solid var(--border-color); background: var(--bg-main);
+                               color: var(--text-main); font-size: 0.9rem; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.4rem;">
+                    Description
+                </label>
+                <textarea name="description" rows="4"
+                    placeholder="Describe the role, responsibilities, and what the intern will work on..."
+                    style="width: 100%; padding: 0.6rem 0.9rem; border-radius: var(--radius-md);
+                           border: 1px solid var(--border-color); background: var(--bg-main);
+                           color: var(--text-main); font-size: 0.9rem; resize: vertical; box-sizing: border-box;">{{ internship.description if internship and internship.description else '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.4rem;">
+                    Required Skills
+                    <span style="font-weight: 400; color: var(--text-muted);">(comma-separated)</span>
+                </label>
+                <input type="text" name="required_skills"
+                    value="{{ internship.required_skills if internship and internship.required_skills else '' }}"
+                    placeholder="e.g. Python, React, SQL"
+                    style="width: 100%; padding: 0.6rem 0.9rem; border-radius: var(--radius-md);
+                           border: 1px solid var(--border-color); background: var(--bg-main);
+                           color: var(--text-main); font-size: 0.9rem; box-sizing: border-box;">
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.4rem;">
+                    Application Link
+                </label>
+                <input type="url" name="application_link"
+                    value="{{ internship.application_link if internship and internship.application_link else '' }}"
+                    placeholder="https://company.com/apply"
+                    style="width: 100%; padding: 0.6rem 0.9rem; border-radius: var(--radius-md);
+                           border: 1px solid var(--border-color); background: var(--bg-main);
+                           color: var(--text-main); font-size: 0.9rem; box-sizing: border-box;">
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; padding-top: 0.5rem; border-top: 1px solid var(--border-color);">
+                <a href="{{ url_for('internships.index') }}"
+                    style="padding: 0.6rem 1.4rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);
+                           color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: opacity 0.2s;">
+                    Cancel
+                </a>
+                <button type="submit" class="glass-button"
+                    style="padding: 0.6rem 1.8rem; font-size: 0.9rem; cursor: pointer;">
+                    {% if internship %}Save Changes{% else %}Post Internship{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
