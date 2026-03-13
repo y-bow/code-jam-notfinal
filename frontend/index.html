@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal - Internships</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">
+            <i class="fas fa-graduation-cap"></i> UniPortal
+        </a>
+        <nav>
+            <a href="index.html" class="active">Internships</a>
+            <a href="admin.html">Admin Dashboard</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1 class="page-title">Find Your Next Internship</h1>
+        <p class="page-subtitle">Discover opportunities to kickstart your career.</p>
+
+        <section class="filters-section">
+            <div class="input-group">
+                <label for="searchRole">Search Role</label>
+                <div style="position: relative;">
+                    <i class="fas fa-search" style="position: absolute; left: 12px; top: 14px; color: var(--text-muted);"></i>
+                    <input type="text" id="searchRole" placeholder="e.g. Software Engineer" style="padding-left: 36px;">
+                </div>
+            </div>
+            <div class="input-group">
+                <label for="filterLocation">Location</label>
+                <select id="filterLocation">
+                    <option value="">All Locations</option>
+                    <option value="Remote">Remote</option>
+                    <option value="On-site">On-site</option>
+                    <option value="Hybrid">Hybrid</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="filterDuration">Duration</label>
+                <select id="filterDuration">
+                    <option value="">Any Duration</option>
+                    <option value="3 months">3 months</option>
+                    <option value="4 months">4 months</option>
+                    <option value="6 months">6 months</option>
+                </select>
+            </div>
+        </section>
+
+        <section id="internshipsContainer" class="internships-grid">
+            <div class="loader"><i class="fas fa-circle-notch fa-spin"></i> Loading internships...</div>
+        </section>
+    </main>
+
+    <!-- Modal for Internship Details -->
+    <div id="detailsModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <div class="company-name" id="modalCompany"></div>
+                    <h2 class="role-title" id="modalRole"></h2>
+                </div>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                    <span class="badge" id="modalLocation"></span>
+                    <span class="badge" id="modalDuration"></span>
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981;" id="modalStipend"></span>
+                </div>
+                
+                <div class="detail-item"><i class="far fa-calendar-alt"></i> Apply by: <strong id="modalDeadline"></strong></div>
+                
+                <h4>Description</h4>
+                <p id="modalDescription"></p>
+                
+                <h4>Requirements</h4>
+                <p id="modalRequirements"></p>
+            </div>
+            <div class="card-footer" style="border: none; margin-top: 1rem;">
+                <button class="btn btn-primary" onclick="alert('Application submitted! (Demo only)')">Apply Now <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

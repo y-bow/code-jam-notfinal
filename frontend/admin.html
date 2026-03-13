@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Internships</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">
+            <i class="fas fa-graduation-cap"></i> UniPortal
+        </a>
+        <nav>
+            <a href="index.html">Internships</a>
+            <a href="admin.html" class="active">Admin Dashboard</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h1 class="page-title">Manage Internships</h1>
+                <p class="page-subtitle">Add, edit, or remove internship listings.</p>
+            </div>
+            <button class="btn btn-primary" id="openAddModalBtn">
+                <i class="fas fa-plus"></i> Add New Internship
+            </button>
+        </div>
+
+        <section class="admin-table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Role</th>
+                        <th>Location</th>
+                        <th>Deadline</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="internshipsTableBody">
+                    <tr>
+                        <td colspan="5" class="loader"><i class="fas fa-circle-notch fa-spin"></i> Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- Modal for Add/Edit Form -->
+    <div id="formModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Internship</h2>
+                <button class="modal-close" id="closeFormModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="internshipForm">
+                    <input type="hidden" id="internshipId">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="companyName">Company Name *</label>
+                            <input type="text" id="companyName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="roleTitle">Role *</label>
+                            <input type="text" id="roleTitle" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location">Location *</label>
+                            <select id="location" required>
+                                <option value="Remote">Remote</option>
+                                <option value="On-site">On-site</option>
+                                <option value="Hybrid">Hybrid</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="duration">Duration *</label>
+                            <input type="text" id="duration" placeholder="e.g. 3 months" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="stipend">Stipend</label>
+                            <input type="text" id="stipend" placeholder="e.g. $2000/month">
+                        </div>
+                        <div class="form-group">
+                            <label for="deadline">Deadline *</label>
+                            <input type="date" id="deadline" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description *</label>
+                        <textarea id="description" rows="4" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="requirements">Requirements *</label>
+                        <textarea id="requirements" rows="4" required></textarea>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
+                        <button type="button" class="btn btn-outline" id="cancelFormBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Internship</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal to Confirm Delete -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div style="font-size: 3rem; color: #ef4444; margin-bottom: 1rem;">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 style="margin-bottom: 1rem;">Confirm Deletion</h3>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Are you sure you want to delete this internship? This action cannot be undone.</p>
+            <div style="display: flex; justify-content: center; gap: 1rem;">
+                <button class="btn btn-outline" id="cancelDeleteBtn">Cancel</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

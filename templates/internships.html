@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+
+{% block title %}Internships - Hive{% endblock %}
+
+{% block page_title %}Internship Listings{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Filtering Script
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("searchInput");
+        const locationFilter = document.getElementById("locationFilter");
+        const durationFilter = document.getElementById("durationFilter");
+        const applyFiltersBtn = document.getElementById("applyFiltersBtn");
+        
+        // Modals
+        const viewModal = document.getElementById("viewModal");
+        const addModal = document.getElementById("addModal");
+        const editModal = document.getElementById("editModal");
+        
+        function applyFilters() {
+            const search = searchInput.value;
+            const location = locationFilter.value;
+            const duration = durationFilter.value;
+            
+            let url = "{{ url_for('internships.index') }}?";
+            if (search) url += `search=${encodeURIComponent(search)}&`;
+            if (location) url += `location=${encodeURIComponent(location)}&`;
+            if (duration) url += `duration=${encodeURIComponent(duration)}&`;
+            
+            window.location.href = url;
+        }
+
+        if (applyFiltersBtn) {
+            applyFiltersBtn.addEventListener("click", applyFilters);
+        }
+
+        // View Modal Logic
+        document.querySelectorAll(".view-btn").forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+                const id = e.target.closest('.view-btn').dataset.id;
+                try {
+                    const response = await fetch(`{{ url_for('internships.index') }}api/${id}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        document.getElementById("viewCompany").textContent = data.company_name;
+                        document.getElementById("viewRole").textContent = data.role;
+                        document.getElementById("viewLocation").textContent = data.location;
+                        document.getElementById("viewDuration").textContent = data.duration;
+                        document.getElementById("viewStipend").textContent = data.stipend || 'Unpaid / NA';
+                        document.getElementById("viewDeadline").textContent = data.application_deadline || 'Open';
+                        document.getElementById("viewDescription").textContent = data.description || 'No description available.';
+                        document.getElementById("viewSkills").textContent = data.required_skills || 'No specific skills listed.';
+                        
+                        const linkEl = document.getElementById("viewLink");
+                        if (data.application_link) {
+                            linkEl.href = data.application_link;
+                            linkEl.style.display = 'inline-block';
+                        } else {
+                            linkEl.style.display = 'none';
+                        }
+                        
+                        viewModal.classList.add("active");
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch internship details", error);
+                }
+            });
+        });
+
+        // Add Modal Logic
+        const openAddBtn = document.getElementById("openAddModalBtn");
+        if (openAddBtn) {
+            openAddBtn.addEventListener("click", () => {
+                addModal.classList.add("active");
+            });
+        }
+
+        // Edit Modal Logic
+        document.querySelectorAll(".edit-btn").forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+                const id = e.target.closest('.edit-btn').dataset.id;
+                const form = document.getElementById("editInternshipForm");
+                form.action = `{{ url_for('internships.index') }}edit/${id}`;
+                
+                try {
+                    const response = await fetch(`{{ url_for('internships.index') }}api/${id}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        document.getElementById("edit_company_name").value = data.company_name;
+                        document.getElementById("edit_role").value = data.role;
+                        document.getElementById("edit_location").value = data.location;
+                        document.getElementById("edit_duration").value = data.duration;
+                        document.getElementById("edit_stipend").value = data.stipend || '';
+                        document.getElementById("edit_application_deadline").value = data.application_deadline || '';
+                        document.getElementById("edit_description").value = data.description || '';
+                        document.getElementById("edit_required_skills").value = data.required_skills || '';
+                        document.getElementById("edit_application_link").value = data.application_link || '';
+                        
+                        editModal.classList.add("active");
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch internship details for edit", error);
+                }
+            });
+        });
+
+        // Close Modals
+        document.querySelectorAll(".close-modal").forEach(span => {
+            span.addEventListener("click", () => {
+                viewModal.classList.remove("active");
+                if(addModal) addModal.classList.remove("active");
+                if(editModal) editModal.classList.remove("active");
+            });
+        });
+
+        window.onclick = function(event) {
+            if (event.target == viewModal) viewModal.classList.remove("active");
+            if (addModal && event.target == addModal) addModal.classList.remove("active");
+            if (editModal && event.target == editModal) editModal.classList.remove("active");
+        };
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">
+          {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="internships-header glass-panel" style="padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
+    <div class="filters" style="display: flex; gap: 1rem; flex-wrap: wrap; flex: 1;">
+        <input type="text" id="searchInput" placeholder="Search by company or role..." value="{{ search }}" class="form-input" style="flex: 1; min-width: 200px;">
+        
+        <select id="locationFilter" class="form-input" style="width: auto;">
+            <option value="">All Locations</option>
+            <option value="Remote" {% if location == 'Remote' %}selected{% endif %}>Remote</option>
+            <option value="On-site" {% if location == 'On-site' %}selected{% endif %}>On-site</option>
+            <option value="Hybrid" {% if location == 'Hybrid' %}selected{% endif %}>Hybrid</option>
+        </select>
+        
+        <select id="durationFilter" class="form-input" style="width: auto;">
+            <option value="">All Durations</option>
+            <option value="1" {% if duration == '1' %}selected{% endif %}>1 Month</option>
+            <option value="2" {% if duration == '2' %}selected{% endif %}>2 Months</option>
+            <option value="3" {% if duration == '3' %}selected{% endif %}>3 Months</option>
+            <option value="6" {% if duration == '6' %}selected{% endif %}>6 Months</option>
+        </select>
+        
+        <button id="applyFiltersBtn" class="btn btn-primary"><span class="material-symbols-rounded" style="font-size: 1.2rem; margin-right: 5px;">search</span> Filter</button>
+    </div>
+    
+    {% if g.current_user.role_level >= 10 %}
+    <button id="openAddModalBtn" class="btn btn-success" style="display: flex; align-items: center; gap: 5px;">
+        <span class="material-symbols-rounded">add</span> Add Internship
+    </button>
+    {% endif %}
+</div>
+
+<div class="internships-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+    {% for internship in internships %}
+    <div class="internship-card glass-panel" style="padding: 1.5rem; border-radius: 12px; display: flex; flex-direction: column; gap: 1rem; position: relative; overflow: hidden;">
+        <div class="card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+            <h3 style="margin: 0; font-size: 1.2rem; color: var(--primary-color);">{{ internship.role }}</h3>
+            <p style="margin: 0; font-size: 0.95rem; color: var(--text-color); font-weight: 500;">{{ internship.company_name }}</p>
+        </div>
+        
+        <div class="card-body" style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem;">
+                <span class="material-symbols-rounded" style="font-size: 1.2rem; color: var(--text-muted);">location_on</span>
+                {{ internship.location }}
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem;">
+                <span class="material-symbols-rounded" style="font-size: 1.2rem; color: var(--text-muted);">schedule</span>
+                {{ internship.duration }}
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem;">
+                <span class="material-symbols-rounded" style="font-size: 1.2rem; color: var(--text-muted);">payments</span>
+                {{ internship.stipend or 'Not disclosed' }}
+            </div>
+        </div>
+        
+        <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+            <button class="btn btn-outline view-btn" data-id="{{ internship.id }}" style="padding: 0.4rem 1rem; font-size: 0.9rem;">View Details</button>
+            
+            {% if g.current_user.role_level >= 10 %}
+            <div class="admin-actions" style="display: flex; gap: 0.5rem;">
+                <button class="icon-btn edit-btn" data-id="{{ internship.id }}" title="Edit"><span class="material-symbols-rounded">edit</span></button>
+                <form action="{{ url_for('internships.delete', id=internship.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this internship?');">
+                    <button type="submit" class="icon-btn delete-btn" style="color: var(--danger-color);" title="Delete"><span class="material-symbols-rounded">delete</span></button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">
+        <span class="material-symbols-rounded" style="font-size: 4rem; opacity: 0.5;">workspace_premium</span>
+        <h3>No internships found</h3>
+        <p>Try adjusting your search or filters.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- View Details Modal -->
+<div id="viewModal" class="modal-overlay">
+    <div class="modal-content glass-panel" style="max-width: 600px;">
+        <span class="close-modal">&times;</span>
+        <div class="modal-header" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+            <h2 id="viewRole" style="color: var(--primary-color); margin:0;">Role</h2>
+            <h4 id="viewCompany" style="margin: 5px 0 0 0; color: var(--text-color);">Company</h4>
+        </div>
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 1rem; line-height: 1.6;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: var(--bg-hover); padding: 1rem; border-radius: 8px;">
+                <div><strong>Location:</strong> <span id="viewLocation"></span></div>
+                <div><strong>Duration:</strong> <span id="viewDuration"></span></div>
+                <div><strong>Stipend:</strong> <span id="viewStipend"></span></div>
+                <div><strong>Deadline:</strong> <span id="viewDeadline"></span></div>
+            </div>
+            <div>
+                <h4 style="margin-bottom: 0.5rem;">Description</h4>
+                <p id="viewDescription" style="white-space: pre-wrap; font-size: 0.95rem;"></p>
+            </div>
+            <div>
+                <h4 style="margin-bottom: 0.5rem;">Required Skills</h4>
+                <p id="viewSkills" style="font-size: 0.95rem;"></p>
+            </div>
+        </div>
+        <div class="modal-footer" style="margin-top: 1.5rem; text-align: right;">
+            <a href="#" id="viewLink" target="_blank" class="btn btn-primary" style="display: none; text-decoration: none;">Apply Now</a>
+        </div>
+    </div>
+</div>
+
+{% if g.current_user.role_level >= 10 %}
+<!-- Add Internship Modal -->
+<div id="addModal" class="modal-overlay">
+    <div class="modal-content glass-panel" style="max-width: 500px;">
+        <span class="close-modal">&times;</span>
+        <h2>Add New Internship</h2>
+        <form action="{{ url_for('internships.add') }}" method="POST" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+            <div class="form-group">
+                <label>Company Name *</label>
+                <input type="text" name="company_name" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label>Role *</label>
+                <input type="text" name="role" class="form-input" required>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Location *</label>
+                    <input type="text" name="location" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Duration *</label>
+                    <input type="text" name="duration" class="form-input" required>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Stipend</label>
+                    <input type="text" name="stipend" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Deadline</label>
+                    <input type="date" name="application_deadline" class="form-input">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" class="form-input" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Required Skills</label>
+                <input type="text" name="required_skills" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Application Link</label>
+                <input type="url" name="application_link" class="form-input" placeholder="https://...">
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Add Internship</button>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Internship Modal -->
+<div id="editModal" class="modal-overlay">
+    <div class="modal-content glass-panel" style="max-width: 500px;">
+        <span class="close-modal">&times;</span>
+        <h2>Edit Internship</h2>
+        <form id="editInternshipForm" action="" method="POST" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+            <div class="form-group">
+                <label>Company Name *</label>
+                <input type="text" name="company_name" id="edit_company_name" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label>Role *</label>
+                <input type="text" name="role" id="edit_role" class="form-input" required>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Location *</label>
+                    <input type="text" name="location" id="edit_location" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Duration *</label>
+                    <input type="text" name="duration" id="edit_duration" class="form-input" required>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Stipend</label>
+                    <input type="text" name="stipend" id="edit_stipend" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Deadline</label>
+                    <input type="date" name="application_deadline" id="edit_application_deadline" class="form-input">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" id="edit_description" class="form-input" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Required Skills</label>
+                <input type="text" name="required_skills" id="edit_required_skills" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Application Link</label>
+                <input type="url" name="application_link" id="edit_application_link" class="form-input" placeholder="https://...">
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Save Changes</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
