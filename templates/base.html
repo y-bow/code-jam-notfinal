@@ -22,7 +22,7 @@
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=2">
 </head>
 
 <body class="light-theme">
@@ -50,64 +50,84 @@
                 {% block sidebar_links %}
                 <a href="{{ url_for('index') }}"
                     class="nav-item {{ 'active' if request.endpoint == 'index' or request.endpoint == 'dashboard.student_dashboard' or request.endpoint == 'dashboard.teacher_dashboard' }}">
-                    <span class="material-symbols-rounded">space_dashboard</span>
-                    Global Hub
+                    <div class="nav-item-content">
+                        <span class="material-symbols-rounded">space_dashboard</span>
+                        Global Hub
+                    </div>
                 </a>
 
                 {% if g.current_user.role == 'student' or g.current_user.role == 'class_rep' %}
                 <a href="{{ url_for('dashboard.timetable') }}"
                     class="nav-item {{ 'active' if request.endpoint == 'dashboard.timetable' }}">
-                    <span class="material-symbols-rounded">calendar_today</span>
-                    Timetable
+                    <div class="nav-item-content">
+                        <span class="material-symbols-rounded">calendar_today</span>
+                        Timetable
+                    </div>
                 </a>
 
                 <a href="{{ url_for('dashboard.tasks') }}"
                     class="nav-item {{ 'active' if request.endpoint == 'dashboard.tasks' }}">
-                    <span class="material-symbols-rounded">task_alt</span>
-                    Tasks
+                    <div class="nav-item-content">
+                        <span class="material-symbols-rounded">task_alt</span>
+                        Tasks
+                    </div>
                 </a>
                 <a href="{{ url_for('dashboard.grades') }}"
                     class="nav-item {{ 'active' if request.endpoint == 'dashboard.grades' }}">
-                    <span class="material-symbols-rounded">bar_chart</span>
-                    Grades Overview
+                    <div class="nav-item-content">
+                        <span class="material-symbols-rounded">bar_chart</span>
+                        Grades Overview
+                    </div>
                 </a>
                 <a href="{{ url_for('dashboard.announcements') }}"
                     class="nav-item {{ 'active' if request.endpoint == 'dashboard.announcements' }}">
-                    <span class="material-symbols-rounded">campaign</span>
-                    Announcements
+                    <div class="nav-item-content">
+                        <span class="material-symbols-rounded">campaign</span>
+                        Announcements
+                    </div>
                 </a>
                 <a href="{{ url_for('fees.student_dashboard') }}"
                     class="nav-item {{ 'active' if 'fees' in request.endpoint }}">
-                    <span class="material-symbols-rounded">account_balance_wallet</span>
-                    Fees
+                    <div class="nav-item-content">
+                        <span class="material-symbols-rounded">account_balance_wallet</span>
+                        Fees
+                    </div>
                 </a>
                 {% endif %}
 
                 {% if g.current_user.role_level >= 4 %}
                 <a href="{{ url_for('dashboard.manage_timetable') }}"
                     class="nav-item {{ 'active' if request.endpoint == 'dashboard.manage_timetable' }}">
-                    <span class="material-symbols-rounded">calendar_month</span>
-                    Manage Schedule
+                    <div class="nav-item-content">
+                        <span class="material-symbols-rounded">calendar_month</span>
+                        Manage Schedule
+                    </div>
                 </a>
                 {% endif %}
 
                 {% if g.current_user.role_level >= 5 %}
                 <a href="{{ url_for('dashboard.dean_ratings') }}"
                     class="nav-item {{ 'active' if request.endpoint == 'dashboard.dean_ratings' }}">
-                    <span class="material-symbols-rounded">star_half</span>
-                    Teacher Ratings
+                    <div class="nav-item-content">
+                        <span class="material-symbols-rounded">star_half</span>
+                        Teacher Ratings
+                    </div>
                 </a>
                 <a href="{{ url_for('fees.admin_dashboard') }}"
                     class="nav-item {{ 'active' if 'fees' in request.endpoint }}">
-                    <span class="material-symbols-rounded">account_balance</span>
-                    Fees Hub
+                    <div class="nav-item-content">
+                        <span class="material-symbols-rounded">account_balance</span>
+                        Fees Hub
+                    </div>
                 </a>
                 {% endif %}
 
                 <a href="{{ url_for('messages.index') }}"
                     class="nav-item {{ 'active' if 'messages' in request.endpoint and 'fees' not in request.endpoint }}">
-                    <span class="material-symbols-rounded">forum</span>
-                    Messages
+                    <div class="nav-item-content">
+                        <span class="material-symbols-rounded">forum</span>
+                        Messages
+                    </div>
                 </a>
                 {% endblock %}
             </nav>
@@ -291,7 +311,7 @@
     </div>
 
     <!-- Custom JS -->
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=2"></script>
     {% block extra_js %}{% endblock %}
 </body>
 

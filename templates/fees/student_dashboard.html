@@ -17,7 +17,7 @@
         </div>
         <div class="stat-card glass-panel" style="padding: 1.5rem; border-radius: 12px; text-align: center;">
             <div class="stat-title" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Remaining Balance</div>
-            <div class="stat-value" style="font-size: 1.8rem; font-weight: 600; color: var(--danger-color);">₹{{ "{:,.0f}".format(fee.remaining_balance) }}</div>
+            <div class="stat-value {{ 'balance-due' if fee.remaining_balance > 0 else 'balance-clear' }}" style="font-size: 1.8rem; font-weight: 600;">₹{{ "{:,.0f}".format(fee.remaining_balance) }}</div>
         </div>
         <div class="stat-card glass-panel" style="padding: 1.5rem; border-radius: 12px; text-align: center;">
             <div class="stat-title" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Status</div>
