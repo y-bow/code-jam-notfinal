@@ -3,26 +3,23 @@
 {% block title %}Hive | Admin Dashboard{% endblock %}
 {% block page_title %}Admin Hub{% endblock %}
 
-{% block sidebar_links %}
-<a href="{{ url_for('dashboard.admin_dashboard') }}" class="nav-item active">
-    <span class="material-symbols-rounded">admin_panel_settings</span>
-    Admin Overview
-</a>
-<a href="{{ url_for('dashboard.admin_timetable') }}" class="nav-item">
-    <span class="material-symbols-rounded">calendar_view_week</span>
-    Master Timetable
-</a>
-<a href="{{ url_for('dashboard.announcements') }}" class="nav-item">
-    <span class="material-symbols-rounded">campaign</span>
-    Announcements
-</a>
-<a href="{{ url_for('messages.index') }}" class="nav-item">
-    <span class="material-symbols-rounded">forum</span>
-    Messages
-</a>
-{% endblock %}
 
 {% block content %}
+
+{% if g.current_user and g.current_user.must_change_password %}
+<div id="pw-suggest-banner" class="pw-suggest-banner glass-panel" role="alert">
+    <span class="material-symbols-rounded pw-banner-icon">lock</span>
+    <span class="pw-banner-text">
+        <strong>You're using a default password.</strong>
+        Update it to keep your account secure.
+    </span>
+    <a href="{{ url_for('auth.change_password') }}" class="pw-banner-btn">Change Password</a>
+    <button class="pw-banner-dismiss" id="pwDismissBtn" title="Dismiss for this session" aria-label="Dismiss">
+        <span class="material-symbols-rounded">close</span>
+    </button>
+</div>
+{% endif %}
+
 <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
     <div class="glass-panel" style="padding: 1.5rem; text-align: center;">
         <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Total Students</div>

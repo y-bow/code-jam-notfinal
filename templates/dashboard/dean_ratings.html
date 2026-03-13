@@ -3,16 +3,6 @@
 {% block title %}Hive | Dean - Teacher Ratings{% endblock %}
 {% block page_title %}Faculty Performance Overview{% endblock %}
 
-{% block sidebar_links %}
-<a href="{{ url_for('dashboard.school_analytics') }}" class="nav-item">
-    <span class="material-symbols-rounded">arrow_back</span>
-    Back to Analytics
-</a>
-<a href="{{ url_for('dashboard.dean_ratings') }}" class="nav-item active">
-    <span class="material-symbols-rounded">star_half</span>
-    Teacher Ratings
-</a>
-{% endblock %}
 
 {% block content %}
 <div class="glass-panel" style="padding: 2rem; border-radius: var(--radius-lg);">

@@ -7,16 +7,16 @@
     <title>{% block title %}Hive Dashboard{% endblock %}</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
 
+    <!-- Material Symbols/Icons -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
     <!-- Modern Typography: Outfit & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700&display=swap"
         rel="stylesheet">
-
-    <!-- Material Symbols/Icons -->
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
     <!-- Plotly for Data Visualizations -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
@@ -35,6 +35,7 @@
         })();
     </script>
     <div class="app-container">
+        {% if g.get('current_user') %}
         <!-- Sidebar Navigation -->
         <aside class="sidebar glass-panel">
             <div class="sidebar-header">
@@ -47,89 +48,112 @@
             </div>
 
             <nav class="sidebar-nav">
-                {% block sidebar_links %}
-                <a href="{{ url_for('index') }}"
-                    class="nav-item {{ 'active' if request.endpoint == 'index' or request.endpoint == 'dashboard.student_dashboard' or request.endpoint == 'dashboard.teacher_dashboard' }}">
-                    <div class="nav-item-content">
-                        <span class="material-symbols-rounded">space_dashboard</span>
-                        Global Hub
-                    </div>
+                {% if request.endpoint in ['classroom.student_view', 'classroom.teacher_view'] %}
+                <!-- Classroom Specific Navigation -->
+                <a href="{{ url_for('dashboard.student_dashboard' if g.current_user.role == 'student' else 'dashboard.teacher_dashboard') }}" class="nav-item">
+                    <span class="nav-icon material-symbols-rounded">arrow_back</span>
+                    <span class="nav-label">Back to Hub</span>
+                </a>
+                
+                {% if request.endpoint == 'classroom.student_view' %}
+                <a href="#" class="nav-item tab-link active" onclick="openTab(event, 'Home')">
+                    <span class="nav-icon material-symbols-rounded">class</span>
+                    <span class="nav-label">Class Home</span>
+                </a>
+                <a href="#" class="nav-item tab-link" onclick="openTab(event, 'Assignments')">
+                    <span class="nav-icon material-symbols-rounded">assignment</span>
+                    <span class="nav-label">Assignments</span>
+                </a>
+                <a href="#" class="nav-item tab-link" onclick="openTab(event, 'Performance')">
+                    <span class="nav-icon material-symbols-rounded">fact_check</span>
+                    <span class="nav-label">My Progress</span>
+                </a>
+                {% else %}
+                <a href="#" class="nav-item tab-link active" onclick="openTab(event, 'Students')">
+                    <span class="nav-icon material-symbols-rounded">manage_accounts</span>
+                    <span class="nav-label">Students</span>
+                </a>
+                <a href="#" class="nav-item tab-link" onclick="openTab(event, 'Assignments')">
+                    <span class="nav-icon material-symbols-rounded">assignment</span>
+                    <span class="nav-label">Assignments</span>
+                </a>
+                <a href="#" class="nav-item tab-link" onclick="openTab(event, 'Attendance')">
+                    <span class="nav-icon material-symbols-rounded">checklist</span>
+                    <span class="nav-label">Attendance</span>
+                </a>
+                <a href="#" class="nav-item tab-link" onclick="openTab(event, 'Announcements')">
+                    <span class="nav-icon material-symbols-rounded">campaign</span>
+                    <span class="nav-label">Announcements</span>
+                </a>
+                {% endif %}
+
+                {% else %}
+                <!-- Standard Navigation -->
+                {% if g.current_user.role == 'admin' %}
+                <a href="{{ url_for('dashboard.admin_dashboard') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.admin_dashboard' }}">
+                    <span class="nav-icon material-symbols-rounded">admin_panel_settings</span>
+                    <span class="nav-label">Admin Overview</span>
+                </a>
+                <a href="{{ url_for('dashboard.admin_timetable') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.admin_timetable' }}">
+                    <span class="nav-icon material-symbols-rounded">calendar_view_week</span>
+                    <span class="nav-label">Master Timetable</span>
+                </a>
+                {% else %}
+                <a href="{{ url_for('index') }}" class="nav-item {{ 'active' if request.endpoint in ['index', 'dashboard.student_dashboard', 'dashboard.teacher_dashboard'] }}">
+                    <span class="nav-icon material-symbols-rounded">space_dashboard</span>
+                    <span class="nav-label">Global Hub</span>
+                </a>
+                {% endif %}
+
+                <a href="{{ url_for('dashboard.timetable') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.timetable' }}">
+                    <span class="nav-icon material-symbols-rounded">calendar_today</span>
+                    <span class="nav-label">Timetable</span>
                 </a>
 
-                {% if g.current_user.role == 'student' or g.current_user.role == 'class_rep' %}
-                <a href="{{ url_for('dashboard.timetable') }}"
-                    class="nav-item {{ 'active' if request.endpoint == 'dashboard.timetable' }}">
-                    <div class="nav-item-content">
-                        <span class="material-symbols-rounded">calendar_today</span>
-                        Timetable
-                    </div>
+                {% if g.current_user.role in ['student', 'class_rep'] %}
+                <a href="{{ url_for('dashboard.tasks') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.tasks' }}">
+                    <span class="nav-icon material-symbols-rounded">task_alt</span>
+                    <span class="nav-label">Tasks</span>
                 </a>
-
-                <a href="{{ url_for('dashboard.tasks') }}"
-                    class="nav-item {{ 'active' if request.endpoint == 'dashboard.tasks' }}">
-                    <div class="nav-item-content">
-                        <span class="material-symbols-rounded">task_alt</span>
-                        Tasks
-                    </div>
+                <a href="{{ url_for('dashboard.grades') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.grades' }}">
+                    <span class="nav-icon material-symbols-rounded">bar_chart</span>
+                    <span class="nav-label">Grades Overview</span>
                 </a>
-                <a href="{{ url_for('dashboard.grades') }}"
-                    class="nav-item {{ 'active' if request.endpoint == 'dashboard.grades' }}">
-                    <div class="nav-item-content">
-                        <span class="material-symbols-rounded">bar_chart</span>
-                        Grades Overview
-                    </div>
-                </a>
-                <a href="{{ url_for('dashboard.announcements') }}"
-                    class="nav-item {{ 'active' if request.endpoint == 'dashboard.announcements' }}">
-                    <div class="nav-item-content">
-                        <span class="material-symbols-rounded">campaign</span>
-                        Announcements
-                    </div>
-                </a>
-                <a href="{{ url_for('fees.student_dashboard') }}"
-                    class="nav-item {{ 'active' if 'fees' in request.endpoint }}">
-                    <div class="nav-item-content">
-                        <span class="material-symbols-rounded">account_balance_wallet</span>
-                        Fees
-                    </div>
+                <a href="{{ url_for('fees.student_dashboard') }}" class="nav-item {{ 'active' if 'fees.student_dashboard' in request.endpoint }}">
+                    <span class="nav-icon material-symbols-rounded">account_balance_wallet</span>
+                    <span class="nav-label">Fees</span>
                 </a>
                 {% endif %}
 
                 {% if g.current_user.role_level >= 4 %}
-                <a href="{{ url_for('dashboard.manage_timetable') }}"
-                    class="nav-item {{ 'active' if request.endpoint == 'dashboard.manage_timetable' }}">
-                    <div class="nav-item-content">
-                        <span class="material-symbols-rounded">calendar_month</span>
-                        Manage Schedule
-                    </div>
+                <a href="{{ url_for('dashboard.manage_timetable') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.manage_timetable' }}">
+                    <span class="nav-icon material-symbols-rounded">calendar_month</span>
+                    <span class="nav-label">Manage Schedule</span>
                 </a>
                 {% endif %}
 
                 {% if g.current_user.role_level >= 5 %}
-                <a href="{{ url_for('dashboard.dean_ratings') }}"
-                    class="nav-item {{ 'active' if request.endpoint == 'dashboard.dean_ratings' }}">
-                    <div class="nav-item-content">
-                        <span class="material-symbols-rounded">star_half</span>
-                        Teacher Ratings
-                    </div>
+                <a href="{{ url_for('dashboard.dean_ratings') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.dean_ratings' }}">
+                    <span class="nav-icon material-symbols-rounded">star_half</span>
+                    <span class="nav-label">Teacher Ratings</span>
                 </a>
-                <a href="{{ url_for('fees.admin_dashboard') }}"
-                    class="nav-item {{ 'active' if 'fees' in request.endpoint }}">
-                    <div class="nav-item-content">
-                        <span class="material-symbols-rounded">account_balance</span>
-                        Fees Hub
-                    </div>
+                <a href="{{ url_for('fees.admin_dashboard') }}" class="nav-item {{ 'active' if 'fees.admin_dashboard' in request.endpoint }}">
+                    <span class="nav-icon material-symbols-rounded">account_balance</span>
+                    <span class="nav-label">Fees Hub</span>
                 </a>
                 {% endif %}
 
-                <a href="{{ url_for('messages.index') }}"
-                    class="nav-item {{ 'active' if 'messages' in request.endpoint and 'fees' not in request.endpoint }}">
-                    <div class="nav-item-content">
-                        <span class="material-symbols-rounded">forum</span>
-                        Messages
-                    </div>
+                <a href="{{ url_for('messages.index') }}" class="nav-item {{ 'active' if 'messages' in request.endpoint and 'fees' not in request.endpoint }}">
+                    <span class="nav-icon material-symbols-rounded">forum</span>
+                    <span class="nav-label">Messages</span>
                 </a>
-                {% endblock %}
+
+                <a href="{{ url_for('dashboard.announcements') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.announcements' }}">
+                    <span class="nav-icon material-symbols-rounded">campaign</span>
+                    <span class="nav-label">Announcements</span>
+                    <span class="nav-badge">2</span>
+                </a>
+                {% endif %}
             </nav>
 
             <div class="sidebar-footer">
@@ -141,8 +165,11 @@
                         {% endif %}
                     </div>
                     <div class="user-info">
-                        <span class="user-name">
+                        <span class="user-name" style="display: flex; align-items: center; gap: 0.4rem;">
                             {% if g.current_user %}{{ g.current_user.name }}{% else %}User Name{% endif %}
+                            {% if g.current_user and g.current_user.must_change_password %}
+                            <span class="pw-dot" title="Default password in use — click to update"></span>
+                            {% endif %}
                         </span>
                         <span class="user-role">
                             {% if g.current_user %}
@@ -154,10 +181,29 @@
                     </div>
                 </a>
             </div>
+
+            <style>
+                .pw-dot {
+                    display: inline-block;
+                    width: 8px;
+                    height: 8px;
+                    background: #f59e0b;
+                    border-radius: 50%;
+                    flex-shrink: 0;
+                    animation: pw-pulse 2s ease-in-out infinite;
+                    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5);
+                }
+                @keyframes pw-pulse {
+                    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
+                    50% { box-shadow: 0 0 0 5px rgba(245, 158, 11, 0); }
+                }
+            </style>
         </aside>
+        {% endif %}
 
         <!-- Main Content Area -->
-        <main class="main-content">
+        <main class="main-content {{ 'no-sidebar' if not g.get('current_user') }}">
+            {% if g.get('current_user') %}
             <header class="topbar glass-panel">
                 <div class="page-title">
                     <h2>{% block page_title %}Dashboard{% endblock %}</h2>
@@ -236,6 +282,7 @@
                     </div>
                 </div>
             </header>
+            {% endif %}
 
             <div class="content-wrapper">
                 {% block content %}
@@ -249,6 +296,7 @@
         </main>
     </div>
 
+    {% if g.get('current_user') %}
     <!-- Profile Modal -->
     <div id="profileModal" class="modal-overlay">
         <div class="modal-content glass-panel">
@@ -305,14 +353,116 @@
             </div>
 
             <div class="profile-actions">
+                <a href="{{ url_for('auth.change_password') }}" class="btn-secondary" style="margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem; border-radius: var(--radius-md); background: rgba(var(--primary-rgb), 0.1); color: var(--text-main); text-decoration: none; font-weight: 500; transition: all 0.2s ease;">
+                    <span class="material-symbols-rounded" style="font-size: 18px;">lock</span> Change Password
+                </a>
                 <a href="{{ url_for('auth.logout') }}" class="btn-logout">Log Out</a>
             </div>
         </div>
     </div>
+    {% endif %}
 
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/app.js') }}?v=2"></script>
     {% block extra_js %}{% endblock %}
+
+    <!-- Password Suggestion Banner: styles + dismiss logic -->
+    <style>
+        .pw-suggest-banner {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.9rem 1.25rem;
+            margin-bottom: 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            background: rgba(245, 158, 11, 0.08);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 2px 12px rgba(245, 158, 11, 0.12);
+            animation: bannerSlideIn 0.4s ease;
+        }
+        @keyframes bannerSlideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .pw-banner-icon {
+            color: #f59e0b;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .pw-banner-text {
+            flex: 1;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+        .pw-banner-text strong {
+            color: #d97706;
+        }
+        .pw-banner-btn {
+            flex-shrink: 0;
+            padding: 0.45rem 1rem;
+            border-radius: var(--radius-sm);
+            background: rgba(245, 158, 11, 0.18);
+            border: 1px solid rgba(245, 158, 11, 0.45);
+            color: #d97706;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .pw-banner-btn:hover {
+            background: rgba(245, 158, 11, 0.32);
+            border-color: #f59e0b;
+            color: #b45309;
+        }
+        .pw-banner-dismiss {
+            flex-shrink: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.2rem;
+            display: flex;
+            align-items: center;
+            color: var(--text-muted);
+            border-radius: 50%;
+            transition: all 0.15s ease;
+        }
+        .pw-banner-dismiss:hover {
+            background: rgba(245, 158, 11, 0.15);
+            color: #d97706;
+        }
+        .pw-banner-dismiss .material-symbols-rounded {
+            font-size: 18px;
+        }
+    </style>
+
+    <script>
+        (function () {
+            // On every page load, check if the banner was dismissed this session
+            var banner = document.getElementById('pw-suggest-banner');
+            if (banner) {
+                if (sessionStorage.getItem('hive_pw_banner_dismissed') === '1') {
+                    banner.style.display = 'none';
+                }
+                var dismissBtn = document.getElementById('pwDismissBtn');
+                if (dismissBtn) {
+                    dismissBtn.addEventListener('click', function () {
+                        sessionStorage.setItem('hive_pw_banner_dismissed', '1');
+                        banner.style.transition = 'opacity 0.25s ease, max-height 0.35s ease, margin 0.35s ease, padding 0.35s ease';
+                        banner.style.opacity = '0';
+                        banner.style.maxHeight = '0';
+                        banner.style.marginBottom = '0';
+                        banner.style.paddingTop = '0';
+                        banner.style.paddingBottom = '0';
+                        banner.style.overflow = 'hidden';
+                        setTimeout(function () { banner.style.display = 'none'; }, 380);
+                    });
+                }
+            }
+        })();
+    </script>
 </body>
 
 </html>

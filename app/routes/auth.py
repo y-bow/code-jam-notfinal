@@ -72,3 +72,73 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('auth.login'))
+
+# Simple in-memory rate limiter for password changes (max 5 attempts / 10 mins)
+# In production, use Flask-Limiter or Redis
+password_change_attempts = {}
+
+@auth_bp.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    user = User.query.get(session['user_id'])
+    
+    if request.method == 'POST':
+        import time
+        from datetime import datetime
+        
+        # Rate Limiting Check
+        now = time.time()
+        attempts = password_change_attempts.get(user.id, [])
+        # Filter attempts within the last 10 minutes (600 seconds)
+        attempts = [t for t in attempts if now - t < 600]
+        if len(attempts) >= 5:
+            flash('Too many password change attempts. Please try again in 10 minutes.', 'danger')
+            return render_template('change_password.html')
+        
+        password_change_attempts[user.id] = attempts + [now]
+
+        current_password = request.form.get('current_password', '')
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+
+        # Validations
+        if not bcrypt.check_password_hash(user.password_hash, current_password):
+            flash('Current password is incorrect.', 'danger')
+            return render_template('change_password.html')
+            
+        if current_password == new_password:
+            flash('New password must be different from current password.', 'danger')
+            return render_template('change_password.html')
+            
+        if new_password != confirm_password:
+            flash('New password and confirmation do not match.', 'danger')
+            return render_template('change_password.html')
+            
+        import re
+        if (len(new_password) < 8 or 
+            not re.search(r"[A-Z]", new_password) or 
+            not re.search(r"[0-9]", new_password) or 
+            not re.search(r"[!@#$%^&*]", new_password)):
+            flash('New password does not meet the minimum security requirements.', 'danger')
+            return render_template('change_password.html')
+
+        # Update Password
+        user.password_hash = bcrypt.generate_password_hash(new_password).decode('utf-8')
+        user.must_change_password = False
+        from ..models import db
+        db.session.commit()
+        
+        # Clear rate limit history on success
+        if user.id in password_change_attempts:
+            del password_change_attempts[user.id]
+            
+        flash('Password updated successfully ✓', 'success')
+
+        if user.role in ('student', 'class_rep'):
+            return redirect(url_for('dashboard.student_dashboard'))
+        elif user.role in ('teacher', 'assistant'):
+            return redirect(url_for('dashboard.teacher_dashboard'))
+        else:
+            return redirect(url_for('dashboard.admin_dashboard'))
+
+    return render_template('change_password.html')

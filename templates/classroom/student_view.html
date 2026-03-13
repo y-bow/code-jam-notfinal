@@ -3,24 +3,6 @@
 {% block title %}Hive | Classroom - {{ course.code }}{% endblock %}
 {% block page_title %}{{ course.code }}: {{ course.name }}{% endblock %}
 
-{% block sidebar_links %}
-<a href="{{ url_for('dashboard.student_dashboard') }}" class="nav-item">
-    <span class="material-symbols-rounded">arrow_back</span>
-    Back to Hub
-</a>
-<a href="#" class="nav-item active tab-link" onclick="openTab(event, 'Home')">
-    <span class="material-symbols-rounded">class</span>
-    Class Home
-</a>
-<a href="#" class="nav-item tab-link" onclick="openTab(event, 'Assignments')">
-    <span class="material-symbols-rounded">assignment</span>
-    Assignments
-</a>
-<a href="#" class="nav-item tab-link" onclick="openTab(event, 'Performance')">
-    <span class="material-symbols-rounded">fact_check</span>
-    My Progress
-</a>
-{% endblock %}
 
 {% block content %}
 <div class="dashboard-grid">

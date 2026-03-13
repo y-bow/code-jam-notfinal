@@ -458,31 +458,92 @@ def timetable():
     if current_day > 4:
         current_day = -1
 
-    # Free Slots Logic Integration
-    sections = []
-    my_section = None
-    selected_section = None
-    free_slots_by_day = None
-
-    if user.role == 'student' and my_section_id:
-        my_section = Section.query.get(my_section_id)
-        # Load all sections from all schools
-        sections = Section.query.join(School).order_by(School.name, Section.name).all()
+    if user.role in ['teacher', 'professor_assistant']:
+        entries = db.session.query(TimetableEntry, Course, Section)\
+            .join(Course, TimetableEntry.course_id == Course.id)\
+            .join(Section, TimetableEntry.section_id == Section.id)\
+            .filter(Course.teacher_id == user.id)\
+            .order_by(TimetableEntry.day, TimetableEntry.start_time)\
+            .all()
+            
+        timetable_data = {i: [] for i in range(5)}
+        sections_taught = set()
+        teaching_minutes = 0
+        total_classes = len(entries)
         
-        if request.method == 'POST':
-            selected_section_id = request.form.get('compare_section_id', type=int)
-            if selected_section_id:
-                selected_section = Section.query.get(selected_section_id)
-                if selected_section:
-                    free_slots_by_day = get_common_free_slots(my_section_id, selected_section_id)
+        for e, c, s in entries:
+            try:
+                st = datetime.strptime(e.start_time.replace(" ", "").upper(), '%I:%M%p')
+                et = datetime.strptime(e.end_time.replace(" ", "").upper(), '%I:%M%p')
+                duration = int((et - st).total_seconds() / 60)
+                teaching_minutes += duration
+            except Exception:
+                duration = 0
 
-    return render_template('dashboard/timetable.html', 
-                         timetable_data=timetable_data, 
-                         current_day=current_day,
-                         sections=sections,
-                         my_section=my_section,
-                         selected_section=selected_section,
-                         free_slots_by_day=free_slots_by_day)
+            if 0 <= e.day <= 4:
+                timetable_data[e.day].append({
+                    'course_name': c.name,
+                    'course_code': c.code,
+                    'section': s.code,
+                    'start_time': e.start_time,
+                    'end_time': e.end_time,
+                    'room': e.room,
+                    'status': e.status,
+                    'color': e.color or 'var(--primary-color)',
+                    'duration': duration
+                })
+            sections_taught.add(s.code)
+
+        for day in timetable_data:
+            timetable_data[day].sort(key=lambda x: datetime.strptime(x['start_time'].replace(" ", "").upper(), '%I:%M%p').time() if 'AM' in x['start_time'].upper() or 'PM' in x['start_time'].upper() else x['start_time'])
+            
+        hours = teaching_minutes // 60
+        mins = teaching_minutes % 60
+        teaching_hours_str = f"{hours}h {mins}m"
+        
+        day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+
+        return render_template('dashboard/timetable_teacher.html',
+                               timetable_data=timetable_data,
+                               current_day=current_day,
+                               total_classes=total_classes,
+                               teaching_hours=teaching_hours_str,
+                               sections_taught=sorted(list(sections_taught)))
+
+    elif user.role in ['student', 'class_rep']:
+        # Free Slots Logic Integration
+        sections = []
+        my_section = None
+        selected_section = None
+        free_slots_by_day = None
+
+        if my_section_id:
+            my_section = Section.query.get(my_section_id)
+            # Load all sections from all schools
+            sections = Section.query.join(School).order_by(School.name, Section.name).all()
+            
+            if request.method == 'POST':
+                selected_section_id = request.form.get('compare_section_id', type=int)
+                if selected_section_id:
+                    selected_section = Section.query.get(selected_section_id)
+                    if selected_section:
+                        free_slots_by_day = get_common_free_slots(my_section_id, selected_section_id)
+
+        return render_template('dashboard/timetable.html', 
+                             timetable_data=timetable_data, 
+                             current_day=current_day,
+                             sections=sections,
+                             my_section=my_section,
+                             selected_section=selected_section,
+                             free_slots_by_day=free_slots_by_day)
+
+    else:
+        # All other roles (dean, superadmin, etc.) get a system wide view
+        all_entries = db.session.query(TimetableEntry, Section)\
+            .join(Section, TimetableEntry.section_id == Section.id)\
+            .order_by(TimetableEntry.day, TimetableEntry.start_time).all()
+        return render_template('dashboard/timetable_system.html', all_entries=all_entries)
+
 
 
 def get_common_free_slots(section_a_id, section_b_id):
@@ -493,6 +554,13 @@ def get_common_free_slots(section_a_id, section_b_id):
     entries_a = TimetableEntry.query.filter_by(section_id=section_a_id).all()
     entries_b = TimetableEntry.query.filter_by(section_id=section_b_id).all()
     
+    # Fetch courses for section_b to map course name to teacher name
+    section_b_courses = Course.query.filter_by(section_id=section_b_id).all()
+    course_teacher_map = {}
+    for c in section_b_courses:
+        if c.teacher:
+            course_teacher_map[c.name] = c.teacher.name
+
     def to_minutes(t_str):
         t = datetime.strptime(t_str.strip().replace(" ", "").upper(), "%I:%M%p")
         return t.hour * 60 + t.minute
@@ -514,15 +582,28 @@ def get_common_free_slots(section_a_id, section_b_id):
     
     for day_idx in range(5):
         busy_intervals = []
+        b_day_entries = []
         for e in entries_a + entries_b:
             if e.day == day_idx:
                 try:
                     start_m = to_minutes(e.start_time)
                     end_m = to_minutes(e.end_time)
                     busy_intervals.append((start_m, end_m))
+                    if e.section_id == section_b_id:
+                        b_day_entries.append((start_m, e.title))
                 except Exception:
                     pass
                     
+        # Process classes for section_b on this day
+        b_day_entries.sort(key=lambda x: x[0])
+        day_classes = []
+        seen_titles = set()
+        for _, title in b_day_entries:
+            if title not in seen_titles:
+                teacher_name = course_teacher_map.get(title, "Unknown")
+                day_classes.append({'title': title, 'teacher_name': teacher_name})
+                seen_titles.add(title)
+
         # Merge overlapping intervals
         busy_intervals.sort(key=lambda x: x[0])
         merged = []
@@ -562,7 +643,8 @@ def get_common_free_slots(section_a_id, section_b_id):
                 'day_name': DAYS_MAP[day_idx],
                 'slots': [],
                 'msg': "No common free time",
-                'has_free': False
+                'has_free': False,
+                'classes': day_classes
             })
         else:
             if len(gaps) == 1 and gaps[0][0] == DAY_START and gaps[0][1] == DAY_END:
@@ -581,7 +663,8 @@ def get_common_free_slots(section_a_id, section_b_id):
                 'day_name': DAYS_MAP[day_idx],
                 'slots': slots_formatted,
                 'msg': msg,
-                'has_free': has_free
+                'has_free': has_free,
+                'classes': day_classes
             })
             
     return free_slots_by_day
