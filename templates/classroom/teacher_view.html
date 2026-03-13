@@ -3,28 +3,6 @@
 {% block title %}Hive | Manage {{ course.code }}{% endblock %}
 {% block page_title %}Manage: {{ course.code }} ({{ course.name }}){% endblock %}
 
-{% block sidebar_links %}
-<a href="{{ url_for('dashboard.teacher_dashboard') }}" class="nav-item">
-    <span class="material-symbols-rounded">arrow_back</span>
-    Back to Hub
-</a>
-<a href="#" class="nav-item tab-link active" onclick="openTab(event, 'Students')">
-    <span class="material-symbols-rounded">manage_accounts</span>
-    Students
-</a>
-<a href="#" class="nav-item tab-link" onclick="openTab(event, 'Assignments')">
-    <span class="material-symbols-rounded">assignment</span>
-    Assignments
-</a>
-<a href="#" class="nav-item tab-link" onclick="openTab(event, 'Attendance')">
-    <span class="material-symbols-rounded">checklist</span>
-    Attendance
-</a>
-<a href="#" class="nav-item tab-link" onclick="openTab(event, 'Announcements')">
-    <span class="material-symbols-rounded">campaign</span>
-    Announcements
-</a>
-{% endblock %}
 
 {% block content %}
 <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg); margin-bottom: 2rem;">

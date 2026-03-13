@@ -128,54 +128,38 @@ a {
 /* Sidebar */
 .sidebar {
     width: var(--sidebar-width);
-    flex-shrink: 0;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    padding: 1.5rem 1rem;
-    z-index: 10;
-    position: relative;
-    overflow: visible;
-}
-
-.sidebar::before {
-    content: '';
-    position: absolute;
+    height: 100vh;
+    position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    overflow: visible;
     background: var(--bg-glass);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    z-index: -1;
-    pointer-events: none;
+    border-right: 1px solid var(--border-color);
 }
 
-.sidebar-header .logo {
+.sidebar-header {
+    padding: 1.5rem;
+    padding-top: 1.5rem;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.75rem;
-    cursor: pointer;
-    padding: 0.5rem;
-}
-
-.sidebar-header .logo h1 {
-    font-size: 1.5rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .sidebar-header .logo {
     display: flex;
     justify-content: center;
     width: 100%;
+    margin-bottom: 1.5rem;
 }
 
 .sidebar-header .logo img {
-    height: 64px;
+    height: 54px;
     width: auto;
     object-fit: contain;
 }
@@ -194,43 +178,67 @@ body.dark-theme .logo-dark {
 }
 
 .sidebar-nav {
-    margin-top: 2rem;
-    flex-grow: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    will-change: auto;
-    isolation: isolate;
+    gap: 4px;
+    padding: 1rem;
+    flex-grow: 1;
+    overflow-y: auto;
 }
 
 .nav-item {
-    position: relative;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.75rem 1rem;
-    border-radius: var(--radius-md);
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: 8px;
     color: var(--text-muted);
+    text-decoration: none;
     font-weight: 500;
-    transition: all var(--transition-fast);
+    font-size: 0.9rem;
+    transition: background 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+    position: relative;
+    cursor: pointer;
 }
 
-.nav-item-content {
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.nav-item.active {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--primary-color) !important;
+    box-shadow: inset 3px 0 0 var(--primary-color);
+}
+
+.nav-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    justify-content: center;
 }
 
-.nav-item:hover,
-.nav-item.active {
-    background-color: var(--bg-glass-hover);
-    color: var(--primary-color);
-    transform: translateX(4px);
+.nav-label {
+    flex-grow: 1;
 }
 
-.nav-item.active {
-    box-shadow: inset 3px 0 0 var(--primary-color);
+.nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--danger-color);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    padding: 0 4px;
+    flex-shrink: 0;
 }
 
 .sidebar-footer .user-profile {
@@ -331,28 +339,16 @@ body.dark-theme .logo-dark {
     color: var(--primary-color);
 }
 
-.badge {
-    background-color: var(--danger-color);
-    color: white;
-    font-size: 0.6rem;
-    font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 10px;
-    margin-left: auto;
-    flex-shrink: 0;
-}
-
-.balance-due {
-    color: var(--danger-color);
-}
-
-.balance-clear {
-    color: var(--text-main);
-}
-
+/* Obsolete badge styles removed in favor of nav-badge */
 .content-wrapper {
     padding: 2rem;
     flex-grow: 1;
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+}
+
+.main-content.no-sidebar .content-wrapper {
+    margin-left: 0 !important;
 }
 
 /* Global Cards */

@@ -87,6 +87,7 @@ class User(db.Model):
     role = db.Column(db.String(20), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     is_active = db.Column(db.Boolean, default=True)
+    must_change_password = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = (
@@ -424,6 +425,7 @@ class TimetableEntry(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True) # Link to Course
     day = db.Column(db.Integer, nullable=False)           # 0=Monday, 1=Tuesday, ..., 4=Friday
     start_time = db.Column(db.String(20), nullable=False)  # e.g. '09:00 AM'
     end_time = db.Column(db.String(20), nullable=False)    # e.g. '10:30 AM'
@@ -437,6 +439,7 @@ class TimetableEntry(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     section = db.relationship('Section', backref=db.backref('timetable_entries', lazy='dynamic'))
+    course = db.relationship('Course', backref=db.backref('timetable_entries', lazy='dynamic'))
 
     __table_args__ = (
         db.Index('ix_timetable_section', 'section_id'),
@@ -456,6 +459,7 @@ class TimetableEntry(db.Model):
             'room': self.room,
             'color': self.color,
             'status': self.status,
+            'course_id': self.course_id,
         }
 
 # =============================================================================

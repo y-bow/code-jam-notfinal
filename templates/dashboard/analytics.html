@@ -3,20 +3,6 @@
 {% block title %}Hive | Dean - School Analytics{% endblock %}
 {% block page_title %}School Analytics Overview{% endblock %}
 
-{% block sidebar_links %}
-<a href="{{ url_for('dashboard.school_analytics') }}" class="nav-item active">
-    <span class="material-symbols-rounded">analytics</span>
-    Analytics
-</a>
-<a href="{{ url_for('dashboard.dean_ratings') }}" class="nav-item">
-    <span class="material-symbols-rounded">star_half</span>
-    Teacher Ratings
-</a>
-<a href="{{ url_for('messages.index') }}" class="nav-item">
-    <span class="material-symbols-rounded">forum</span>
-    Messages
-</a>
-{% endblock %}
 
 {% block content %}
 <div class="stats-grid"

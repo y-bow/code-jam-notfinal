@@ -3,33 +3,6 @@
 {% block title %}Hive | Messages{% endblock %}
 {% block page_title %}Messages{% endblock %}
 
-{% block sidebar_links %}
-<a href="{{ url_for('dashboard.student_dashboard') }}" class="nav-item">
-    <span class="material-symbols-rounded">space_dashboard</span>
-    Global Hub
-</a>
-<a href="{{ url_for('dashboard.timetable') }}" class="nav-item">
-    <span class="material-symbols-rounded">calendar_today</span>
-    Timetable
-</a>
-<a href="{{ url_for('dashboard.tasks') }}" class="nav-item">
-    <span class="material-symbols-rounded">task_alt</span>
-    Tasks
-</a>
-<a href="{{ url_for('dashboard.grades') }}" class="nav-item">
-    <span class="material-symbols-rounded">bar_chart</span>
-    Grades Overview
-</a>
-<a href="{{ url_for('dashboard.announcements') }}" class="nav-item">
-    <span class="material-symbols-rounded">campaign</span>
-    Announcements
-    <span class="badge">2</span>
-</a>
-<a href="{{ url_for('messages.index') }}" class="nav-item active">
-    <span class="material-symbols-rounded">forum</span>
-    Messages
-</a>
-{% endblock %}
 
 {% block content %}
 <div class="glass-panel" style="display: flex; height: 75vh; border-radius: var(--radius-lg); overflow: hidden;">

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Hive | Timetable (System){% endblock %}
+{% block page_title %}System Timetable{% endblock %}
+
+{% block content %}
+<div class="glass-panel" style="padding: 2rem; border-radius: var(--radius-lg);">
+    <div style="margin-bottom: 2rem;">
+        <h3 style="margin: 0; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+            <span class="material-symbols-rounded" style="color: var(--primary-color);">admin_panel_settings</span>
+            System Wide Schedule
+        </h3>
+        <p style="color: var(--text-muted); margin-top: 0.5rem;">Full overview of all scheduled classes across all sections.</p>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; background: var(--bg-main); border-radius: var(--radius-md); overflow: hidden;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem; background: rgba(var(--primary-rgb), 0.05);">
+                    <th style="padding: 1rem;">Section</th>
+                    <th style="padding: 1rem;">Day</th>
+                    <th style="padding: 1rem;">Time</th>
+                    <th style="padding: 1rem;">Course</th>
+                    <th style="padding: 1rem;">Teacher</th>
+                    <th style="padding: 1rem;">Room</th>
+                    <th style="padding: 1rem;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                {% for entry, section in all_entries %}
+                <tr style="border-bottom: 1px solid var(--border-color); font-size: 0.9rem; transition: background var(--transition-fast);" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+                    <td style="padding: 1rem; font-weight: 600; color: var(--primary-color);">
+                        <span style="font-size: 0.75rem; padding: 0.2rem 0.5rem; background: rgba(var(--primary-rgb), 0.1); border-radius: var(--radius-sm); border: 1px solid rgba(var(--primary-rgb), 0.2);">{{ section.code }}</span>
+                    </td>
+                    <td style="padding: 1rem;">{{ days[entry.day] if 0 <= entry.day <= 6 else 'Unknown' }}</td>
+                    <td style="padding: 1rem; color: var(--text-muted); font-weight: 500;">
+                        {{ entry.start_time | fix_time }} - {{ entry.end_time | fix_time }}
+                    </td>
+                    <td style="padding: 1rem; font-weight: 500;">{{ entry.title }}</td>
+                    <td style="padding: 1rem; color: var(--text-muted);">{{ entry.teacher }}</td>
+                    <td style="padding: 1rem; color: var(--text-muted);">{{ entry.room }}</td>
+                    <td style="padding: 1rem;">
+                        {% if entry.status == 'cancelled' %}
+                        <span style="font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.5rem; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-radius: var(--radius-sm); border: 1px solid rgba(239, 68, 68, 0.2);">CANCELLED</span>
+                        {% else %}
+                        <span style="font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.5rem; background: rgba(var(--success-rgb), 0.1); color: var(--success-color); border-radius: var(--radius-sm); border: 1px solid rgba(var(--success-rgb), 0.2);">ACTIVE</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="padding: 3rem 2rem; text-align: center; color: var(--text-muted); border-bottom: none;">
+                        <span class="material-symbols-rounded" style="font-size: 3rem; opacity: 0.2; margin-bottom: 1rem; display: block;">event_busy</span>
+                        No timetable entries found in the system.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

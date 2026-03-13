@@ -3,47 +3,23 @@
 {% block title %}Hive | Teacher Dashboard{% endblock %}
 {% block page_title %}Hello, {{ session.name }}{% endblock %}
 
-{% block sidebar_links %}
-<a href="{{ url_for('dashboard.teacher_dashboard') }}" class="nav-item active">
-    <div class="nav-item-content">
-        <span class="material-symbols-rounded">space_dashboard</span>
-        Global Hub
-    </div>
-</a>
-<a href="{{ url_for('dashboard.timetable') }}" class="nav-item">
-    <div class="nav-item-content">
-        <span class="material-symbols-rounded">calendar_today</span>
-        Timetable
-    </div>
-</a>
-<a href="{{ url_for('dashboard.tasks') }}" class="nav-item">
-    <div class="nav-item-content">
-        <span class="material-symbols-rounded">task_alt</span>
-        Tasks
-    </div>
-</a>
-<a href="{{ url_for('dashboard.grades') }}" class="nav-item">
-    <div class="nav-item-content">
-        <span class="material-symbols-rounded">bar_chart</span>
-        Grades Overview
-    </div>
-</a>
-<a href="{{ url_for('dashboard.announcements') }}" class="nav-item">
-    <div class="nav-item-content">
-        <span class="material-symbols-rounded">campaign</span>
-        Announcements
-    </div>
-    <span class="badge">2</span>
-</a>
-<a href="{{ url_for('messages.index') }}" class="nav-item">
-    <div class="nav-item-content">
-        <span class="material-symbols-rounded">forum</span>
-        Messages
-    </div>
-</a>
-{% endblock %}
 
 {% block content %}
+
+{% if g.current_user and g.current_user.must_change_password %}
+<div id="pw-suggest-banner" class="pw-suggest-banner glass-panel" role="alert">
+    <span class="material-symbols-rounded pw-banner-icon">lock</span>
+    <span class="pw-banner-text">
+        <strong>You're using a default password.</strong>
+        Update it to keep your account secure.
+    </span>
+    <a href="{{ url_for('auth.change_password') }}" class="pw-banner-btn">Change Password</a>
+    <button class="pw-banner-dismiss" id="pwDismissBtn" title="Dismiss for this session" aria-label="Dismiss">
+        <span class="material-symbols-rounded">close</span>
+    </button>
+</div>
+{% endif %}
+
 <!-- Analytics Overview -->
 <div
     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
