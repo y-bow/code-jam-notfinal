@@ -168,7 +168,10 @@
                         <span class="user-name" style="display: flex; align-items: center; gap: 0.4rem;">
                             {% if g.current_user %}{{ g.current_user.name }}{% else %}User Name{% endif %}
                             {% if g.current_user and g.current_user.must_change_password %}
-                            <span class="pw-dot" title="Default password in use — click to update"></span>
+                            <span class="pw-dot-wrapper">
+                                <span class="pw-dot"></span>
+                                <span class="pw-dot-tooltip">Default password in use</span>
+                            </span>
                             {% endif %}
                         </span>
                         <span class="user-role">
@@ -183,6 +186,12 @@
             </div>
 
             <style>
+                .pw-dot-wrapper {
+                    position: relative;
+                    display: inline-flex;
+                    align-items: center;
+                    flex-shrink: 0;
+                }
                 .pw-dot {
                     display: inline-block;
                     width: 8px;
@@ -196,6 +205,32 @@
                 @keyframes pw-pulse {
                     0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
                     50% { box-shadow: 0 0 0 5px rgba(245, 158, 11, 0); }
+                }
+                .pw-dot-tooltip {
+                    position: absolute;
+                    left: 110%;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    white-space: nowrap;
+                    background: rgba(245, 158, 11, 0.15);
+                    border: 1px solid rgba(245, 158, 11, 0.4);
+                    color: #f59e0b;
+                    font-size: 0.7rem;
+                    padding: 4px 8px;
+                    border-radius: 6px;
+                    pointer-events: none;
+                    opacity: 0;
+                    transition: opacity 0.2s ease;
+                    z-index: 9999;
+                    margin-left: 6px;
+                }
+                .pw-dot-wrapper:hover .pw-dot-tooltip {
+                    opacity: 1;
+                }
+                /* Fix 3: amber left-border accent on the Change Password link in profile modal */
+                .pw-change-accent {
+                    box-shadow: inset 3px 0 0 #f59e0b !important;
+                    border-left: none !important;
                 }
             </style>
         </aside>
@@ -353,8 +388,13 @@
             </div>
 
             <div class="profile-actions">
-                <a href="{{ url_for('auth.change_password') }}" class="btn-secondary" style="margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem; border-radius: var(--radius-md); background: rgba(var(--primary-rgb), 0.1); color: var(--text-main); text-decoration: none; font-weight: 500; transition: all 0.2s ease;">
+                <a href="{{ url_for('auth.change_password') }}"
+                   class="btn-secondary{% if g.current_user and g.current_user.must_change_password %} pw-change-accent{% endif %}"
+                   style="margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem; border-radius: var(--radius-md); background: rgba(var(--primary-rgb), 0.1); color: var(--text-main); text-decoration: none; font-weight: 500; transition: all 0.2s ease;">
                     <span class="material-symbols-rounded" style="font-size: 18px;">lock</span> Change Password
+                    {% if g.current_user and g.current_user.must_change_password %}
+                    <span style="margin-left: auto; font-size: 0.7rem; color: #f59e0b; font-weight: 600; background: rgba(245,158,11,0.12); padding: 2px 6px; border-radius: 4px;">Action needed</span>
+                    {% endif %}
                 </a>
                 <a href="{{ url_for('auth.logout') }}" class="btn-logout">Log Out</a>
             </div>
