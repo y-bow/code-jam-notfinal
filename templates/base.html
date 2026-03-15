@@ -144,8 +144,13 @@
                 {% endif %}
 
                 <a href="{{ url_for('messages.index') }}" class="nav-item {{ 'active' if 'messages' in request.endpoint and 'fees' not in request.endpoint }}">
-                    <span class="nav-icon material-symbols-rounded">forum</span>
-                    <span class="nav-label">Messages</span>
+                    <span class="nav-icon material-symbols-rounded">inbox</span>
+                    <span class="nav-label">Inbox</span>
+                </a>
+
+                <a href="{{ url_for('internships.index') }}" class="nav-item {{ 'active' if request.endpoint == 'internships.index' }}">
+                    <span class="nav-icon material-symbols-rounded">workspace_premium</span>
+                    <span class="nav-label">Internships</span>
                 </a>
 
                 <a href="{{ url_for('dashboard.announcements') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.announcements' }}">

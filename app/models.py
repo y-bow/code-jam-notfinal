@@ -106,42 +106,6 @@ class User(db.Model):
     def __repr__(self):
         return f'<User {self.email} ({self.role}) @ School {self.school_id}>'
 
-    # Social Features
-    @property
-    def friends(self):
-        """Returns a list of User objects who are confirmed friends."""
-        f1 = Friendship.query.filter_by(user1_id=self.id).all()
-        f2 = Friendship.query.filter_by(user2_id=self.id).all()
-        friend_ids = [f.user2_id for f in f1] + [f.user1_id for f in f2]
-        if not friend_ids:
-            return []
-        return User.query.filter(User.id.in_(friend_ids)).all()
-
-    @property
-    def pending_requests(self):
-        """Incoming friend requests."""
-        return FriendRequest.query.filter_by(recipient_id=self.id, status='pending').all()
-
-    @property
-    def sent_requests(self):
-        """Outgoing friend requests."""
-        return FriendRequest.query.filter_by(sender_id=self.id, status='pending').all()
-
-    def is_friends_with(self, other_user_id):
-        return Friendship.query.filter(
-            ((Friendship.user1_id == self.id) & (Friendship.user2_id == other_user_id)) |
-            ((Friendship.user1_id == other_user_id) & (Friendship.user2_id == self.id))
-        ).first() is not None
-
-    def has_pending_request_to(self, other_user_id):
-        return FriendRequest.query.filter_by(
-            sender_id=self.id, recipient_id=other_user_id, status='pending'
-        ).first() is not None
-
-    def has_pending_request_from(self, other_user_id):
-        return FriendRequest.query.filter_by(
-            sender_id=other_user_id, recipient_id=self.id, status='pending'
-        ).first() is not None
 
 
 class Student(db.Model):
@@ -376,14 +340,32 @@ class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     recipient_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    subject = db.Column(db.String(100), nullable=False)
     body = db.Column(db.Text, nullable=False)
-    is_read = db.Column(db.Boolean, default=False)
     sent_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_read = db.Column(db.Boolean, default=False)
+    is_deleted_by_sender = db.Column(db.Boolean, default=False)
+    is_deleted_by_recipient = db.Column(db.Boolean, default=False)
+    thread_id = db.Column(db.Integer, db.ForeignKey('messages.id'), nullable=True)
 
     sender = db.relationship('User', foreign_keys=[sender_id],
                              backref=db.backref('sent_messages', lazy='dynamic'))
     recipient = db.relationship('User', foreign_keys=[recipient_id],
                                 backref=db.backref('received_messages', lazy='dynamic'))
+    replies = db.relationship('Message', backref=db.backref('parent', remote_side=[id]))
+
+
+class MessageLog(db.Model):
+    __tablename__ = 'message_logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    recipient_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    subject = db.Column(db.String(100))
+    sent_at = db.Column(db.DateTime, default=datetime.utcnow)
+    ip_address = db.Column(db.String(45))
+    was_blocked = db.Column(db.Boolean, default=False)
+    block_reason = db.Column(db.String(200))
 
 
 class Resource(db.Model):
@@ -484,27 +466,6 @@ class TeacherRating(db.Model):
     review = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-class FriendRequest(db.Model):
-    __tablename__ = 'friend_requests'
-    id = db.Column(db.Integer, primary_key=True)
-    sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    recipient_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    status = db.Column(db.String(20), default='pending')  # pending, accepted, declined
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    sender = db.relationship('User', foreign_keys=[sender_id], backref=db.backref('sent_friend_requests', lazy='dynamic'))
-    recipient = db.relationship('User', foreign_keys=[recipient_id], backref=db.backref('received_friend_requests', lazy='dynamic'))
-
-class Friendship(db.Model):
-    __tablename__ = 'friendships'
-    id = db.Column(db.Integer, primary_key=True)
-    user1_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    user2_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    user1 = db.relationship('User', foreign_keys=[user1_id])
-    user2 = db.relationship('User', foreign_keys=[user2_id])
-
 # =============================================================================
 # FEES MODELS
 # =============================================================================
@@ -563,4 +524,24 @@ class FeePayment(db.Model):
     payment_date = db.Column(db.DateTime, default=datetime.utcnow)
 
     fee = db.relationship('Fee', backref=db.backref('payments', lazy='dynamic', cascade='all, delete-orphan'))
+
+
+# =============================================================================
+# INTERNSHIPS
+# =============================================================================
+
+class Internship(db.Model):
+    __tablename__ = 'internships'
+
+    id = db.Column(db.Integer, primary_key=True)
+    company_name = db.Column(db.String(200), nullable=False)
+    role = db.Column(db.String(200), nullable=False)
+    location = db.Column(db.String(100), nullable=False)
+    duration = db.Column(db.String(100), nullable=False)
+    stipend = db.Column(db.String(100))
+    application_deadline = db.Column(db.DateTime)
+    description = db.Column(db.Text)
+    required_skills = db.Column(db.Text)
+    application_link = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

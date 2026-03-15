@@ -2,9 +2,9 @@ from app import create_app
 from app.models import (
     db, User, Student, Teacher, School, Section,
     Course, Enrollment, Announcement, TimetableEntry, bcrypt,
-    TeacherTodo, TeacherRating, FriendRequest, Friendship
+    TeacherTodo, TeacherRating, Message, Internship
 )
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = create_app()
 
@@ -303,10 +303,43 @@ def seed_db():
 
         db.session.add_all([
             Announcement(school_id=school.id, teacher_id=dean.id, title='Welcome!', body='Classes start March 10.'),
-            TeacherTodo(teacher_id=teacher1.id, title='Grade Assignment 1'),
-            FriendRequest(sender_id=sharan.id, recipient_id=vaibhav.id, status='accepted'),
-            Friendship(user1_id=sharan.id, user2_id=vaibhav.id)
+            TeacherTodo(teacher_id=teacher1.id, title='Grade Assignment 1')
         ])
+        db.session.commit()
+
+        # Generate sample formal messages
+        messages = [
+            Message(
+                sender_id=vaibhav.id, 
+                recipient_id=teacher1.id, 
+                subject='Question regarding CS201 Assignment', 
+                body='Dear Prof. Smith,\n\nI was wondering if we could get an extension on the latest BST assignment. My group has been facing issues with the environment setup.\n\nThank you,\nVaibhav',
+                sent_at=datetime.utcnow() - timedelta(days=1)
+            ),
+            Message(
+                sender_id=teacher1.id, 
+                recipient_id=vaibhav.id, 
+                subject='Re: Question regarding CS201 Assignment', 
+                body='Dear Vaibhav,\n\nYes, I am extending the deadline by 48 hours for the entire class. Please see the recent announcement.\n\nBest,\nProf. Smith',
+                sent_at=datetime.utcnow() - timedelta(hours=10),
+                is_read=True
+            ),
+            Message(
+                sender_id=sharan.id, 
+                recipient_id=teacher_vivek.id, 
+                subject='Doubt in Indian Constitution Pol101', 
+                body='Dear Sir,\n\nCould you clarify the difference between fundamental rights and directive principles as discussed in today\'s lecture?\n\nRegards,\nSharan',
+                sent_at=datetime.utcnow() - timedelta(hours=2)
+            ),
+            Message(
+                sender_id=sadhana.id, 
+                recipient_id=greeta.id, 
+                subject='Absence on Monday', 
+                body='Dear Professor Greeta,\n\nI will be absent this coming Monday due to a medical appointment. I have attached my medical certificate to the leave portal.\n\nBest regards,\nSadhana',
+                sent_at=datetime.utcnow() - timedelta(hours=5)
+            )
+        ]
+        db.session.add_all(messages)
         db.session.commit()
         
         # =====================================================================
@@ -340,6 +373,47 @@ def seed_db():
             FeePayment(fee_id=fees[2].id, amount=61000.0, payment_method='Credit Card', status='success', transaction_id='TXN112233'), # Harshitha - fully paid
         ]
         db.session.add_all(payments)
+        db.session.commit()
+
+        # =====================================================================
+        # 9. INTERNSHIPS
+        # =====================================================================
+        internships = [
+            Internship(
+                company_name='TechNova Solutions',
+                role='Software Developer Intern',
+                location='Remote',
+                duration='3 months',
+                stipend='₹15,000 / month',
+                application_deadline=datetime(2025, 4, 15),
+                description='Join our core engineering team to build scalable microservices. You will work with a modern tech stack including Python, FastAPI, and React.',
+                required_skills='Python, React, basic Git knowledge',
+                application_link='https://technovasolutions.com/careers'
+            ),
+            Internship(
+                company_name='Creative Minds Agency',
+                role='Marketing Intern',
+                location='On-site (Bangalore)',
+                duration='6 months',
+                stipend='₹10,000 / month',
+                application_deadline=datetime(2025, 5, 1),
+                description='Help us plan and execute digital marketing campaigns. Ideal for creative individuals with a passion for social media strategy.',
+                required_skills='SEO, Content Writing, Social Media Management',
+                application_link='https://creativeminds.com/apply'
+            ),
+            Internship(
+                company_name='DataSphere',
+                role='Data Science Intern',
+                location='Hybrid (Chennai)',
+                duration='4 months',
+                stipend='₹20,000 / month',
+                application_deadline=datetime(2025, 3, 30),
+                description='Assist our data scientists in preprocessing large datasets, running EDA, and building foundational machine learning models.',
+                required_skills='Python, Pandas, SQL, Basic ML Concepts',
+                application_link='https://datasphere.io/internships'
+            )
+        ]
+        db.session.add_all(internships)
         db.session.commit()
 
         print("Database seeded successfully!")
