@@ -53,7 +53,6 @@ def create_app():
     from .routes.dashboard import dashboard_bp
     from .routes.classroom import classroom_bp
     from .routes.messages import messages_bp
-    from .routes.social import social_bp
     from .routes.fees import fees_bp
     from .routes.internships import internships_bp
 
@@ -61,7 +60,6 @@ def create_app():
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(classroom_bp)
     app.register_blueprint(messages_bp)
-    app.register_blueprint(social_bp)
     app.register_blueprint(fees_bp)
     app.register_blueprint(internships_bp)
 

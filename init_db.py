@@ -2,9 +2,9 @@ from app import create_app
 from app.models import (
     db, User, Student, Teacher, School, Section,
     Course, Enrollment, Announcement, TimetableEntry, bcrypt,
-    TeacherTodo, TeacherRating, FriendRequest, Friendship, Internship
+    TeacherTodo, TeacherRating, Message, Internship
 )
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = create_app()
 
@@ -39,7 +39,7 @@ def seed_db():
         sec3 = Section(school_id=school.id, name='Section 3', code='SEC-3', batch_year=2025)
         sec4 = Section(school_id=school.id, name='Section 4', code='SEC-4', batch_year=2025)
         sec5 = Section(school_id=school.id, name='Section 5', code='SEC-5', batch_year=2025)
-        sec_soai_1 = Section(school_id=school_soai.id, name='SOAI Section 1', code='SOAI-SEC1', batch_year=2025)
+        sec_soai_1 = Section(school_id=school_soai.id, name='SOAI', code='SOAI', batch_year=2025)
         db.session.add_all([sec1, sec2, sec3, sec4, sec5, sec_soai_1])
         db.session.commit()
 
@@ -106,7 +106,7 @@ def seed_db():
                       password_hash=pw, role='teacher', name='Pankaj', must_change_password=True)
         arun_kumar = User(school_id=school_soai.id, email='arun.kumar@saiuniversity.edu.in',
                            password_hash=pw, role='teacher', name='Arun Kumar', must_change_password=True)
-        sadhana = User(school_id=school_soai.id, email='sadhana.s@soai.saiuniversity.edu.in',
+        sadhana = User(school_id=school_soai.id, email='sadhana.s-29@soai.saiuniversity.edu.in',
                         password_hash=pw, role='student', name='Sadhana Srinivasan', must_change_password=True)
 
         all_users = [admin, superadmin, dean, teacher1, teacher2, teacher_nitish, teacher_megha, teacher_gopi, 
@@ -264,6 +264,25 @@ def seed_db():
             (4, '03:50 PM', '05:15 PM', 'Environment and Sustainability', 'AB2 - 202', 'var(--warning-color)', 'Sarah Davis', 'Period 3'),
         ]
 
+        soai_tt = [
+            (0, '09:00 AM', '10:30 AM', 'DS in C Lab', 'AB1 LAB', 'var(--danger-color)', 'Greeta', 'Period 1'),
+            (0, '12:40 PM', '02:05 PM', 'AI in Programming', 'AB1 101', '#f472b6', 'Greeta', 'Period 2'),
+            (0, '03:50 PM', '05:15 PM', 'Critical Thinking', 'AB2 101', '#a78bfa', 'Siddharth', 'Period 3'),
+            (1, '09:00 AM', '10:30 AM', 'AI Programming Lab', 'AB1 LAB', '#f472b6', 'Greeta', 'Period 1'),
+            (1, '10:40 AM', '12:10 PM', 'Intro to Embedded Systems and Robotics', 'AB2 203', 'var(--warning-color)', 'Greeta', 'Period 2'),
+            (1, '12:40 PM', '02:05 PM', 'Data Structures', 'AB1 101', 'var(--success-color)', 'Greeta', 'Period 3'),
+            (1, '02:15 PM', '03:40 PM', 'Intro to Embedded Systems and Robotics', 'AB2 207', 'var(--warning-color)', 'Greeta', 'Period 4'),
+            (2, '09:00 AM', '10:30 AM', 'Indian Constitution', 'AB2 - 202', '#a78bfa', 'Siddanth', 'Period 1'),
+            (2, '10:40 AM', '12:10 PM', "OOP's", 'Moot court', 'var(--danger-color)', 'Pankaj', 'Period 2'),
+            (2, '12:40 PM', '02:05 PM', 'AI in Programming', 'AB1 101', '#f472b6', 'Greeta', 'Period 3'),
+            (3, '09:00 AM', '10:30 AM', 'Critical Thinking', 'AB2 202', '#a78bfa', 'Siddharth', 'Period 1'),
+            (3, '10:40 AM', '12:10 PM', 'Data Structures', 'AB1 101', 'var(--success-color)', 'Greeta', 'Period 2'),
+            (3, '02:15 PM', '03:40 PM', 'Indian Constitution', 'AB2 Mini Audi', '#a78bfa', 'Siddanth', 'Period 3'),
+            (3, '03:50 PM', '05:15 PM', 'P&S', 'AB2 - 203', 'var(--danger-color)', 'Arun Kumar', 'Period 4'),
+            (4, '09:00 AM', '10:30 AM', 'P&S', 'AB2 - 203', 'var(--danger-color)', 'Arun Kumar', 'Period 1'),
+            (4, '10:40 AM', '12:10 PM', "OOP's", 'AB1 101', 'var(--danger-color)', 'Pankaj', 'Period 2'),
+        ]
+
         sec4_tt = [
             (0, '09:00 AM', '10:30 AM', 'Indian Constitution and Democracy', 'AB2-202', '#a78bfa', 'Vivek Yadav', 'Period 1'),
             (0, '01:40 PM', '03:05 PM', 'Programming in Python', 'AB2-101', '#f472b6', 'Ujjwal', 'Period 2'),
@@ -293,7 +312,7 @@ def seed_db():
             (4, '02:15 PM', '03:40 PM', 'Programming in Python', 'AB2 - 101', '#f472b6', 'John Smith', 'Period 3'),
         ]
 
-        for section, tt in [(sec1, sec1_tt), (sec2, sec2_tt), (sec3, sec3_tt), (sec4, sec4_tt), (sec5, sec5_tt)]:
+        for section, tt in [(sec1, sec1_tt), (sec2, sec2_tt), (sec3, sec3_tt), (sec4, sec4_tt), (sec5, sec5_tt), (sec_soai_1, soai_tt)]:
             for day, st, et, title, room, color, teacher, period in tt:
                 course = Course.query.filter_by(section_id=section.id, name=title).first()
                 if not course:
@@ -303,12 +322,45 @@ def seed_db():
 
         db.session.add_all([
             Announcement(school_id=school.id, teacher_id=dean.id, title='Welcome!', body='Classes start March 10.'),
-            TeacherTodo(teacher_id=teacher1.id, title='Grade Assignment 1'),
-            FriendRequest(sender_id=sharan.id, recipient_id=vaibhav.id, status='accepted'),
-            Friendship(user1_id=sharan.id, user2_id=vaibhav.id)
+            TeacherTodo(teacher_id=teacher1.id, title='Grade Assignment 1')
         ])
         db.session.commit()
 
+        # Generate sample formal messages
+        messages = [
+            Message(
+                sender_id=vaibhav.id, 
+                recipient_id=teacher1.id, 
+                subject='Question regarding CS201 Assignment', 
+                body='Dear Prof. Smith,\n\nI was wondering if we could get an extension on the latest BST assignment. My group has been facing issues with the environment setup.\n\nThank you,\nVaibhav',
+                sent_at=datetime.utcnow() - timedelta(days=1)
+            ),
+            Message(
+                sender_id=teacher1.id, 
+                recipient_id=vaibhav.id, 
+                subject='Re: Question regarding CS201 Assignment', 
+                body='Dear Vaibhav,\n\nYes, I am extending the deadline by 48 hours for the entire class. Please see the recent announcement.\n\nBest,\nProf. Smith',
+                sent_at=datetime.utcnow() - timedelta(hours=10),
+                is_read=True
+            ),
+            Message(
+                sender_id=sharan.id, 
+                recipient_id=teacher_vivek.id, 
+                subject='Doubt in Indian Constitution Pol101', 
+                body='Dear Sir,\n\nCould you clarify the difference between fundamental rights and directive principles as discussed in today\'s lecture?\n\nRegards,\nSharan',
+                sent_at=datetime.utcnow() - timedelta(hours=2)
+            ),
+            Message(
+                sender_id=sadhana.id, 
+                recipient_id=greeta.id, 
+                subject='Absence on Monday', 
+                body='Dear Professor Greeta,\n\nI will be absent this coming Monday due to a medical appointment. I have attached my medical certificate to the leave portal.\n\nBest regards,\nSadhana',
+                sent_at=datetime.utcnow() - timedelta(hours=5)
+            )
+        ]
+        db.session.add_all(messages)
+        db.session.commit()
+        
         # =====================================================================
         # 8. FEES
         # =====================================================================
