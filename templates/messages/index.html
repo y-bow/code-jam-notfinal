@@ -510,10 +510,10 @@ function loadThread(userId) {
                 
                 bubble.innerHTML = `
                     <div class="msg-header">
-                        <span class="msg-name">${isMe ? 'You' : data.partner.name}</span>
+                        <span class="msg-name">${isMe ? 'You' : escapeHtml(data.partner.name)}</span>
                         <span class="msg-time">${msg.timestamp}</span>
                     </div>
-                    <div class="msg-body">${escapeHtml(msg.body)}</div>
+                    <div class="msg-body">${msg.body}</div>
                 `;
                 container.appendChild(bubble);
             });

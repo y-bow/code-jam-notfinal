@@ -2,6 +2,7 @@
 :root {
     /* Light Theme (Default) - White & Blue */
     --primary-color: #2563eb;
+    --primary-rgb: 37, 99, 235;
     /* Blue */
     --primary-light: #60a5fa;
     --primary-dark: #1d4ed8;
@@ -43,6 +44,7 @@
 /* Dark Theme Variables - Black & Red */
 body.dark-theme {
     --primary-color: #dc2626;
+    --primary-rgb: 220, 38, 38;
     /* Red */
     --primary-light: #ef4444;
     --primary-dark: #b91c1c;
@@ -159,7 +161,7 @@ a {
 }
 
 .sidebar-header .logo img {
-    height: 54px;
+    height: 120px;
     width: auto;
     object-fit: contain;
 }
@@ -702,4 +704,43 @@ body.dark-theme .notifications-dropdown {
 .btn-outline:hover {
     background: var(--bg-glass-hover);
     border-color: var(--primary-color);
-}
+}
+
+/* Form Components */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.3px;
+}
+
+.form-input {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    transition: all var(--transition-fast);
+    width: 100%;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: var(--bg-glass-hover);
+    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
+}
+
+.form-input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
