@@ -1,6 +1,10 @@
 from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, request, session, flash
 from ..models import User, School, bcrypt
+import random
+import io
+import base64
+from PIL import Image, ImageDraw, ImageFont
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -29,11 +33,65 @@ def role_required(role):
     return decorator
 
 
+def generate_captcha():
+    """Generates an alphanumeric image CAPTCHA and stores the answer in the session."""
+    # Generate random string
+    chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789" # Exclude confusing chars like 0, O, 1, I, l
+    captcha_text = "".join(random.choices(chars, k=random.randint(5, 6)))
+    session['captcha_answer'] = captcha_text
+    
+    # Create image
+    width, height = 180, 60
+    image = Image.new('RGB', (width, height), color=(240, 240, 240))
+    draw = ImageDraw.Draw(image)
+    
+    # Add noise lines
+    for _ in range(8):
+        x1 = random.randint(0, width)
+        y1 = random.randint(0, height)
+        x2 = random.randint(0, width)
+        y2 = random.randint(0, height)
+        draw.line((x1, y1, x2, y2), fill=(random.randint(150, 200), random.randint(150, 200), random.randint(150, 200)), width=1)
+
+    # Add noise dots
+    for _ in range(100):
+        draw.point((random.randint(0, width), random.randint(0, height)), fill=(random.randint(100, 200), random.randint(100, 200), random.randint(100, 200)))
+
+    # Draw text with simple distortion
+    try:
+        # Try to use a system font if available, otherwise fallback to default
+        font = ImageFont.load_default()
+    except:
+        font = ImageFont.load_default()
+
+    # Draw characters individually with slight rotation simulation (offsetting)
+    current_x = 20
+    for char in captcha_text:
+        char_y = random.randint(10, 25)
+        # Using dark colors for text
+        draw.text((current_x, char_y), char, fill=(random.randint(0, 100), random.randint(0, 100), random.randint(0, 100)), font=font)
+        current_x += random.randint(25, 30)
+
+    # Convert to base64
+    buffered = io.BytesIO()
+    image.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode()
+    session['captcha_image'] = f"data:image/png;base64,{img_str}"
+    return session['captcha_image']
+
+
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
+        user_captcha = request.form.get('captcha_answer', '').strip()
+
+        # CAPTCHA Validation (Case-sensitive)
+        if user_captcha != session.get('captcha_answer'):
+            flash('Invalid CAPTCHA. Please try again.', 'danger')
+            generate_captcha() 
+            return render_template('login.html')
 
         # Find user by email (may exist in multiple schools, but email+school is unique)
         # For single-school deployments, this is straightforward.
@@ -64,8 +122,18 @@ def login():
                 return redirect(url_for('index'))
 
         flash('Invalid email or password', 'danger')
+        generate_captcha() # Refresh on failed login
 
+    # Generate CAPTCHA for initial GET request if not already present or on refresh
+    generate_captcha()
     return render_template('login.html')
+
+
+@auth_bp.route('/refresh-captcha', methods=['GET'])
+def refresh_captcha():
+    """Endpoint to get a new CAPTCHA image via AJAX."""
+    image_src = generate_captcha()
+    return {"image_src": image_src}
 
 
 @auth_bp.route('/logout')

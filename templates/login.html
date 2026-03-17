@@ -43,6 +43,20 @@
                 <span class="material-symbols-rounded" style="cursor: pointer;" onclick="togglePassword('password', this)">visibility_off</span>
             </div>
 
+            <div class="captcha-container">
+                <div class="captcha-question-wrapper">
+                    <img id="captcha-image" src="{{ session.get('captcha_image') }}" alt="CAPTCHA Image" style="border-radius: 4px; border: 1px solid var(--border-color);">
+                    <button type="button" class="refresh-btn" onclick="refreshCaptcha()" title="Refresh CAPTCHA">
+                        <span class="material-symbols-rounded">refresh</span>
+                    </button>
+                </div>
+                <div class="input-group captcha-input">
+                    <input type="text" id="captcha_answer" name="captcha_answer" required placeholder=" ">
+                    <label for="captcha_answer">Enter CAPTCHA Code</label>
+                    <span class="material-symbols-rounded">spellcheck</span>
+                </div>
+            </div>
+
             <button type="submit" class="login-btn">
                 <span>Sign In</span>
                 <span class="material-symbols-rounded">arrow_forward</span>
@@ -60,6 +74,23 @@
         } else {
             input.type = "password";
             icon.textContent = "visibility_off";
+        }
+    }
+
+    async function refreshCaptcha() {
+        const captchaImg = document.getElementById('captcha-image');
+        const refreshIcon = document.querySelector('.refresh-btn .material-symbols-rounded');
+        
+        refreshIcon.classList.add('spinning');
+        try {
+            const response = await fetch('/refresh-captcha');
+            const data = await response.json();
+            captchaImg.src = data.image_src;
+            document.getElementById('captcha_answer').value = '';
+        } catch (error) {
+            console.error('Error refreshing captcha:', error);
+        } finally {
+            setTimeout(() => refreshIcon.classList.remove('spinning'), 500);
         }
     }
 </script>
@@ -126,6 +157,70 @@
     .login-header p {
         color: var(--text-muted);
         font-size: 0.95rem;
+    }
+
+    .captcha-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        background: rgba(var(--primary-rgb), 0.05);
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .captcha-question-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: var(--text-main);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .refresh-btn {
+        background: none;
+        border: none;
+        color: var(--primary-color);
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s;
+    }
+
+    .refresh-btn:hover {
+        transform: rotate(30deg);
+    }
+
+    .refresh-btn .material-symbols-rounded {
+        font-size: 20px;
+    }
+
+    .spinning {
+        animation: spin 0.5s ease-in-out;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .captcha-input input {
+        padding: 1rem 1rem 0.4rem !important;
+        font-size: 0.9rem !important;
+    }
+
+    .captcha-input label {
+        top: 0.7rem !important;
+        font-size: 0.9rem !important;
+    }
+
+    .captcha-input input:focus~label,
+    .captcha-input input:not(:placeholder-shown)~label {
+        top: 0.2rem !important;
+        font-size: 0.7rem !important;
     }
 
     .login-form {
