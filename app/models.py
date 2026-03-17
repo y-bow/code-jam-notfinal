@@ -568,3 +568,44 @@ class LostFoundItem(db.Model):
 
     reporter = db.relationship('User', backref=db.backref('lost_found_items', lazy='dynamic'))
 
+
+# =============================================================================
+# CLUBS AND EVENTS
+# =============================================================================
+
+class Club(db.Model):
+    __tablename__ = 'clubs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    category = db.Column(db.String(100))
+    contact_email = db.Column(db.String(120))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('school_id', 'name', name='uq_club_school_name'),
+        db.Index('ix_club_school', 'school_id'),
+    )
+
+    school = db.relationship('School', backref=db.backref('clubs', lazy='dynamic'))
+
+class ExternalEvent(db.Model):
+    __tablename__ = 'external_events'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    hosting_college = db.Column(db.String(200), nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
+    location = db.Column(db.String(200))
+    description = db.Column(db.Text)
+    registration_link = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.Index('ix_event_school', 'school_id'),
+    )
+
+    school = db.relationship('School', backref=db.backref('external_events', lazy='dynamic'))

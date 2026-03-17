@@ -141,7 +141,17 @@
                     <span class="nav-icon material-symbols-rounded">account_balance</span>
                     <span class="nav-label">Fees Hub</span>
                 </a>
+                <a href="{{ url_for('clubs.admin_clubs') }}" class="nav-item {{ 'active' if 'clubs.admin' in request.endpoint }}">
+                    <span class="nav-icon material-symbols-rounded">groups_3</span>
+                    <span class="nav-label">Manage Clubs</span>
+                </a>
                 {% endif %}
+
+                <a href="{{ url_for('clubs.index') }}"
+                    class="nav-item {{ 'active' if request.endpoint in ['clubs.index', 'clubs.club_details', 'clubs.events'] }}">
+                    <span class="nav-icon material-symbols-rounded">groups</span>
+                    <span class="nav-label">Clubs & Events</span>
+                </a>
 
                 <a href="{{ url_for('internships.index') }}"
                     class="nav-item {{ 'active' if request.endpoint == 'internships.index' }}">
