@@ -2,7 +2,8 @@ from app import create_app
 from app.models import (
     db, User, Student, Teacher, School, Section,
     Course, Enrollment, Announcement, TimetableEntry, bcrypt,
-    TeacherTodo, TeacherRating, Message, Internship, LostFoundItem
+    TeacherTodo, TeacherRating, Message, Internship, LostFoundItem,
+    Club, ExternalEvent
 )
 from datetime import datetime, timedelta
 
@@ -433,6 +434,77 @@ def seed_db():
             )
         ]
         db.session.add_all(internships)
+        db.session.commit()
+
+        # =====================================================================
+        # 10. CLUBS
+        # =====================================================================
+        clubs = [
+            Club(
+                school_id=1,
+                name='Nexus AI Club',
+                category='Technology',
+                description='Exploring the future of Artificial Intelligence and Machine Learning through hands-on projects and workshops.',
+                contact_email='nexus@saiuniversity.edu.in'
+            ),
+            Club(
+                school_id=1,
+                name='The Arts Collective',
+                category='Arts & Culture',
+                description='A hub for painters, sculptors, and digital artists to share their work and collaborate on campus installations.',
+                contact_email='arts@saiuniversity.edu.in'
+            ),
+            Club(
+                school_id=1,
+                name='CyberSecurity Shield',
+                category='Technology',
+                description='Learn ethical hacking, network security, and cryptography. Participate in CTF competitions.',
+                contact_email='cyber@saiuniversity.edu.in'
+            ),
+            Club(
+                school_id=1,
+                name='The Debating Society',
+                category='Humanities',
+                description='Hone your public speaking and critical thinking skills through weekly debates on global issues.',
+                contact_email='debate@saiuniversity.edu.in'
+            )
+        ]
+        db.session.add_all(clubs)
+        db.session.commit()
+
+        # =====================================================================
+        # 11. EXTERNAL EVENTS
+        # =====================================================================
+        external_events = [
+            ExternalEvent(
+                school_id=1,
+                title='Kuruhetra Inter-College Tech Fest',
+                hosting_college='College of Engineering, Guindy',
+                date=datetime(2025, 4, 10, 9, 30),
+                location='CEG Campus, Chennai',
+                description='One of South India\'s largest technical symposiums featuring coding challenges, robotics, and paper presentations.',
+                registration_link='https://example.com/kurukshetra'
+            ),
+            ExternalEvent(
+                school_id=1,
+                title='HackSummit 2025',
+                hosting_college='IIT Madras',
+                date=datetime(2025, 5, 5, 18, 0),
+                location='Online',
+                description='A 36-hour hackathon focused on building sustainable solutions for urban development.',
+                registration_link='https://example.com/hacksummit'
+            ),
+            ExternalEvent(
+                school_id=1,
+                title='DesignXpo',
+                hosting_college='NID Bangalore',
+                date=datetime(2025, 4, 25, 10, 0),
+                location='NID Campus',
+                description='An exhibition of the latest trends in UI/UX and product design with workshops from industry leaders.',
+                registration_link='https://example.com/designxpo'
+            )
+        ]
+        db.session.add_all(external_events)
         db.session.commit()
 
         print("Database seeded successfully!")
