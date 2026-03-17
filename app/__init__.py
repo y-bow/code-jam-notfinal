@@ -56,6 +56,7 @@ def create_app():
     from .routes.fees import fees_bp
     from .routes.internships import internships_bp
     from .routes.lost_found import lost_found_bp
+    from .routes.clubs import clubs_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -64,6 +65,7 @@ def create_app():
     app.register_blueprint(fees_bp)
     app.register_blueprint(internships_bp)
     app.register_blueprint(lost_found_bp)
+    app.register_blueprint(clubs_bp)
 
     @app.route('/')
     def index():

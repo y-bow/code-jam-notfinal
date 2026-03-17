@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Clubs & Societies - Hive{% endblock %}
+{% block page_title %}Clubs & Societies{% endblock %}
+
+{% block content %}
+<div class="clubs-dashboard fade-in">
+    <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h2>Campus Clubs</h2>
+            <p class="text-muted">Discover and join student organizations</p>
+        </div>
+        <div class="actions">
+            <a href="{{ url_for('clubs.events') }}" class="btn-secondary" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+                <span class="material-symbols-rounded">event</span>
+                External Events
+            </a>
+            {% if g.current_user.role in ['admin', 'dean', 'superadmin'] %}
+            <a href="{{ url_for('clubs.admin_clubs') }}" class="btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; margin-left: 0.5rem;">
+                <span class="material-symbols-rounded">settings</span> Manage
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="clubs-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+        {% for club in clubs %}
+        <div class="club-card glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                <h3 style="margin: 0; font-size: 1.25rem;">{{ club.name }}</h3>
+                <span class="category-badge" style="background: rgba(var(--primary-rgb), 0.1); color: var(--primary-color); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600;">
+                    {{ club.category or 'General' }}
+                </span>
+            </div>
+            
+            <p class="club-desc" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                {{ club.description or 'No description available for this club.' }}
+            </p>
+            
+            <div class="card-footer" style="padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <span class="club-email" style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.3rem;">
+                    <span class="material-symbols-rounded" style="font-size: 16px;">mail</span>
+                    Contact Us
+                </span>
+                
+                <a href="{{ url_for('clubs.club_details', club_id=club.id) }}" class="btn-text" style="color: var(--primary-color); font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 0.25rem;">
+                    Details <span class="material-symbols-rounded" style="font-size: 18px;">arrow_forward</span>
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state glass-panel" style="grid-column: 1 / -1; padding: 4rem 2rem; text-align: center; border-radius: var(--radius-lg);">
+            <div class="empty-icon" style="width: 64px; height: 64px; background: rgba(var(--primary-rgb), 0.1); color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                <span class="material-symbols-rounded" style="font-size: 32px;">groups</span>
+            </div>
+            <h3>No Clubs Found</h3>
+            <p class="text-muted" style="margin-top: 0.5rem; max-width: 400px; margin-left: auto; margin-right: auto;">
+                There are currently no active clubs registered. Check back later!
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

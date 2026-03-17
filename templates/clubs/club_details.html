@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}{{ club.name }} - Hive{% endblock %}
+{% block page_title %}Club Details{% endblock %}
+
+{% block content %}
+<div class="club-details fade-in">
+    <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                <h2 style="margin: 0;">{{ club.name }}</h2>
+                <span class="category-badge" style="background: rgba(var(--primary-rgb), 0.1); color: var(--primary-color); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;">
+                    {{ club.category or 'General' }}
+                </span>
+            </div>
+            <p class="text-muted" style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="material-symbols-rounded" style="font-size: 18px;">calendar_today</span>
+                Established {{ club.created_at.strftime('%Y') }}
+            </p>
+        </div>
+        <div class="actions">
+            <a href="{{ url_for('clubs.index') }}" class="btn-secondary" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+                <span class="material-symbols-rounded">arrow_back</span>
+                Back to Clubs
+            </a>
+            {% if g.current_user.role in ['admin', 'dean', 'superadmin'] %}
+            <a href="{{ url_for('clubs.admin_clubs') }}" class="btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; margin-left: 0.5rem;">
+                <span class="material-symbols-rounded">edit</span> Edit This Club
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="club-content" style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+        
+        <div class="main-info">
+            <div class="glass-panel" style="padding: 2rem; border-radius: var(--radius-lg); margin-bottom: 2rem;">
+                <h3 style="margin-top: 0; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">About Us</h3>
+                <div class="formatted-text" style="color: var(--text-main); line-height: 1.7;">
+                    {% if club.description %}
+                        {{ club.description | replace('\n', '<br>') | safe }}
+                    {% else %}
+                        <p class="text-muted">No description provided yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-info">
+            <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg); position: sticky; top: 2rem;">
+                <h3 style="margin-top: 0; margin-bottom: 1.5rem;">Contact Information</h3>
+                
+                <div class="contact-item" style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="icon-bg" style="width: 40px; height: 40px; background: rgba(var(--primary-rgb), 0.1); color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <span class="material-symbols-rounded">mail</span>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">Email Address</h4>
+                        {% if club.contact_email %}
+                        <a href="mailto:{{ club.contact_email }}" style="color: var(--primary-color); text-decoration: none; font-size: 0.9rem;">
+                            {{ club.contact_email }}
+                        </a>
+                        {% else %}
+                        <span class="text-muted" style="font-size: 0.9rem;">Not provided</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="action-box" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); text-align: center;">
+                    <p style="margin-top: 0; margin-bottom: 1rem; font-size: 0.95rem; color: var(--text-muted);">Interested in joining?</p>
+                    <button class="btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                        <span class="material-symbols-rounded">person_add</span> Express Interest
+                    </button>
+                    <small class="text-muted" style="display: block; margin-top: 0.75rem;">The club administrators will reach out to you.</small>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}
