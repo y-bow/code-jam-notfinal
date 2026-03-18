@@ -670,6 +670,121 @@ def get_common_free_slots(section_a_id, section_b_id):
     return free_slots_by_day
 
 
+@dashboard_bp.route('/courses')
+@school_scoped
+@role_minimum('teacher')
+def courses():
+    """List of courses for teachers and deans to manage."""
+    user = g.current_user
+    if user.role_level >= 5: # Dean/Admin: see all courses in school
+        courses = Course.query.join(Section).filter(Section.school_id == g.school_id).all()
+    else: # Teacher: see only their courses
+        courses = Course.query.filter_by(teacher_id=user.id).all()
+    
+    return render_template('dashboard/courses.html', courses=courses)
+
+
+@dashboard_bp.route('/courses/<int:course_id>/manage')
+@school_scoped
+@role_minimum('teacher')
+def manage_course(course_id):
+    """View students, attendance, and grades for a specific course."""
+    user = g.current_user
+    course = Course.query.get_or_404(course_id)
+    
+    if user.role_level < 5 and course.teacher_id != user.id:
+        flash("You do not have permission to manage this course.", "danger")
+        return redirect(url_for('dashboard.courses'))
+
+    enrollments = Enrollment.query.filter_by(course_id=course.id, status='active').all()
+    students_data = []
+    
+    for enrollment in enrollments:
+        student = enrollment.student
+        
+        # Calculate attendance
+        total_classes = Attendance.query.filter_by(course_id=course.id, student_id=student.id).count()
+        present_classes = Attendance.query.filter_by(course_id=course.id, student_id=student.id, status='present').count()
+        attendance_perc = (present_classes / total_classes * 100) if total_classes > 0 else 0
+        
+        # Get grade
+        grade_record = Grade.query.filter_by(course_id=course.id, student_id=student.id).first()
+        current_grade = grade_record.grade if grade_record else 0.0
+        
+        students_data.append({
+            'id': student.id,
+            'name': student.name,
+            'email': student.email,
+            'attendance': round(attendance_perc, 1),
+            'grade': current_grade
+        })
+        
+    return render_template('dashboard/manage_course.html', course=course, students=students_data)
+
+
+@dashboard_bp.route('/courses/<int:course_id>/update_grade', methods=['POST'])
+@school_scoped
+@role_minimum('teacher')
+def update_course_grade(course_id):
+    user = g.current_user
+    course = Course.query.get_or_404(course_id)
+    
+    if user.role_level < 5 and course.teacher_id != user.id:
+        return jsonify({'success': False, 'message': 'Permission denied'}), 403
+
+    student_id = request.form.get('student_id', type=int)
+    grade_val = request.form.get('grade', type=float)
+    
+    if not student_id or grade_val is None:
+        return jsonify({'success': False, 'message': 'Invalid data'}), 400
+        
+    grade_record = Grade.query.filter_by(course_id=course.id, student_id=student_id).first()
+    if grade_record:
+        grade_record.grade = grade_val
+        grade_record.calculated_at = datetime.utcnow()
+    else:
+        new_grade = Grade(student_id=student_id, course_id=course.id, grade=grade_val)
+        db.session.add(new_grade)
+        
+    db.session.commit()
+    flash(f"Grade updated successfully.", "success")
+    return redirect(url_for('dashboard.manage_course', course_id=course.id))
+
+
+@dashboard_bp.route('/courses/<int:course_id>/update_attendance', methods=['POST'])
+@school_scoped
+@role_minimum('teacher')
+def update_course_attendance(course_id):
+    user = g.current_user
+    course = Course.query.get_or_404(course_id)
+    
+    if user.role_level < 5 and course.teacher_id != user.id:
+        return jsonify({'success': False, 'message': 'Permission denied'}), 403
+
+    student_id = request.form.get('student_id', type=int)
+    status = request.form.get('status')
+    date_str = request.form.get('date')
+    
+    if not student_id or not status or not date_str:
+        return jsonify({'success': False, 'message': 'Invalid data'}), 400
+        
+    try:
+        att_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({'success': False, 'message': 'Invalid date format'}), 400
+        
+    att_record = Attendance.query.filter_by(course_id=course.id, student_id=student_id, date=att_date).first()
+    if att_record:
+        att_record.status = status
+    else:
+        new_att = Attendance(course_id=course.id, student_id=student_id, date=att_date, status=status)
+        db.session.add(new_att)
+        
+    db.session.commit()
+    flash(f"Attendance recorded successfully.", "success")
+    return redirect(url_for('dashboard.manage_course', course_id=course.id))
+
+
 @dashboard_bp.route('/tasks', methods=['GET', 'POST'])
 @school_scoped
 def tasks():

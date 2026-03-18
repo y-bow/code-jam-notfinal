@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Manage {{ course.code }} - Hive Dashboard{% endblock %}
+{% block page_title %}Manage Course: {{ course.name }}{% endblock %}
+
+{% block content %}
+<div class="row" style="margin-bottom: 1.5rem;">
+    <div class="col-12">
+        <div class="glass-panel" style="padding: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3>{{ course.name }} ({{ course.code }})</h3>
+                <p class="text-muted" style="margin-bottom: 0;">Section: {{ course.section.name }} | Credits: {{ course.credits }}</p>
+            </div>
+            <a href="{{ url_for('dashboard.courses') }}" class="btn-secondary" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: var(--radius-md); text-decoration: none;">
+                <span class="material-symbols-rounded" style="font-size: 18px;">arrow_back</span> Back to Courses
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="glass-panel" style="padding: 1.5rem;">
+            <h4 style="margin-bottom: 1.5rem;">Enrolled Students</h4>
+            
+            <div class="table-responsive">
+                <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--border-color); text-align: left;">
+                            <th style="padding: 1rem;">Student Name</th>
+                            <th style="padding: 1rem;">Email</th>
+                            <th style="padding: 1rem;">Attendance %</th>
+                            <th style="padding: 1rem;">Current Grade</th>
+                            <th style="padding: 1rem; text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 1rem; font-weight: 500;">{{ student.name }}</td>
+                            <td style="padding: 1rem; color: var(--text-muted);">{{ student.email }}</td>
+                            <td style="padding: 1rem;">
+                                <span class="badge {{ 'badge-success' if student.attendance >= 75 else 'badge-warning' if student.attendance >= 60 else 'badge-danger' }}" 
+                                      style="background: {{ 'rgba(16, 185, 129, 0.1)' if student.attendance >= 75 else 'rgba(245, 158, 11, 0.1)' if student.attendance >= 60 else 'rgba(239, 68, 68, 0.1)' }};
+                                             color: {{ '#10b981' if student.attendance >= 75 else '#f59e0b' if student.attendance >= 60 else '#ef4444' }};">
+                                    {{ student.attendance }}%
+                                </span>
+                            </td>
+                            <td style="padding: 1rem; font-weight: bold;">{{ student.grade }}</td>
+                            <td style="padding: 1rem; text-align: right;">
+                                <button onclick="openAttendanceModal({{ student.id }}, '{{ student.name }}')" class="btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: var(--radius-sm); margin-right: 0.5rem; background: rgba(var(--primary-rgb), 0.1); border: 1px solid rgba(var(--primary-rgb), 0.2); color: var(--primary-color); cursor: pointer;">
+                                    <span class="material-symbols-rounded" style="font-size: 16px; vertical-align: text-bottom;">checklist</span> Attendance
+                                </button>
+                                <button onclick="openGradeModal({{ student.id }}, '{{ student.name }}', {{ student.grade }})" class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: var(--radius-sm); cursor: pointer;">
+                                    <span class="material-symbols-rounded" style="font-size: 16px; vertical-align: text-bottom;">edit</span> Grade
+                                </button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-muted);">No students are currently enrolled in this course.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grade Modal -->
+<div id="gradeModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content glass-panel" style="max-width: 400px;">
+        <span class="close-modal" onclick="closeModal('gradeModal')" style="cursor: pointer; float: right; font-size: 1.5rem;">&times;</span>
+        <h3 style="margin-top: 0; margin-bottom: 1.5rem;">Update Grade</h3>
+        
+        <form action="{{ url_for('dashboard.update_course_grade', course_id=course.id) }}" method="POST">
+            <input type="hidden" name="student_id" id="gradeStudentId">
+            
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">Student</label>
+                <div id="gradeStudentName" style="font-weight: 500; font-size: 1.1rem; margin-bottom: 1rem;"></div>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label for="gradeValue" style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">Grade Value</label>
+                <input type="number" step="0.01" name="grade" id="gradeValue" class="form-control" required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-main);">
+            </div>
+            
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" class="btn-secondary" onclick="closeModal('gradeModal')" style="padding: 0.75rem 1.5rem; border-radius: var(--radius-md); cursor: pointer; border: 1px solid var(--border-color); background: transparent; color: var(--text-main);">Cancel</button>
+                <button type="submit" class="btn-primary" style="padding: 0.75rem 1.5rem; border-radius: var(--radius-md); border: none; cursor: pointer; background: var(--primary-color); color: white;">Save Grade</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Attendance Modal -->
+<div id="attendanceModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content glass-panel" style="max-width: 400px;">
+        <span class="close-modal" onclick="closeModal('attendanceModal')" style="cursor: pointer; float: right; font-size: 1.5rem;">&times;</span>
+        <h3 style="margin-top: 0; margin-bottom: 1.5rem;">Record Attendance</h3>
+        
+        <form action="{{ url_for('dashboard.update_course_attendance', course_id=course.id) }}" method="POST">
+            <input type="hidden" name="student_id" id="attStudentId">
+            
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">Student</label>
+                <div id="attStudentName" style="font-weight: 500; font-size: 1.1rem; margin-bottom: 1rem;"></div>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="attDate" style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">Date</label>
+                <input type="date" name="date" id="attDate" class="form-control" required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-main);">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label for="attStatus" style="display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">Status</label>
+                <select name="status" id="attStatus" class="form-control" required style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-main);">
+                    <option value="present">Present</option>
+                    <option value="absent">Absent</option>
+                    <option value="late">Late</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" class="btn-secondary" onclick="closeModal('attendanceModal')" style="padding: 0.75rem 1.5rem; border-radius: var(--radius-md); cursor: pointer; border: 1px solid var(--border-color); background: transparent; color: var(--text-main);">Cancel</button>
+                <button type="submit" class="btn-primary" style="padding: 0.75rem 1.5rem; border-radius: var(--radius-md); border: none; cursor: pointer; background: var(--primary-color); color: white;">Save Attendance</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Set today's date automatically in attendance modal
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('attDate').value = today;
+    });
+
+    function openGradeModal(studentId, studentName, currentGrade) {
+        document.getElementById('gradeStudentId').value = studentId;
+        document.getElementById('gradeStudentName').innerText = studentName;
+        document.getElementById('gradeValue').value = currentGrade;
+        document.getElementById('gradeModal').style.display = 'flex';
+    }
+
+    function openAttendanceModal(studentId, studentName) {
+        document.getElementById('attStudentId').value = studentId;
+        document.getElementById('attStudentName').innerText = studentName;
+        document.getElementById('attendanceModal').style.display = 'flex';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+</script>
+{% endblock %}

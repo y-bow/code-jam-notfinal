@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Courses - Hive Dashboard{% endblock %}
+{% block page_title %}Courses List{% endblock %}
+
+{% block content %}
+<div class="row" style="margin-bottom: 1.5rem;">
+    <div class="col-12">
+        <div class="glass-panel" style="padding: 1.5rem;">
+            <h3>Your Courses</h3>
+            <p class="text-muted">Manage your assigned classes, students, and grades.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for course in courses %}
+    <div class="col-md-4" style="margin-bottom: 1.5rem;">
+        <div class="glass-panel card-hover" style="height: 100%; display: flex; flex-direction: column; padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                <div>
+                    <h4 style="margin: 0; color: var(--primary-color);">{{ course.code }}</h4>
+                    <h5 style="margin: 0.25rem 0 0 0;">{{ course.name }}</h5>
+                </div>
+                <span class="badge" style="background: rgba(var(--primary-rgb), 0.1); color: var(--primary-color);">{{ course.credits }} Credits</span>
+            </div>
+            
+            <div style="flex-grow: 1;">
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                    <span class="material-symbols-rounded" style="font-size: 16px; vertical-align: text-bottom;">group</span>
+                    Section: <strong>{{ course.section.name }}</strong>
+                </p>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">
+                    <span class="material-symbols-rounded" style="font-size: 16px; vertical-align: text-bottom;">person</span>
+                    Instructor: <strong>{{ course.teacher.name }}</strong>
+                </p>
+            </div>
+            
+            <div style="margin-top: 1.5rem;">
+                <a href="{{ url_for('dashboard.manage_course', course_id=course.id) }}" class="btn-primary" style="width: 100%; text-align: center; display: inline-block; padding: 0.75rem; border-radius: var(--radius-md); text-decoration: none;">Manage Course</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="glass-panel text-center" style="padding: 3rem;">
+            <span class="material-symbols-rounded" style="font-size: 48px; color: var(--text-muted); margin-bottom: 1rem;">menu_book</span>
+            <h4>No Courses Found</h4>
+            <p class="text-muted">You have not been assigned to any courses yet.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

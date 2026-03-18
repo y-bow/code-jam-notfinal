@@ -125,6 +125,13 @@
                 </a>
                 {% endif %}
 
+                {% if g.current_user.role_level >= 2 %}
+                 <a href="{{ url_for('dashboard.courses') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.courses' or request.endpoint == 'dashboard.manage_course' }}">
+                    <span class="nav-icon material-symbols-rounded">menu_book</span>
+                    <span class="nav-label">Courses</span>
+                </a>
+                {% endif %}
+
                 {% if g.current_user.role_level >= 4 %}
                 <a href="{{ url_for('dashboard.manage_timetable') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.manage_timetable' }}">
                     <span class="nav-icon material-symbols-rounded">calendar_month</span>
@@ -133,6 +140,10 @@
                 {% endif %}
 
                 {% if g.current_user.role_level >= 5 %}
+                <a href="{{ url_for('dashboard.courses') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.courses' or request.endpoint == 'dashboard.manage_course' }}">
+                    <span class="nav-icon material-symbols-rounded">menu_book</span>
+                    <span class="nav-label">Courses</span>
+                </a>
                 <a href="{{ url_for('dashboard.dean_ratings') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.dean_ratings' }}">
                     <span class="nav-icon material-symbols-rounded">star_half</span>
                     <span class="nav-label">Teacher Ratings</span>
