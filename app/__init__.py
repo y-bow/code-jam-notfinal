@@ -12,6 +12,7 @@ def create_app():
     
     # Configuration
     # Safe absolute pathing for SQLite on Windows (uses 4 slashes)
+    os.makedirs(app.instance_path, exist_ok=True)
     db_path = os.path.join(app.instance_path, 'app.db').replace('\\', '/')
     if not db_path.startswith('/'):
         db_path = '/' + db_path

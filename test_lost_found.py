@@ -4,10 +4,12 @@ from app.models import db, User, LostFoundItem, Message
 
 class LostFoundTestCase(unittest.TestCase):
     def setUp(self):
+        import os
+        os.environ['DATABASE_URL'] = 'sqlite://'
         self.app = create_app()
         self.app.config['TESTING'] = True
         self.app.config['WTF_CSRF_ENABLED'] = False
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
         self.client = self.app.test_client()
         
         with self.app.app_context():
