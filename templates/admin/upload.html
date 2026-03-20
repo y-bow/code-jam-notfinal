@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Center | Hive LMS{% endblock %}
+
+{% block page_title %}University Upload Center{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+    <div class="welcome-card glass-panel gradient-border" style="margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="icon-circle" style="background: var(--primary-color); color: white; padding: 12px; border-radius: 50%;">
+                <span class="material-symbols-rounded">cloud_upload</span>
+            </div>
+            <div>
+                <h3 style="margin: 0;">Bulk Data Import</h3>
+                <p style="margin: 0; color: var(--text-muted);">Populate your university data using standardized Excel templates.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="upload-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+        
+        <!-- STUDENT ROSTER -->
+        <div class="upload-card glass-panel" id="card-student">
+            <div class="card-header" style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <h4 style="margin: 0; color: var(--primary-color);">Student Roster</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Bulk create or update student profiles.</p>
+                </div>
+                <span class="material-symbols-rounded" style="color: var(--primary-color);">group_add</span>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <div class="format-info" style="margin-bottom: 1rem; font-size: 0.8rem;">
+                    <button class="btn-text" onclick="showFormat('student')" style="padding: 0; color: var(--primary-color); text-decoration: underline; background: none; border: none; cursor: pointer;">View Expected Format</button>
+                </div>
+                <div class="actions" style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <a href="{{ url_for('upload.download_template', type='student') }}" class="btn-secondary" style="font-size: 0.8rem; flex: 1; text-align: center;">Template</a>
+                    <button class="btn-primary" onclick="triggerUpload('student')" style="font-size: 0.8rem; flex: 1;">Upload XLSX</button>
+                </div>
+                <div id="status-student" class="upload-status" style="display: none;">
+                    <div class="progress-bar" style="height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden; margin-bottom: 0.5rem;">
+                        <div class="progress-fill" style="width: 0%; height: 100%; background: var(--primary-color); transition: width 0.3s;"></div>
+                    </div>
+                    <span class="status-text" style="font-size: 0.75rem; color: var(--text-muted);">Processing...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- COURSE LIST -->
+        <div class="upload-card glass-panel" id="card-course">
+            <div class="card-header" style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <h4 style="margin: 0; color: var(--success-color);">Course List</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Import subjects and assign faculty.</p>
+                </div>
+                <span class="material-symbols-rounded" style="color: var(--success-color);">library_books</span>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <div class="format-info" style="margin-bottom: 1rem; font-size: 0.8rem;">
+                    <button class="btn-text" onclick="showFormat('course')" style="padding: 0; color: var(--success-color); text-decoration: underline; background: none; border: none; cursor: pointer;">View Expected Format</button>
+                </div>
+                <div class="actions" style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <a href="{{ url_for('upload.download_template', type='course') }}" class="btn-secondary" style="font-size: 0.8rem; flex: 1; text-align: center;">Template</a>
+                    <button class="btn-primary" onclick="triggerUpload('course')" style="font-size: 0.8rem; flex: 1; background: var(--success-color);">Upload XLSX</button>
+                </div>
+                <div id="status-course" class="upload-status" style="display: none;">
+                    <div class="progress-bar" style="height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden; margin-bottom: 0.5rem;">
+                        <div class="progress-fill" style="width: 0%; height: 100%; background: var(--success-color); transition: width 0.3s;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TIMETABLE -->
+        <div class="upload-card glass-panel" id="card-timetable">
+            <div class="card-header" style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <h4 style="margin: 0; color: #8b5cf6;">Weekly Timetable</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Bulk schedule class slots and rooms.</p>
+                </div>
+                <span class="material-symbols-rounded" style="color: #8b5cf6;">calendar_month</span>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <div class="format-info" style="margin-bottom: 1rem; font-size: 0.8rem;">
+                    <button class="btn-text" onclick="showFormat('timetable')" style="padding: 0; color: #8b5cf6; text-decoration: underline; background: none; border: none; cursor: pointer;">View Expected Format</button>
+                </div>
+                <div class="actions" style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <a href="{{ url_for('upload.download_template', type='timetable') }}" class="btn-secondary" style="font-size: 0.8rem; flex: 1; text-align: center;">Template</a>
+                    <button class="btn-primary" onclick="triggerUpload('timetable')" style="font-size: 0.8rem; flex: 1; background: #8b5cf6;">Upload XLSX</button>
+                </div>
+                <div id="status-timetable" class="upload-status" style="display: none;">
+                    <div class="progress-bar" style="height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden; margin-bottom: 0.5rem;">
+                        <div class="progress-fill" style="width: 0%; height: 100%; background: #8b5cf6; transition: width 0.3s;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ATTENDANCE -->
+        <div class="upload-card glass-panel" id="card-attendance">
+            <div class="card-header" style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <h4 style="margin: 0; color: #f59e0b;">Attendance (Bulk)</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Import historical attendance records.</p>
+                </div>
+                <span class="material-symbols-rounded" style="color: #f59e0b;">event_available</span>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <div class="format-info" style="margin-bottom: 1rem; font-size: 0.8rem;">
+                    <button class="btn-text" onclick="showFormat('attendance')" style="padding: 0; color: #f59e0b; text-decoration: underline; background: none; border: none; cursor: pointer;">View Expected Format</button>
+                </div>
+                <div class="actions" style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <a href="{{ url_for('upload.download_template', type='attendance') }}" class="btn-secondary" style="font-size: 0.8rem; flex: 1; text-align: center;">Template</a>
+                    <button class="btn-primary" onclick="triggerUpload('attendance')" style="font-size: 0.8rem; flex: 1; background: #f59e0b;">Upload XLSX</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRADES -->
+        <div class="upload-card glass-panel" id="card-grade">
+            <div class="card-header" style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <h4 style="margin: 0; color: #ef4444;">Grades Upload</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Bulk import student marks and components.</p>
+                </div>
+                <span class="material-symbols-rounded" style="color: #ef4444;">grade</span>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <div class="format-info" style="margin-bottom: 1rem; font-size: 0.8rem;">
+                    <button class="btn-text" onclick="showFormat('grade')" style="padding: 0; color: #ef4444; text-decoration: underline; background: none; border: none; cursor: pointer;">View Expected Format</button>
+                </div>
+                <div class="actions" style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <a href="{{ url_for('upload.download_template', type='grade') }}" class="btn-secondary" style="font-size: 0.8rem; flex: 1; text-align: center;">Template</a>
+                    <button class="btn-primary" onclick="triggerUpload('grade')" style="font-size: 0.8rem; flex: 1; background: #ef4444;">Upload XLSX</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- UPLOAD HISTORY -->
+    <div class="history-section glass-panel">
+        <div class="section-header" style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0;">Upload History</h3>
+            <span class="badge" style="background: var(--primary-color);">{{ history|length }} Total</span>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>File Type</th>
+                        <th>Filename</th>
+                        <th>Rows</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in history %}
+                    <tr>
+                        <td style="font-size: 0.85rem;">{{ item.created_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+                        <td><span class="badge" style="text-transform: capitalize;">{{ item.file_type }}</span></td>
+                        <td style="font-size: 0.85rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ item.filename }}">{{ item.filename }}</td>
+                        <td>
+                            <div style="font-size: 0.75rem;">
+                                <span style="color: var(--success-color);">{{ item.success_count }} ✓</span>
+                                <span style="color: var(--error-color); margin-left: 0.5rem;">{{ item.error_count }} ✗</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if item.status == 'completed' %}
+                                <span class="status-pill status-active">Success</span>
+                            {% elif item.status == 'failed' %}
+                                <span class="status-pill status-cancelled">Failed</span>
+                            {% else %}
+                                <span class="status-pill" style="background: var(--border-color);">{{ item.status|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.error_count > 0 %}
+                            <a href="{{ url_for('upload.download_logs', upload_id=item.id) }}" class="icon-btn" title="Download Error Log" style="color: var(--error-color);">
+                                <span class="material-symbols-rounded">download_for_offline</span>
+                            </a>
+                            {% else %}
+                            <span class="material-symbols-rounded" style="color: var(--text-muted); font-size: 1.2rem;">check_circle</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                            <span class="material-symbols-rounded" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 1rem;">history</span>
+                            No upload history found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden File Input -->
+<form id="upload-form" action="{{ url_for('upload.process_upload') }}" method="POST" enctype="multipart/form-data" style="display: none;">
+    <input type="file" id="file-input" name="file" onchange="submitUpload()">
+    <input type="hidden" id="type-input" name="type">
+</form>
+
+<!-- Format Modal -->
+<div id="formatModal" class="modal-overlay">
+    <div class="modal-content glass-panel" style="max-width: 500px;">
+        <span class="close-modal" id="closeFormatBtn" onclick="closeFormat()">&times;</span>
+        <h3 id="format-title">Expected Format</h3>
+        <p id="format-desc" style="color: var(--text-muted); font-size: 0.9rem;"></p>
+        <div class="format-list" id="format-columns" style="background: rgba(var(--primary-rgb), 0.05); padding: 1rem; border-radius: var(--radius-md); margin-top: 1rem;">
+            <!-- Column list here -->
+        </div>
+    </div>
+</div>
+
+<style>
+    .upload-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .upload-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+    .status-pill {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+</style>
+
+<script>
+    const formats = {
+        'student': {
+            title: 'Student Roster Format',
+            desc: 'Ensure your XLSX has the following headers in exact order:',
+            cols: ['Name', 'Email', 'Roll Number', 'Section', 'Year', 'Phone (optional)']
+        },
+        'course': {
+            title: 'Course List Format',
+            desc: 'Ensure your XLSX has the following headers in exact order:',
+            cols: ['Course Name', 'Course Code', 'Credits', 'Section', 'Professor Email (optional)']
+        },
+        'timetable': {
+            title: 'Timetable Format',
+            desc: 'Ensure your XLSX has the following headers in exact order:',
+            cols: ['Course Code', 'Section', 'Day', 'Start Time', 'End Time', 'Room']
+        },
+        'attendance': {
+            title: 'Attendance Format',
+            desc: 'Ensure your XLSX has the following headers in exact order:',
+            cols: ['Roll Number', 'Date (DD/MM/YYYY)', 'Course Code', 'Status (P/A/L)']
+        },
+        'grade': {
+            title: 'Grades Format',
+            desc: 'Ensure your XLSX has the following headers in exact order:',
+            cols: ['Roll Number', 'Course Code', 'Component', 'Marks', 'Max Marks']
+        }
+    };
+
+    function showFormat(type) {
+        const format = formats[type];
+        document.getElementById('format-title').innerText = format.title;
+        document.getElementById('format-desc').innerText = format.desc;
+        const colList = document.getElementById('format-columns');
+        colList.innerHTML = '';
+        format.cols.forEach(col => {
+            const div = document.createElement('div');
+            div.style.display = 'flex';
+            div.style.alignItems = 'center';
+            div.style.gap = '0.5rem';
+            div.style.marginBottom = '0.25rem';
+            div.innerHTML = `<span class="material-symbols-rounded" style="font-size: 16px; color: var(--primary-color);">check_circle</span> <span>${col}</span>`;
+            colList.appendChild(div);
+        });
+        document.getElementById('formatModal').style.display = 'flex';
+    }
+
+    function closeFormat() {
+        document.getElementById('formatModal').style.display = 'none';
+    }
+
+    function triggerUpload(type) {
+        document.getElementById('type-input').value = type;
+        document.getElementById('file-input').click();
+    }
+
+    function submitUpload() {
+        const type = document.getElementById('type-input').value;
+        const statusDiv = document.getElementById(`status-${type}`);
+        if(statusDiv) {
+            statusDiv.style.display = 'block';
+            const bar = statusDiv.querySelector('.progress-fill');
+            bar.style.width = '0%';
+            setTimeout(() => { bar.style.width = '70%'; }, 100);
+        }
+        document.getElementById('upload-form').submit();
+    }
+</script>
+{% endblock %}

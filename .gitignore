@@ -9,6 +9,7 @@ __pycache__/
 
 # Database
 instance/
+static/uploads/
 *.db
 *.sqlite3
 

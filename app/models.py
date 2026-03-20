@@ -33,7 +33,6 @@ class School(db.Model):
     code = db.Column(db.String(20), unique=True, nullable=False)
     domain = db.Column(db.String(100))  # e.g. 'scds.saiuniversity.edu.in'
     is_active = db.Column(db.Boolean, default=True)
-    onboarding_completed = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
@@ -113,6 +112,7 @@ class Student(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), nullable=False)
     enrollment_year = db.Column(db.Integer, nullable=False)
+    roll_number = db.Column(db.String(50), nullable=False)
     major = db.Column(db.String(100))
     sgpa = db.Column(db.Float, default=0.0)
     cgpa = db.Column(db.Float, default=0.0)
@@ -652,46 +652,34 @@ class ClassRepNomination(db.Model):
 
 
 # =============================================================================
-# ONBOARDING AND REGISTRATION MODELS
+# DATA UPLOAD & LOGGING
 # =============================================================================
 
-class UniversityRegistration(db.Model):
-    """Pending university applications."""
-    __tablename__ = 'university_registrations'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200), nullable=False)
-    website_url = db.Column(db.String(200), nullable=False)
-    country = db.Column(db.String(100), nullable=False, default='India')
-    recognition_number = db.Column(db.String(100)) # Optional
-    rep_name = db.Column(db.String(100), nullable=False)
-    rep_email = db.Column(db.String(120), nullable=False)
-    rep_designation = db.Column(db.String(50), nullable=False) 
-    # Chancellor / Registrar / IT Admin / Principal / Director
-    domain = db.Column(db.String(100), nullable=False)
-    status = db.Column(db.String(20), default='pending') # pending, verified, approved, rejected
-    verification_token = db.Column(db.String(100), unique=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def __repr__(self):
-        return f'<UniversityRegistration {self.name} ({self.status})>'
-
-
-class InviteToken(db.Model):
-    """Tokens for inviting Professors and Deans."""
-    __tablename__ = 'invite_tokens'
+class UploadedFile(db.Model):
+    """Tracks files uploaded for bulk processing."""
+    __tablename__ = 'uploaded_files'
 
     id = db.Column(db.Integer, primary_key=True)
     school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
-    email = db.Column(db.String(120), nullable=False)
-    role = db.Column(db.String(20), nullable=False) # dean, professor, assistant_professor
-    token = db.Column(db.String(100), unique=True, nullable=False)
-    expires_at = db.Column(db.DateTime, nullable=False)
-    used_at = db.Column(db.DateTime)
+    uploader_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    filepath = db.Column(db.String(500), nullable=False)
+    file_type = db.Column(db.String(50), nullable=False) # student, course, timetable, attendance, grade
+    status = db.Column(db.String(20), default='pending') # pending, processing, completed, failed
+    row_count = db.Column(db.Integer, default=0)
+    success_count = db.Column(db.Integer, default=0)
+    error_count = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    school = db.relationship('School', backref=db.backref('invite_tokens', lazy='dynamic'))
+    logs = db.relationship('UploadLog', backref='upload', lazy='dynamic', cascade='all, delete-orphan')
 
-    def is_valid(self):
-        return self.used_at is None and self.expires_at > datetime.utcnow()
+class UploadLog(db.Model):
+    """Row-level error logging for bulk uploads."""
+    __tablename__ = 'upload_logs'
 
+    id = db.Column(db.Integer, primary_key=True)
+    upload_id = db.Column(db.Integer, db.ForeignKey('uploaded_files.id'), nullable=False)
+    row_number = db.Column(db.Integer)
+    error_message = db.Column(db.Text, nullable=False)
+    row_data = db.Column(db.Text) # JSON representation of the row that failed
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

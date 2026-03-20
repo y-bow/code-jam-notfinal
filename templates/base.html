@@ -205,6 +205,10 @@
                     <span class="nav-icon material-symbols-rounded">person_add</span>
                     <span class="nav-label">Accounts</span>
                 </a>
+                <a href="{{ url_for('upload.upload_center') }}" class="nav-item {{ 'active' if request.endpoint == 'upload.upload_center' }}">
+                    <span class="nav-icon material-symbols-rounded">cloud_upload</span>
+                    <span class="nav-label">Data Upload</span>
+                </a>
                 <a href="{{ url_for('dashboard.admin_settings') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.admin_settings' }}">
                     <span class="nav-icon material-symbols-rounded">settings</span>
                     <span class="nav-label">Settings</span>
