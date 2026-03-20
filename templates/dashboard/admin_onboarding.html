@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Onboarding - Hive LMS{% endblock %}
+
+{% block content %}
+<div class="onboarding-container" style="max-width: 900px; margin: 40px auto; padding: 30px;">
+    <div style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h1 style="color: #fff; font-size: 2.5rem; margin-bottom: 10px;">Welcome, Admin!</h1>
+            <p style="color: #aaa; font-size: 1.1rem;">Let's get <strong>{{ school.name }}</strong> set up on Hive.</p>
+        </div>
+
+        {# Progress Bar #}
+        <div style="margin-bottom: 40px;">
+            <div style="display: flex; justify-content: space-between; color: #fff; margin-bottom: 10px; font-weight: 500;">
+                <span>Setup Progress</span>
+                <span>{{ progress }}%</span>
+            </div>
+            <div style="width: 100%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden;">
+                <div style="width: {{ progress }}%; height: 100%; background: linear-gradient(90deg, #00d2ff, #3a7bd5); transition: width 0.5s ease;"></div>
+            </div>
+        </div>
+
+        {# Checklist Items #}
+        <div class="checklist" style="display: grid; gap: 15px;">
+            {% set items = [
+                ('Upload student roster (xlsx)', 'student_roster', progress_data.students),
+                ('Upload course list (xlsx)', 'course_list', progress_data.courses),
+                ('Upload timetable (xlsx)', 'timetable', progress_data.timetable),
+                ('Invite your Dean', 'invite_dean', progress_data.dean),
+                ('Invite your Professors', 'invite_profs', progress_data.profs),
+                ('Set semester dates', 'semester_dates', progress_data.dates),
+                ('Configure grading scale', 'grading_scale', progress_data.grading)
+            ] %}
+
+            {% for title, key, completed in items %}
+            <div style="display: flex; align-items: center; padding: 20px; background: rgba(255,255,255,0.03); border: 1px solid {{ 'rgba(0, 255, 136, 0.3)' if completed else 'rgba(255,255,255,0.1)' }}; border-radius: 12px; transition: transform 0.2s;">
+                <div style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid {{ '#00ff88' if completed else '#555' }}; display: flex; align-items: center; justify-content: center; margin-right: 20px; background: {{ '#00ff88' if completed else 'transparent' }};">
+                    {% if completed %}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    {% endif %}
+                </div>
+                <span style="color: {{ '#fff' if not completed else '#aaa' }}; font-size: 1.1rem; text-decoration: {{ 'line-through' if completed else 'none' }}; flex-grow: 1;">{{ title }}</span>
+                {% if not completed %}
+                <a href="#" style="color: #00d2ff; text-decoration: none; font-weight: 500;">Complete Now →</a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if progress == 100 %}
+        <div style="margin-top: 40px; text-align: center;">
+            <form action="{{ url_for('dashboard.complete_onboarding') }}" method="POST">
+                <button type="submit" style="padding: 15px 40px; background: #00ff88; color: #000; border: none; border-radius: 10px; font-weight: 700; font-size: 1.1rem; cursor: pointer; box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);">
+                    Go to Dashboard
+                </button>
+            </form>
+        </div>
+        {% else %}
+        <div style="margin-top: 30px; text-align: center;">
+            <p style="color: #777; font-size: 0.9rem;">Complete all steps to unlock your full dashboard.</p>
+            <a href="{{ url_for('dashboard.student_dashboard') }}" style="color: #555; font-size: 0.8rem; text-decoration: none; margin-top: 10px; display: inline-block;">(Skip for Demo)</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

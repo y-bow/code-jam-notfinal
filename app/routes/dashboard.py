@@ -144,6 +144,36 @@ def teacher_dashboard():
 @school_scoped
 @role_minimum('admin')
 def admin_dashboard():
+    # Check if this is a School Admin (multi-tenancy) and needs onboarding
+    if g.school_id:
+        school = School.query.get(g.school_id)
+        if school and not school.onboarding_completed:
+            # Calculate Progress
+            students_count = User.query.filter_by(school_id=g.school_id, role='student').count()
+            courses_count = Course.query.join(Section).filter(Section.school_id == g.school_id).count()
+            timetable_count = TimetableEntry.query.join(Section).filter(Section.school_id == g.school_id).count()
+            dean_count = User.query.filter_by(school_id=g.school_id, role='dean').count()
+            profs_count = User.query.filter_by(school_id=g.school_id, role='professor').count()
+            
+            progress_data = {
+                'students': students_count > 0,
+                'courses': courses_count > 0,
+                'timetable': timetable_count > 0,
+                'dean': dean_count > 0,
+                'profs': profs_count > 0,
+                'dates': False, # Placeholder
+                'grading': False # Placeholder
+            }
+            
+            completed_steps = sum(1 for v in progress_data.values() if v)
+            total_steps = len(progress_data)
+            progress = int((completed_steps / total_steps) * 100)
+            
+            return render_template('dashboard/admin_onboarding.html', 
+                                   school=school, 
+                                   progress=progress, 
+                                   progress_data=progress_data)
+
     """Global Admin Dashboard: system-wide overview."""
     total_schools = School.query.count()
     total_students = User.query.filter_by(role='student').count()
@@ -185,7 +215,15 @@ def admin_dashboard():
                            announcements=Announcement.query.filter_by(school_id=None).order_by(Announcement.posted_at.desc()).limit(5).all())
 
 
-@dashboard_bp.route('/admin/timetable', methods=['GET'])
+@dashboard_bp.route('/admin/complete-onboarding', methods=['POST'])
+@school_scoped
+@role_minimum('admin')
+def complete_onboarding():
+    school = School.query.get_or_404(g.school_id)
+    school.onboarding_completed = True
+    db.session.commit()
+    flash('Onboarding completed! Welcome to your dashboard.', 'success')
+    return redirect(url_for('dashboard.admin_dashboard'))
 @school_scoped
 @role_minimum('admin')
 def admin_timetable():

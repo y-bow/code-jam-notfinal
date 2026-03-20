@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Confirmation - Hive LMS{% endblock %}
+
+{% block content %}
+<div class="auth-container" style="max-width: 600px; margin: 100px auto; padding: 40px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
+    <div style="margin-bottom: 30px;">
+        <div style="width: 80px; height: 80px; background: rgba(0, 255, 136, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </div>
+        <h1 style="font-size: 2rem; color: #fff; margin-bottom: 15px;">Success!</h1>
+        <p style="color: #ccc; font-size: 1.1rem; line-height: 1.6;">{{ message }}</p>
+    </div>
+    
+    <div style="margin-top: 30px;">
+        <a href="{{ url_for('auth.login') }}" style="display: inline-block; padding: 12px 30px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; color: #fff; text-decoration: none; font-weight: 500; transition: background 0.3s;">
+            Return to Login
+        </a>
+    </div>
+</div>
+{% endblock %}

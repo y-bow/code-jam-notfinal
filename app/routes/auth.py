@@ -1,6 +1,9 @@
 from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, request, session, flash
-from ..models import User, School, bcrypt
+from ..models import User, School, UniversityRegistration, InviteToken, Section, Student, bcrypt, db
+import secrets
+from datetime import datetime, timedelta
+
 import random
 import io
 import base64
@@ -216,4 +219,256 @@ def change_password():
         else:
             return redirect(url_for('dashboard.admin_dashboard'))
 
+
     return render_template('change_password.html')
+
+
+# =============================================================================
+# UNIVERSITY REGISTRATION FLOW
+# =============================================================================
+
+@auth_bp.route('/register/university', methods=['GET', 'POST'])
+def register_university():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        website_url = request.form.get('website_url')
+        country = request.form.get('country', 'India')
+        recognition_number = request.form.get('recognition_number')
+        rep_name = request.form.get('rep_name')
+        rep_email = request.form.get('rep_email', '').strip().lower()
+        rep_designation = request.form.get('rep_designation')
+        domain = request.form.get('domain', '').strip().lower()
+
+        # Validation
+        if not all([name, website_url, rep_name, rep_email, rep_designation, domain]):
+            flash('All required fields must be filled.', 'danger')
+            return render_template('auth/register_university.html')
+
+        # Validate rep email matches declared domain
+        if not rep_email.endswith('@' + domain) and not rep_email.endswith('.' + domain):
+            flash(f'Representative email must match the university domain (@{domain}).', 'danger')
+            return render_template('auth/register_university.html')
+
+        # Validate domain is not already registered
+        existing_school = School.query.filter_by(domain=domain).first()
+        if existing_school:
+            flash('This university domain is already registered on Hive.', 'danger')
+            return render_template('auth/register_university.html')
+
+        existing_reg = UniversityRegistration.query.filter_by(domain=domain).first()
+        if existing_reg:
+            flash('An application for this domain is already pending.', 'warning')
+            return render_template('auth/register_university.html')
+
+        # Create Registration record
+        token = secrets.token_urlsafe(32)
+        new_reg = UniversityRegistration(
+            name=name,
+            website_url=website_url,
+            country=country,
+            recognition_number=recognition_number,
+            rep_name=rep_name,
+            rep_email=rep_email,
+            rep_designation=rep_designation,
+            domain=domain,
+            verification_token=token,
+            status='pending'
+        )
+        db.session.add(new_reg)
+        db.session.commit()
+
+        # Mock Email Verification
+        print(f"\n--- [DEMO] Verification Email ---")
+        print(f"To: {rep_email}")
+        print(f"Subject: Verify your University Application - Hive LMS")
+        print(f"Body: Click here to verify: {url_for('auth.verify_university', token=token, _external=True)}")
+        print(f"----------------------------------\n")
+
+        # Notify Platform Owner (Mock)
+        print(f"\n--- [DEMO] Platform Owner Notification ---")
+        print(f"To: owner@hive.app")
+        print(f"Subject: New University Application: {name}")
+        print(f"Body: A new application from {rep_name} ({rep_email}) is pending review.")
+        print(f"------------------------------------------\n")
+
+        return render_template('auth/register_confirmation.html', 
+                               message="Application submitted. Please verify your email. You will receive approval within 24-48 hours.")
+
+    return render_template('auth/register_university.html')
+
+
+@auth_bp.route('/register/verify/<token>')
+def verify_university(token):
+    reg = UniversityRegistration.query.filter_by(verification_token=token).first()
+    if not reg:
+        flash('Invalid or expired verification token.', 'danger')
+        return redirect(url_for('auth.login'))
+
+    if reg.status == 'pending':
+        reg.status = 'verified'
+        db.session.commit()
+        flash('Email verified! Your application is now being reviewed by the platform owner.', 'success')
+    elif reg.status == 'verified':
+        flash('Email already verified.', 'info')
+    
+    return render_template('auth/register_confirmation.html', 
+                           message="Email verified. Your application is under review.")
+
+
+@auth_bp.route('/register/approve/<int:reg_id>')
+def approve_university(reg_id):
+    # In a real app, this would be protected by platform_owner_required
+    reg = UniversityRegistration.query.get_or_404(reg_id)
+    
+    if reg.status != 'verified' and reg.status != 'pending':
+        flash('Registration is already processed or not verified.', 'warning')
+        return redirect(url_for('auth.login'))
+
+    # 1. Create School
+    school_code = reg.name[:4].upper() + str(random.randint(10, 99))
+    new_school = School(
+        name=reg.name,
+        code=school_code,
+        domain=reg.domain,
+        is_active=True,
+        onboarding_completed=False
+    )
+    db.session.add(new_school)
+    db.session.flush() # Get ID
+
+    # 2. Create Admin Account
+    admin_email = f"admin@{reg.domain}"
+    temp_password = secrets.token_urlsafe(8)
+    admin_user = User(
+        school_id=new_school.id,
+        email=admin_email,
+        password_hash=bcrypt.generate_password_hash(temp_password).decode('utf-8'),
+        role='admin',
+        name=f"Admin @ {reg.name}",
+        must_change_password=True
+    )
+    db.session.add(admin_user)
+
+    # 3. Update registration status
+    reg.status = 'approved'
+    db.session.commit()
+
+    # 4. Mock Welcome Email
+    welcome_msg = (
+        f"\n--- [DEMO] Welcome Email to University Admin ---\n"
+        f"To: {admin_email}\n"
+        f"Subject: Welcome to Hive LMS - Your University is Ready\n"
+        f"Body: Your university instance is ready.\n"
+        f"Login at: {url_for('auth.login', _external=True)}\n"
+        f"Credentials:\n"
+        f"Email: {admin_email}\n"
+        f"Password: {temp_password}\n"
+        f"(You will be required to change your password on first login)\n\n"
+        f"Onboarding Checklist: {url_for('dashboard.admin_dashboard', _external=True)}\n"
+        f"--------------------------------------------------\n"
+    )
+    print(welcome_msg)
+
+    flash(f'University {reg.name} approved! Admin account created: {admin_email}', 'success')
+    return redirect(url_for('auth.login'))
+
+
+# =============================================================================
+# STUDENT SELF-REGISTRATION
+# =============================================================================
+
+@auth_bp.route('/register/student', methods=['GET', 'POST'])
+def register_student():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password')
+
+        if not all([name, email, password]):
+            flash('All fields are required.', 'danger')
+            return render_template('auth/register_student.html')
+
+        # Extract domain
+        if '@' not in email:
+            flash('Invalid email address.', 'danger')
+            return render_template('auth/register_student.html')
+        
+        domain = email.split('@')[-1]
+
+        # Match domain against School
+        school = School.query.filter_by(domain=domain).first()
+        if not school:
+            flash('No university found for this email domain. Contact your university administrator.', 'danger')
+            return render_template('auth/register_student.html')
+
+        # Check if student already exists
+        existing_user = User.query.filter_by(email=email, school_id=school.id).first()
+        if existing_user:
+            flash(f'You are already enrolled at {school.name}. A student can only belong to one university.', 'danger')
+            return render_template('auth/register_student.html')
+
+        # Create User
+        new_user = User(
+            school_id=school.id,
+            email=email,
+            password_hash=bcrypt.generate_password_hash(password).decode('utf-8'),
+            role='student',
+            name=name,
+            is_active=False # Pending email verification
+        )
+        db.session.add(new_user)
+        db.session.commit()
+
+        # Mock Verification Email
+        print(f"\n--- [DEMO] Student Verification Email ---")
+        print(f"To: {email}")
+        print(f"Subject: Verify your Student Account - Hive LMS")
+        print(f"Body: Your account at {school.name} is ready. Please verify your email to log in.")
+        print(f"------------------------------------------\n")
+
+        flash('Registration successful! Please check your email to verify your account.', 'success')
+        return redirect(url_for('auth.login'))
+
+    return render_template('auth/register_student.html')
+
+
+# =============================================================================
+# STAFF REGISTRATION VIA INVITE
+# =============================================================================
+
+@auth_bp.route('/register/invite/<token>', methods=['GET', 'POST'])
+def register_invite(token):
+    invite = InviteToken.query.filter_by(token=token).first()
+    
+    if not invite or not invite.is_valid():
+        flash('Invalid, expired, or already used invite link.', 'danger')
+        return redirect(url_for('auth.login'))
+
+    if request.method == 'POST':
+        name = request.form.get('name')
+        password = request.form.get('password')
+
+        if not all([name, password]):
+            flash('All fields are required.', 'danger')
+            return render_template('auth/register_invite.html', invite=invite)
+
+        # Create User
+        new_user = User(
+            school_id=invite.school_id,
+            email=invite.email,
+            password_hash=bcrypt.generate_password_hash(password).decode('utf-8'),
+            role=invite.role,
+            name=name,
+            is_active=True
+        )
+        db.session.add(new_user)
+        
+        # Mark token as used
+        invite.used_at = datetime.utcnow()
+        db.session.commit()
+
+        flash(f'Account created for {invite.role.replace("_", " ").title()}! You can now log in.', 'success')
+        return redirect(url_for('auth.login'))
+
+    return render_template('auth/register_invite.html', invite=invite)
+

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}University Registration - Hive LMS{% endblock %}
+
+{% block content %}
+<div class="auth-container" style="max-width: 800px; margin: 50px auto; padding: 40px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);">
+    <div style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: 2.5rem; background: linear-gradient(135deg, #fff 0%, #aaa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px;">Register Your University</h1>
+        <p style="color: #aaa;">Join the next generation of Learning Management</p>
+    </div>
+
+    <form method="POST" class="auth-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="form-group" style="grid-column: span 2;">
+            <label style="display: block; color: #fff; margin-bottom: 8px; font-weight: 500;">University Full Name</label>
+            <input type="text" name="name" required style="width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 1rem; transition: border-color 0.3s;" placeholder="e.g. Sai University">
+        </div>
+
+        <div class="form-group">
+            <label style="display: block; color: #fff; margin-bottom: 8px; font-weight: 500;">Official Website URL</label>
+            <input type="url" name="website_url" required style="width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 1rem;" placeholder="https://saiuniversity.edu.in">
+        </div>
+
+        <div class="form-group">
+            <label style="display: block; color: #fff; margin-bottom: 8px; font-weight: 500;">Country</label>
+            <select name="country" style="width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 1rem;">
+                <option value="India" selected>India</option>
+                <option value="USA">USA</option>
+                <option value="UK">UK</option>
+                <option value="Canada">Canada</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label style="display: block; color: #fff; margin-bottom: 8px; font-weight: 500;">UGC/AICTE Recognition Number</label>
+            <input type="text" name="recognition_number" style="width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 1rem;" placeholder="Optional but recommended">
+        </div>
+
+        <div class="form-group">
+            <label style="display: block; color: #fff; margin-bottom: 8px; font-weight: 500;">University Email Domain</label>
+            <input type="text" name="domain" required style="width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 1rem;" placeholder="e.g. saiuniversity.edu.in">
+        </div>
+
+        <div style="grid-column: span 2; margin: 20px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+            <h3 style="color: #fff; font-size: 1.2rem; margin-bottom: 15px;">Representative Information</h3>
+        </div>
+
+        <div class="form-group">
+            <label style="display: block; color: #fff; margin-bottom: 8px; font-weight: 500;">Full Name</label>
+            <input type="text" name="rep_name" required style="width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 1rem;">
+        </div>
+
+        <div class="form-group">
+            <label style="display: block; color: #fff; margin-bottom: 8px; font-weight: 500;">Official Email</label>
+            <input type="email" name="rep_email" required style="width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 1rem;" placeholder="Must match university domain">
+        </div>
+
+        <div class="form-group" style="grid-column: span 2;">
+            <label style="display: block; color: #fff; margin-bottom: 8px; font-weight: 500;">Designation</label>
+            <select name="rep_designation" required style="width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 1rem;">
+                <option value="" disabled selected>Select Designation</option>
+                <option value="Chancellor">Chancellor</option>
+                <option value="Registrar">Registrar</option>
+                <option value="IT Admin">IT Admin</option>
+                <option value="Principal">Principal</option>
+                <option value="Director">Director</option>
+            </select>
+        </div>
+
+        <div style="grid-column: span 2; margin-top: 20px;">
+            <button type="submit" style="width: 100%; padding: 15px; background: linear-gradient(135deg, var(--primary-color) 0%, #6a11cb 100%); border: none; border-radius: 10px; color: #fff; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
+                Submit Application
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    input:focus, select:focus {
+        border-color: var(--primary-color) !important;
+        outline: none;
+        box-shadow: 0 0 10px rgba(106, 17, 203, 0.3);
+    }
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(106, 17, 203, 0.4);
+    }
+</style>
+{% endblock %}
