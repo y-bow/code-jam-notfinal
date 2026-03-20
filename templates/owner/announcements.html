@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Platform Announcements | Hive{% endblock %}
+
+{% block page_title %}Platform Announcements{% endblock %}
+
+{% block content %}
+<div class="owner-dashboard">
+    <div class="glass-panel" style="padding: 2rem;">
+        <h3 style="color: var(--owner-accent);">Post New System-Wide Announcement</h3>
+        <p style="color: var(--text-muted);">This announcement will be visible as a banner to ALL users across ALL universities.</p>
+        
+        <form action="{{ url_for('owner.announcements') }}" method="POST" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="form-group">
+                <label>Announcement Title</label>
+                <input type="text" name="title" class="search-input" style="width: 100%;" placeholder="e.g. Scheduled System Maintenance" required>
+            </div>
+            <div class="form-group">
+                <label>Announcement Body</label>
+                <textarea name="body" class="search-input" style="width: 100%; height: 150px;" placeholder="Details of the announcement..." required></textarea>
+            </div>
+            <button type="submit" class="btn-primary" style="background: var(--owner-accent); width: fit-content;">Post Announcement</button>
+        </form>
+    </div>
+
+    <div class="glass-panel" style="padding: 2rem; margin-top: 2rem;">
+        <h3>Previous Announcements</h3>
+        <div class="uni-table-wrapper">
+            <table class="uni-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Posted At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ann in announcements %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ ann.title }}</td>
+                        <td>{{ ann.posted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <button class="btn-icon" style="color: #ef4444;" title="Delete">
+                                <span class="material-symbols-rounded">delete</span>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not announcements %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: var(--text-muted);">No announcements posted yet.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

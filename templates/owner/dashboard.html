@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+
+{% block title %}Platform Owner Dashboard | Hive{% endblock %}
+
+{% block page_title %}Platform Control Center{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --owner-accent: #a855f7; /* Deep Purple */
+        --owner-accent-secondary: #eab308; /* Gold */
+        --owner-gradient: linear-gradient(135.44deg, #a855f7 0%, #6366f1 100%);
+    }
+
+    .owner-dashboard {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    /* Stats Strip */
+    .stats-strip {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stat-card {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--owner-accent);
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        font-family: 'Outfit', sans-serif;
+        color: var(--text-main);
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* University Table */
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .filters-search {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .search-input {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-md);
+        color: var(--text-main);
+    }
+
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-md);
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .filter-btn.active {
+        background: var(--owner-accent);
+        color: white;
+        border-color: var(--owner-accent);
+    }
+
+    .uni-table-wrapper {
+        overflow-x: auto;
+    }
+
+    .uni-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .uni-table th, .uni-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-active { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .status-suspended { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+
+    /* Pending Approvals */
+    .pending-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .pending-card {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .reg-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .reg-label { font-size: 0.75rem; color: var(--text-muted); }
+    .reg-value { font-size: 0.9rem; font-weight: 500; }
+
+    .action-btns {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    /* Charts */
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+        .charts-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="owner-dashboard">
+    <!-- Stats Strip -->
+    <div class="stats-strip">
+        <div class="stat-card glass-panel">
+            <span class="stat-value">{{ total_universities }}</span>
+            <span class="stat-label">Total Universities</span>
+        </div>
+        <div class="stat-card glass-panel">
+            <span class="stat-value">{{ active_universities }}</span>
+            <span class="stat-label">Active Institutions</span>
+        </div>
+        <div class="stat-card glass-panel" style="--owner-accent: var(--owner-accent-secondary)">
+            <span class="stat-value">{{ pending_approval_count }}</span>
+            <span class="stat-label">Pending Approval</span>
+        </div>
+        <div class="stat-card glass-panel">
+            <span class="stat-value">{{ total_users }}</span>
+            <span class="stat-label">Global Users</span>
+        </div>
+        <div class="stat-card glass-panel">
+            <span class="stat-value">{{ total_students }}</span>
+            <span class="stat-label">Total Students</span>
+        </div>
+        <div class="stat-card glass-panel" style="--owner-accent: var(--owner-accent-secondary)">
+            <span class="stat-value">{{ total_professors }}</span>
+            <span class="stat-label">Total Professors</span>
+        </div>
+    </div>
+
+    <!-- Analytics Charts -->
+    <div class="charts-grid">
+        <div class="glass-panel" style="padding: 1rem;">
+            <div id="uniGrowthChart"></div>
+        </div>
+        <div class="glass-panel" style="padding: 1rem;">
+            <div id="userGrowthChart"></div>
+        </div>
+        <div class="glass-panel" style="padding: 1rem;">
+            <div id="userDistChart"></div>
+        </div>
+        <div class="glass-panel" style="padding: 1rem;">
+            <div id="courseDistChart"></div>
+        </div>
+    </div>
+
+    <!-- University List -->
+    <div class="university-list glass-panel" style="padding: 2rem;">
+        <div class="section-header">
+            <h3>Registered Universities</h3>
+            <div class="filters-search">
+                <form action="{{ url_for('owner.dashboard') }}" method="GET" style="display: flex; gap: 0.5rem;">
+                    <input type="text" name="search" placeholder="Search name or domain..." class="search-input" value="{{ request.args.get('search', '') }}">
+                    <select name="status" class="search-input" onchange="this.form.submit()">
+                        <option value="all" {{ 'selected' if request.args.get('status') == 'all' }}>All Status</option>
+                        <option value="active" {{ 'selected' if request.args.get('status') == 'active' }}>Active</option>
+                        <option value="suspended" {{ 'selected' if request.args.get('status') == 'suspended' }}>Suspended</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <div class="uni-table-wrapper">
+            <table class="uni-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Domain</th>
+                        <th>Students</th>
+                        <th>Professors</th>
+                        <th>Courses</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for uni in universities %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ uni.name }}</td>
+                        <td><code>{{ uni.domain }}</code></td>
+                        <td>{{ uni.students }}</td>
+                        <td>{{ uni.professors }}</td>
+                        <td>{{ uni.courses }}</td>
+                        <td><span class="status-badge status-{{ uni.status.lower() }}">{{ uni.status }}</span></td>
+                        <td>{{ uni.joined_date }}</td>
+                        <td>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="{{ url_for('owner.university_detail', uni_id=uni.id) }}" class="btn-icon" title="View Detail">
+                                    <span class="material-symbols-rounded">visibility</span>
+                                </a>
+                                {% if uni.status == 'Active' %}
+                                <form action="{{ url_for('owner.suspend_university', uni_id=uni.id) }}" method="POST">
+                                    <button class="btn-icon" title="Suspend" style="color: #ef4444;">
+                                        <span class="material-symbols-rounded">block</span>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pending Approvals -->
+    <div class="pending-approvals">
+        <div class="section-header">
+            <h3>Pending University Registrations</h3>
+        </div>
+        <div class="pending-grid">
+            {% for reg in pending_registrations %}
+            <div class="pending-card glass-panel">
+                <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">
+                    <h4 style="margin: 0;">{{ reg.university_name }}</h4>
+                    <span class="reg-label">{{ reg.domain }}</span>
+                </div>
+                <div class="reg-info">
+                    <span class="reg-label">UGC Number</span>
+                    <span class="reg-value">{{ reg.ugc_number }}</span>
+                    <span class="reg-label">Representative</span>
+                    <span class="reg-value">{{ reg.rep_name }}</span>
+                    <span class="reg-label">Email</span>
+                    <span class="reg-value">{{ reg.rep_email }}</span>
+                    <span class="reg-label">Designation</span>
+                    <span class="reg-value">{{ reg.rep_designation }}</span>
+                    <span class="reg-label">Submitted</span>
+                    <span class="reg-value">{{ reg.submitted_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+                <div class="action-btns">
+                    <form action="{{ url_for('owner.approve_university', reg_id=reg.id) }}" method="POST" style="flex: 1;">
+                        <button class="btn-primary" style="width: 100%; background: #22c55e;">Approve</button>
+                    </form>
+                    <button class="btn-secondary" onclick="showRejectModal({{ reg.id }}, '{{ reg.university_name }}')" style="flex: 1;">Reject</button>
+                </div>
+            </div>
+            {% endfor %}
+            {% if not pending_registrations %}
+            <div class="glass-panel" style="grid-column: 1/-1; padding: 2rem; text-align: center; color: var(--text-muted);">
+                No pending registrations at the moment.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div id="rejectModal" class="modal-overlay">
+    <div class="modal-content glass-panel" style="max-width: 400px;">
+        <h3>Reject Registration</h3>
+        <p id="rejectUniName" style="color: var(--text-muted);"></p>
+        <form id="rejectForm" method="POST">
+            <div class="form-group" style="margin-top: 1rem;">
+                <label>Reason for Rejection</label>
+                <textarea name="reason" class="search-input" style="width: 100%; height: 100px;" required></textarea>
+            </div>
+            <div class="action-btns">
+                <button type="submit" class="btn-primary" style="background: #ef4444;">Confirm Rejection</button>
+                <button type="button" class="btn-secondary" onclick="closeRejectModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Initialize Charts
+    const uniChartData = {{ uni_chart | safe }};
+    Plotly.newPlot('uniGrowthChart', uniChartData.data, uniChartData.layout, {responsive: true});
+
+    const userChartData = {{ user_chart | safe }};
+    Plotly.newPlot('userGrowthChart', userChartData.data, userChartData.layout, {responsive: true});
+
+    const distChartData = {{ dist_chart | safe }};
+    Plotly.newPlot('userDistChart', distChartData.data, distChartData.layout, {responsive: true});
+
+    const courseChartData = {{ course_chart | safe }};
+    Plotly.newPlot('courseDistChart', courseChartData.data, courseChartData.layout, {responsive: true});
+
+    function showRejectModal(id, name) {
+        document.getElementById('rejectUniName').innerText = "Rejecting: " + name;
+        document.getElementById('rejectForm').action = "/owner/reject-university/" + id;
+        document.getElementById('rejectModal').style.display = 'flex';
+    }
+
+    function closeRejectModal() {
+        document.getElementById('rejectModal').style.display = 'none';
+    }
+</script>
+{% endblock %}

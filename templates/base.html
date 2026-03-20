@@ -118,6 +118,27 @@
                     <span class="nav-icon material-symbols-rounded">space_dashboard</span>
                     <span class="nav-label">Faculty Dashboard</span>
                 </a>
+                {% elif g.current_user.role == 'owner' %}
+                <a href="{{ url_for('owner.dashboard') }}" class="nav-item {{ 'active' if request.endpoint == 'owner.dashboard' }}">
+                    <span class="nav-icon material-symbols-rounded">analytics</span>
+                    <span class="nav-label">Dashboard</span>
+                </a>
+                <a href="{{ url_for('owner.dashboard') }}#universities" class="nav-item">
+                    <span class="nav-icon material-symbols-rounded">apartment</span>
+                    <span class="nav-label">Universities</span>
+                </a>
+                <a href="{{ url_for('owner.dashboard') }}#pending" class="nav-item">
+                    <span class="nav-icon material-symbols-rounded">pending_actions</span>
+                    <span class="nav-label">Pending</span>
+                </a>
+                <a href="{{ url_for('owner.announcements') }}" class="nav-item {{ 'active' if request.endpoint == 'owner.announcements' }}">
+                    <span class="nav-icon material-symbols-rounded">campaign</span>
+                    <span class="nav-label">Announcements</span>
+                </a>
+                <a href="{{ url_for('owner.settings') }}" class="nav-item {{ 'active' if request.endpoint == 'owner.settings' }}">
+                    <span class="nav-icon material-symbols-rounded">settings</span>
+                    <span class="nav-label">Settings</span>
+                </a>
                 {% else %}
                 <a href="{{ url_for('dashboard.student_dashboard') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.student_dashboard' }}">
                     <span class="nav-icon material-symbols-rounded">space_dashboard</span>
@@ -396,6 +417,32 @@
             {% endif %}
 
             <div class="content-wrapper">
+                {% if g.platform_announcement %}
+                <div class="platform-banner glass-panel" style="background: linear-gradient(90deg, #a855f7 0%, #6366f1 100%); color: white; margin-bottom: 2rem; padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1rem; border: none;">
+                    <span class="material-symbols-rounded">campaign</span>
+                    <div style="flex: 1;">
+                        <strong style="display: block; font-size: 1rem;">{{ g.platform_announcement.title }}</strong>
+                        <p style="margin: 0; font-size: 0.85rem; opacity: 0.9;">{{ g.platform_announcement.body }}</p>
+                    </div>
+                    <button class="icon-btn" style="color: white; opacity: 0.7;" onclick="this.parentElement.remove()">
+                        <span class="material-symbols-rounded" style="font-size: 18px;">close</span>
+                    </button>
+                </div>
+                {% endif %}
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="flash-messages" style="margin-bottom: 1.5rem;">
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" style="padding: 1rem; border-radius: var(--radius-md); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem; background: rgba(var(--primary-rgb), 0.1); border: 1px solid var(--border-color); color: var(--text-main);">
+                        <span class="material-symbols-rounded">{% if category == 'danger' %}error{% elif category == 'success' %}check_circle{% else %}info{% endif %}</span>
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+
                 {% block content %}
                 <!-- Main Page Content Goes Here -->
                 <div class="welcome-card glass-panel gradient-border">
