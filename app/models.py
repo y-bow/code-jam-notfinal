@@ -15,9 +15,10 @@ ROLE_HIERARCHY = {
     'professor': 4,
     'dean': 5,
     'admin': 99,
+    'platform_owner': 100,
 }
 
-VALID_ROLES = {'student', 'class_rep', 'assistant_professor', 'professor', 'dean', 'admin'}
+VALID_ROLES = {'student', 'class_rep', 'assistant_professor', 'professor', 'dean', 'admin', 'platform_owner'}
 
 
 # =============================================================================
@@ -30,21 +31,31 @@ class School(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
-    code = db.Column(db.String(20), unique=True, nullable=False)
-    domain = db.Column(db.String(100))  # e.g. 'scds.saiuniversity.edu.in'
+    slug = db.Column(db.String(100), unique=True, nullable=False)
+    domain = db.Column(db.String(100), unique=True, nullable=False)
+    country = db.Column(db.String(100), default='India')
+    ugc_number = db.Column(db.String(50), nullable=True)
+    trust_level = db.Column(db.String(20), default='pending') # 'verified', 'pending', 'rejected'
+    logo_url = db.Column(db.String(500), nullable=True)
+    accent_color = db.Column(db.String(7), default='#3B82F6')
+    website_url = db.Column(db.String(200), nullable=True)
+    address = db.Column(db.Text, nullable=True)
+    established_year = db.Column(db.Integer, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    approved_at = db.Column(db.DateTime, nullable=True)
+    approved_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
 
     # Relationships
     sections = db.relationship('Section', backref='school', lazy='dynamic',
                                cascade='all, delete-orphan')
     users = db.relationship('User', backref='school', lazy='dynamic',
-                            cascade='all, delete-orphan')
+                            cascade='all, delete-orphan', foreign_keys='User.school_id')
     announcements = db.relationship('Announcement', backref='school', lazy='dynamic',
                                     cascade='all, delete-orphan')
 
     def __repr__(self):
-        return f'<School {self.code}: {self.name}>'
+        return f'<School {self.slug}: {self.name}>'
 
 
 class Section(db.Model):
@@ -79,13 +90,17 @@ class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=True) # NULL for Global Admin
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=True) # NULL for Platform Owner
     email = db.Column(db.String(120), nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     role = db.Column(db.String(20), nullable=False)
     name = db.Column(db.String(100), nullable=False)
+    one_school_enforced = db.Column(db.Boolean, default=True)
     is_active = db.Column(db.Boolean, default=True)
+    is_suspended = db.Column(db.Boolean, default=False)
+    suspension_reason = db.Column(db.String(500), nullable=True)
     must_change_password = db.Column(db.Boolean, default=False)
+    last_login_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = (
@@ -110,8 +125,11 @@ class Student(db.Model):
     __tablename__ = 'students'
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
     section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), nullable=False)
+    student_id_number = db.Column(db.String(50), nullable=True) # University roll number
     enrollment_year = db.Column(db.Integer, nullable=False)
+    joined_at = db.Column(db.DateTime, default=datetime.utcnow)
     major = db.Column(db.String(100))
     sgpa = db.Column(db.Float, default=0.0)
     cgpa = db.Column(db.Float, default=0.0)
@@ -120,7 +138,9 @@ class Student(db.Model):
     section = db.relationship('Section', backref=db.backref('students', lazy='dynamic'))
 
     __table_args__ = (
+        db.UniqueConstraint('user_id', 'school_id', name='uq_student_user_school'),
         db.Index('ix_student_section', 'section_id'),
+        db.Index('ix_student_school', 'school_id'),
     )
 
 
@@ -610,24 +630,102 @@ class ExternalEvent(db.Model):
     school = db.relationship('School', backref=db.backref('external_events', lazy='dynamic'))
 
 # =============================================================================
+# DATA UPLOAD MODELS
+# =============================================================================
+
+class UploadedFile(db.Model):
+    __tablename__ = 'uploaded_files'
+
+    id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+    uploaded_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    file_type = db.Column(db.String(50), nullable=False) # 'attendance'/'timetable'/'roster'/'grades'/'courses'
+    file_name = db.Column(db.String(255), nullable=False)
+    file_path = db.Column(db.String(500), nullable=False)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    processed = db.Column(db.Boolean, default=False)
+    processing_errors = db.Column(db.Text, nullable=True)
+
+class UploadLog(db.Model):
+    __tablename__ = 'upload_logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    upload_id = db.Column(db.Integer, db.ForeignKey('uploaded_files.id'), nullable=False)
+    row_number = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String(20), nullable=False) # 'success'/'error'/'skipped'
+    message = db.Column(db.Text, nullable=True)
+    processed_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# =============================================================================
+# ONBOARDING & REGISTRATION MODELS
+# =============================================================================
+
+class UniversityRegistration(db.Model):
+    __tablename__ = 'university_registrations'
+
+    id = db.Column(db.Integer, primary_key=True)
+    university_name = db.Column(db.String(200), nullable=False)
+    domain = db.Column(db.String(100), nullable=False)
+    ugc_number = db.Column(db.String(50), nullable=False)
+    rep_name = db.Column(db.String(100), nullable=False)
+    rep_email = db.Column(db.String(120), nullable=False)
+    rep_designation = db.Column(db.String(100), nullable=False)
+    website_url = db.Column(db.String(200), nullable=True)
+    country = db.Column(db.String(100), default='India')
+    status = db.Column(db.String(20), default='pending') # 'pending'/'approved'/'rejected'
+    submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    decided_at = db.Column(db.DateTime, nullable=True)
+    decision_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    rejection_reason = db.Column(db.Text, nullable=True)
+
+class InviteToken(db.Model):
+    __tablename__ = 'invite_tokens'
+
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(32), unique=True, nullable=False)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
+    role = db.Column(db.String(50), nullable=False) # 'professor'/'dean'/'assistant_professor'
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    is_used = db.Column(db.Boolean, default=False)
+    used_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    used_at = db.Column(db.DateTime, nullable=True)
+
+class JoinCode(db.Model):
+    __tablename__ = 'join_codes'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(6), unique=True, nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
+    section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    max_uses = db.Column(db.Integer, nullable=True)
+    use_count = db.Column(db.Integer, default=0)
+
+
+# =============================================================================
 # NEW ROLE MANAGEMENT TABLES
 # =============================================================================
 
-class ProfessorAssistant(db.Model):
+class ProfessorAssistantAssignment(db.Model):
     """Tracks teachers assigned as assistants to specific courses."""
-    __tablename__ = 'professor_assistants'
+    __tablename__ = 'professor_assistant_assignments'
 
     id = db.Column(db.Integer, primary_key=True)
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
     professor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    assistant_teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    assistant_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     assigned_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
+    revoked_at = db.Column(db.DateTime, nullable=True)
 
-    course = db.relationship('Course', backref=db.backref('professor_assistants', cascade='all, delete-orphan'))
+    course = db.relationship('Course', backref=db.backref('assistant_assignments', cascade='all, delete-orphan'))
     professor = db.relationship('User', foreign_keys=[professor_id])
-    assistant = db.relationship('User', foreign_keys=[assistant_teacher_id], 
-                                backref=db.backref('assistant_roles', lazy='dynamic'))
+    assistant = db.relationship('User', foreign_keys=[assistant_id], 
+                                backref=db.backref('assistant_assignments', lazy='dynamic'))
 
 class ClassRepNomination(db.Model):
     """Workflow for appointing a student as Class Rep (Section Rep)."""
@@ -642,9 +740,11 @@ class ClassRepNomination(db.Model):
     status = db.Column(db.String(20), default='pending') # pending, approved, rejected
     nominated_at = db.Column(db.DateTime, default=datetime.utcnow)
     decided_at = db.Column(db.DateTime)
+    rejection_reason = db.Column(db.Text, nullable=True)
 
     student = db.relationship('User', foreign_keys=[student_id])
     nominator = db.relationship('User', foreign_keys=[nominated_by])
     approver = db.relationship('User', foreign_keys=[approved_by])
     course = db.relationship('Course')
-    section = db.relationship('Section')
+# Compatibility Aliases
+ProfessorAssistant = ProfessorAssistantAssignment
