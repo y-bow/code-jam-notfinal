@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Owner Account Settings | Hive{% endblock %}
+
+{% block page_title %}Owner Settings{% endblock %}
+
+{% block content %}
+<div class="owner-dashboard">
+    <div class="glass-panel" style="padding: 2rem; max-width: 600px;">
+        <h3 style="color: var(--owner-accent);">Account Security & Identity</h3>
+        <p style="color: var(--text-muted);">Manage your platform owner credentials and security settings.</p>
+        
+        <form action="{{ url_for('owner.settings') }}" method="POST" style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="form-group">
+                <label>Owner Email Address</label>
+                <input type="email" name="email" class="search-input" style="width: 100%;" value="{{ user.email }}" required>
+            </div>
+            
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; margin-top: 1rem;">
+                <h4>Change Password</h4>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label>New Password</label>
+                    <input type="password" name="new_password" class="search-input" style="width: 100%;" placeholder="Leave blank to keep current">
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; margin-top: 1rem;">
+                <h4>Two-Factor Authentication (TOTP)</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Enhance security by requiring a code from your mobile authenticator app.</p>
+                <button type="button" class="btn-secondary" style="margin-top: 0.5rem;">Setup TOTP</button>
+            </div>
+
+            <button type="submit" class="btn-primary" style="background: var(--owner-accent); margin-top: 1rem; width: fit-content;">Save Changes</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

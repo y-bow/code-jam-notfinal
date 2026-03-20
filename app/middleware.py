@@ -12,7 +12,7 @@ Usage in routes:
 """
 from functools import wraps
 from flask import session, g, abort, flash, redirect, url_for
-from .models import User, ROLE_HIERARCHY, Message, Announcement
+from .models import User, ROLE_HIERARCHY, Message, Announcement, PlatformAnnouncement
 
 
 def school_scoped(f):
@@ -40,8 +40,8 @@ def school_scoped(f):
             flash('Account not found or deactivated.', 'danger')
             return redirect(url_for('auth.login'))
 
-        # Verify school is still active (Except for Global Admin)
-        if user.role != 'admin':
+        # Verify school is still active (Except for Global Admin / Platform Owner)
+        if user.role not in ('admin', 'owner'):
             if not user.school or not user.school.is_active:
                 session.clear()
                 flash('Your institution is currently inactive.', 'danger')
@@ -49,6 +49,13 @@ def school_scoped(f):
 
         g.current_user = user
         g.school_id = user.school_id
+
+        # Platform Owner doesn't need unread messages or announcements from a specific school
+        if user.role == 'owner':
+            g.unread_messages = []
+            g.unread_count = 0
+            g.recent_announcements = []
+            return f(*args, **kwargs)
 
         # Notification data
         g.unread_messages = Message.query.filter_by(recipient_id=user.id, is_read=False).order_by(Message.sent_at.desc()).limit(5).all()
@@ -59,6 +66,9 @@ def school_scoped(f):
             g.recent_announcements = Announcement.query.order_by(Announcement.posted_at.desc()).limit(3).all()
         else:
             g.recent_announcements = Announcement.query.filter_by(school_id=user.school_id).order_by(Announcement.posted_at.desc()).limit(3).all()
+
+        # Platform-wide announcement for everyone
+        g.platform_announcement = PlatformAnnouncement.query.filter_by(is_active=True).order_by(PlatformAnnouncement.posted_at.desc()).first()
 
         return f(*args, **kwargs)
     return decorated_function
@@ -91,6 +101,29 @@ def role_minimum(min_role):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+
+def platform_owner_required(f):
+    """
+    Enforce that the user is the Platform Owner.
+    Also checks for the 'is_owner' session flag for extra security.
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('auth.login'))
+        
+        if session.get('role') != 'owner' or not session.get('is_owner'):
+            abort(403)
+        
+        user = User.query.get(session['user_id'])
+        if not user or user.role != 'owner' or not user.is_active:
+            abort(403)
+            
+        g.current_user = user
+        g.school_id = None
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 def owns_resource(resource_obj, school_id_attr='school_id'):

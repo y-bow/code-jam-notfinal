@@ -111,6 +111,11 @@ def login():
             session['role'] = user.role
             session['name'] = user.name
             session['school_id'] = user.school_id
+            
+            # Special flag for Platform Owner
+            if user.role == 'owner':
+                session['is_owner'] = True
+                return redirect(url_for('owner.dashboard'))
 
             if user.role in ('student', 'class_rep'):
                 return redirect(url_for('dashboard.student_dashboard'))

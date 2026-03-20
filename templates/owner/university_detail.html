@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}University Detail: {{ uni.name }} | Hive{% endblock %}
+
+{% block page_title %}{{ uni.name }} Details{% endblock %}
+
+{% block content %}
+<div class="owner-dashboard">
+    <div class="glass-panel" style="padding: 2rem; display: flex; flex-direction: column; gap: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1.5rem;">
+            <div>
+                <h2 style="margin: 0; color: #a855f7;">{{ uni.name }}</h2>
+                <p style="color: var(--text-muted); margin: 0.5rem 0;">Domain: <code>{{ uni.domain }}</code> | Code: <code>{{ uni.code }}</code></p>
+                <span class="status-badge status-{{ 'active' if uni.is_active else 'suspended' }}" style="font-size: 0.85rem;">
+                    {{ 'Active' if uni.is_active else 'Suspended' }}
+                </span>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                {% if uni.is_active %}
+                <form action="{{ url_for('owner.suspend_university', uni_id=uni.id) }}" method="POST">
+                    <button class="btn-secondary" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: #ef4444;">Suspend University</button>
+                </form>
+                {% endif %}
+                <button class="btn-primary" style="background: var(--owner-accent);">Override Settings</button>
+            </div>
+        </div>
+
+        <div class="stats-strip">
+            <div class="stat-card glass-panel">
+                <span class="stat-value">{{ student_count }}</span>
+                <span class="stat-label">Total Students</span>
+            </div>
+            <div class="stat-card glass-panel">
+                <span class="stat-value">{{ professor_count }}</span>
+                <span class="stat-label">Total Professors</span>
+            </div>
+            <div class="stat-card glass-panel">
+                <span class="stat-value">{{ admins|length }}</span>
+                <span class="stat-label">School Admins</span>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <!-- Admins Section -->
+            <div class="glass-panel" style="padding: 1.5rem;">
+                <h3>School Administrators</h3>
+                <div class="uni-table-wrapper">
+                    <table class="uni-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for admin in admins %}
+                            <tr>
+                                <td>{{ admin.name }}</td>
+                                <td>{{ admin.email }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Activity Placeholder -->
+            <div class="glass-panel" style="padding: 1.5rem;">
+                <h3>Recent System Activity</h3>
+                {% if recent_activity %}
+                    <ul>
+                    {% for act in recent_activity %}
+                        <li>{{ act.description }} - {{ act.timestamp.strftime('%Y-%m-%d %H:%M') }}</li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p style="color: var(--text-muted);">No activity logs available for this institution.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="glass-panel" style="padding: 1.5rem;">
+            <h3>Data Upload History</h3>
+            {% if upload_history %}
+                <table class="uni-table">
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Uploader</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- History items -->
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="color: var(--text-muted);">No data upload logs found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

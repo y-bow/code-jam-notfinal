@@ -3,7 +3,8 @@ from app.models import (
     db, User, Student, Teacher, School, Section,
     Course, Enrollment, Announcement, TimetableEntry, bcrypt,
     TeacherTodo, TeacherRating, Message, Internship, LostFoundItem,
-    Club, ExternalEvent, ProfessorAssistant, ClassRepNomination
+    Club, ExternalEvent, ProfessorAssistant, ClassRepNomination,
+    UniversityRegistration, PlatformAnnouncement
 )
 from datetime import datetime, timedelta
 
@@ -40,6 +41,10 @@ def seed_db():
         # =====================================================================
         pw = bcrypt.generate_password_hash('password123').decode('utf-8')
 
+        # ROLE 7: PLATFORM OWNER (Level 100)
+        owner = User(school_id=None, email='owner@hive.lms',
+                     password_hash=pw, role='owner', name='Hive Platform Owner', must_change_password=False)
+
         # ROLE 6: ADMIN (Level 99 - Global)
         admin = User(school_id=None, email='admin@hive.lms',
                      password_hash=pw, role='admin', name='HIVE Global Admin', must_change_password=False)
@@ -66,7 +71,7 @@ def seed_db():
         student1 = User(school_id=school.id, email='vaibhav.b-29@scds.saiuniversity.edu.in',
                        password_hash=pw, role='student', name='Vaibhav Student', must_change_password=False)
         
-        db.session.add_all([admin, dean, prof_nitish, prof_megha, assistant_prof, class_rep, student1])
+        db.session.add_all([owner, admin, dean, prof_nitish, prof_megha, assistant_prof, class_rep, student1])
         db.session.commit()
 
         # =====================================================================
@@ -114,7 +119,41 @@ def seed_db():
         ])
         db.session.commit()
 
-        print("Database seeded successfully with 6 roles!")
+        # =====================================================================
+        # 8. UNIVERSITY REGISTRATIONS
+        # =====================================================================
+        db.session.add_all([
+            UniversityRegistration(
+                university_name='Amity University',
+                domain='amity.edu',
+                ugc_number='UGC-12345',
+                rep_name='Rajesh Kumar',
+                rep_email='rajesh@amity.edu',
+                rep_designation='Registrar',
+                status='pending'
+            ),
+            UniversityRegistration(
+                university_name='BITS Pilani',
+                domain='bits-pilani.ac.in',
+                ugc_number='UGC-67890',
+                rep_name='Dr. Smitha Rao',
+                rep_email='smitha@bits-pilani.ac.in',
+                rep_designation='Vice Chancellor',
+                status='pending'
+            )
+        ])
+        db.session.commit()
+
+        # =====================================================================
+        # 9. PLATFORM ANNOUNCEMENTS
+        # =====================================================================
+        db.session.add(PlatformAnnouncement(
+            title='Welcome to HIVE 2.0',
+            body='We are excited to announce the launch of our new multi-university scaling features!'
+        ))
+        db.session.commit()
+
+        print("Database seeded successfully with 7 roles!")
 
 if __name__ == '__main__':
     seed_db()

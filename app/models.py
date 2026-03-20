@@ -15,9 +15,10 @@ ROLE_HIERARCHY = {
     'professor': 4,
     'dean': 5,
     'admin': 99,
+    'owner': 100,
 }
 
-VALID_ROLES = {'student', 'class_rep', 'assistant_professor', 'professor', 'dean', 'admin'}
+VALID_ROLES = {'student', 'class_rep', 'assistant_professor', 'professor', 'dean', 'admin', 'owner'}
 
 
 # =============================================================================
@@ -32,6 +33,7 @@ class School(db.Model):
     name = db.Column(db.String(200), nullable=False)
     code = db.Column(db.String(20), unique=True, nullable=False)
     domain = db.Column(db.String(100))  # e.g. 'scds.saiuniversity.edu.in'
+    trust_level = db.Column(db.String(20), default='unverified') # 'unverified', 'verified'
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -648,3 +650,41 @@ class ClassRepNomination(db.Model):
     approver = db.relationship('User', foreign_keys=[approved_by])
     course = db.relationship('Course')
     section = db.relationship('Section')
+
+
+# =============================================================================
+# PLATFORM OWNER MODELS
+# =============================================================================
+
+class UniversityRegistration(db.Model):
+    """Pending applications for new universities to join Hive."""
+    __tablename__ = 'university_registrations'
+
+    id = db.Column(db.Integer, primary_key=True)
+    university_name = db.Column(db.String(200), nullable=False)
+    domain = db.Column(db.String(100), nullable=False)
+    ugc_number = db.Column(db.String(50), nullable=False)
+    rep_name = db.Column(db.String(100), nullable=False)
+    rep_email = db.Column(db.String(120), nullable=False)
+    rep_designation = db.Column(db.String(100), nullable=False)
+    status = db.Column(db.String(20), default='pending') # pending, approved, rejected
+    rejection_reason = db.Column(db.Text)
+    submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Registration {self.university_name}: {self.status}>'
+
+
+class PlatformAnnouncement(db.Model):
+    """System-wide announcements from the Platform Owner."""
+    __tablename__ = 'platform_announcements'
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    posted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime)
+
+    def __repr__(self):
+        return f'<PlatformAnnouncement {self.title}>'

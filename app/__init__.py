@@ -58,6 +58,7 @@ def create_app():
     from .routes.internships import internships_bp
     from .routes.lost_found import lost_found_bp
     from .routes.clubs import clubs_bp
+    from .owner import owner_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -67,6 +68,7 @@ def create_app():
     app.register_blueprint(internships_bp)
     app.register_blueprint(lost_found_bp)
     app.register_blueprint(clubs_bp)
+    app.register_blueprint(owner_bp, url_prefix='/owner')
 
     @app.route('/')
     def index():
@@ -80,6 +82,8 @@ def create_app():
                 return redirect(url_for('dashboard.school_analytics'))
             elif role == 'admin':
                 return redirect(url_for('dashboard.admin_dashboard'))
+            elif role == 'owner':
+                return redirect(url_for('owner.dashboard'))
         return redirect(url_for('auth.login'))
 
     return app
