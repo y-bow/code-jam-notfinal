@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Hive | 403 Forbidden{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="glass-panel error-card gradient-border">
+        <div class="error-icon">
+            <span class="material-symbols-rounded">block</span>
+        </div>
+        <h1>403 Forbidden</h1>
+        <p>You don't have permission to access this page.</p>
+        <div class="error-actions">
+            {% if g.current_user %}
+                {% if g.current_user.role == 'admin' %}
+                    <a href="{{ url_for('dashboard.admin_dashboard') }}" class="btn-primary">Back to Dashboard</a>
+                {% elif g.current_user.role == 'dean' %}
+                    <a href="{{ url_for('dashboard.school_analytics') }}" class="btn-primary">Back to Dashboard</a>
+                {% elif g.current_user.role in ['professor', 'assistant_professor'] %}
+                    <a href="{{ url_for('dashboard.teacher_dashboard') }}" class="btn-primary">Back to Dashboard</a>
+                {% else %}
+                    <a href="{{ url_for('dashboard.student_dashboard') }}" class="btn-primary">Back to Dashboard</a>
+                {% endif %}
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn-primary">Go to Login</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .error-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 160px);
+        padding: 2rem;
+    }
+
+    .error-card {
+        max-width: 500px;
+        width: 100%;
+        padding: 4rem 2rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .error-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(var(--primary-rgb), 0.1);
+        color: var(--primary-color);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    .error-icon .material-symbols-rounded {
+        font-size: 48px;
+    }
+
+    .error-card h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin: 0;
+    }
+
+    .error-card p {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .error-actions {
+        margin-top: 2rem;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.8rem 2rem;
+        background: var(--primary-color);
+        color: white;
+        text-decoration: none;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        transition: all var(--transition-fast);
+        box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.4);
+        filter: brightness(1.1);
+    }
+</style>
+{% endblock %}

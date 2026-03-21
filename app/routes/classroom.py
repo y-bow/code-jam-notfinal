@@ -1,5 +1,8 @@
 from flask import Blueprint, render_template, g, flash, redirect, url_for, abort, request
-from ..middleware import school_scoped, owns_resource, role_minimum
+from ..permissions import (
+    require_role, require_min_role, student_required, 
+    professor_required, admin_required, school_scope
+)
 from ..models import (
     db, User, Student, Course, Enrollment, Section, ProfessorAssistant, 
     ClassRepNomination, Announcement, ROLE_HIERARCHY, Assignment, Attendance, Submission, TeacherRating, JoinCode
@@ -10,13 +13,13 @@ classroom_bp = Blueprint('classroom', __name__, url_prefix='/classroom')
 
 
 @classroom_bp.route('/<int:course_id>')
-@school_scoped
+@require_min_role('student')
 def view_classroom(course_id):
     user = g.current_user
 
-    # Load course and verify it belongs to this school
-    course = Course.query.get_or_404(course_id)
-    owns_resource(course.section, 'school_id')
+    # Load course and verify it belongs to this school using school_scope
+    course = school_scope(Course.query, Course).filter_by(id=course_id).first_or_404()
+
 
     # Fetch related data
     assignments = course.assignments.order_by(Assignment.due_date.desc()).all()
@@ -105,12 +108,12 @@ def view_classroom(course_id):
 
 
 @classroom_bp.route('/<int:course_id>/nominate_cr/<int:student_id>', methods=['POST'])
-@school_scoped
-@role_minimum('professor')
+@professor_required
 def nominate_class_rep(course_id, student_id):
-    course = Course.query.get_or_404(course_id)
+    course = school_scope(Course.query, Course).filter_by(id=course_id).first_or_404()
     if course.teacher_id != g.current_user.id:
         abort(403)
+
     
     # Check if student is enrolled
     enrollment = Enrollment.query.filter_by(student_id=student_id, course_id=course_id).first()
@@ -141,12 +144,12 @@ def nominate_class_rep(course_id, student_id):
 
 
 @classroom_bp.route('/<int:course_id>/assign_assistant', methods=['POST'])
-@school_scoped
-@role_minimum('professor')
+@professor_required
 def assign_assistant_professor(course_id):
-    course = Course.query.get_or_404(course_id)
+    course = school_scope(Course.query, Course).filter_by(id=course_id).first_or_404()
     if course.teacher_id != g.current_user.id:
         abort(403)
+
     
     email = request.form.get('email')
     assistant = User.query.filter_by(school_id=g.school_id, email=email, role='professor').first()
@@ -172,10 +175,10 @@ def assign_assistant_professor(course_id):
 
 
 @classroom_bp.route('/<int:course_id>/create_assignment', methods=['POST'])
-@school_scoped
-@role_minimum('assistant_professor')
+@require_min_role('assistant_professor')
 def create_assignment(course_id):
-    course = Course.query.get_or_404(course_id)
+    course = school_scope(Course.query, Course).filter_by(id=course_id).first_or_404()
+
     # Check if professor owns course or is Assistant Professor
     is_pa = False
     if g.current_user.role == 'assistant_professor':
@@ -200,10 +203,10 @@ def create_assignment(course_id):
 
 
 @classroom_bp.route('/<int:course_id>/mark_attendance', methods=['POST'])
-@school_scoped
-@role_minimum('assistant_professor')
+@require_min_role('assistant_professor')
 def mark_attendance(course_id):
-    course = Course.query.get_or_404(course_id)
+    course = school_scope(Course.query, Course).filter_by(id=course_id).first_or_404()
+
     # Authorization same as above
     if course.teacher_id != g.current_user.id and g.current_user.role != 'assistant_professor':
         abort(403)
@@ -235,9 +238,10 @@ def mark_attendance(course_id):
 
 
 @classroom_bp.route('/<int:course_id>/post_announcement', methods=['POST'])
-@school_scoped
+@require_min_role('student') # CR level
 def post_announcement(course_id):
-    course = Course.query.get_or_404(course_id)
+    course = school_scope(Course.query, Course).filter_by(id=course_id).first_or_404()
+
     user = g.current_user
     
     # Check if professor/Assistant Professor or Admin/Dean
@@ -278,10 +282,10 @@ def post_announcement(course_id):
 
 
 @classroom_bp.route('/<int:course_id>/rate', methods=['POST'])
-@school_scoped
-@role_minimum('student')
+@student_required
 def submit_rating(course_id):
-    course = Course.query.get_or_404(course_id)
+    course = school_scope(Course.query, Course).filter_by(id=course_id).first_or_404()
+
     rating_val = request.form.get('rating', type=int)
     review = request.form.get('review', '')
     is_anon = 'anonymous' in request.form

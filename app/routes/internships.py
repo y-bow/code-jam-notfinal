@@ -1,14 +1,17 @@
 from flask import Blueprint, render_template, request, redirect, url_for, g, flash, abort, jsonify
 from datetime import datetime
-from ..middleware import school_scoped, role_minimum
 from ..models import db, Internship
+from ..permissions import (
+    require_role, require_min_role, student_required, 
+    dean_required, admin_required, school_scope
+)
 
 internships_bp = Blueprint('internships', __name__, url_prefix='/internships')
 
 @internships_bp.route('/', methods=['GET'])
-@school_scoped
+@student_required
 def index():
-    query = Internship.query
+    query = school_scope(Internship.query, Internship)
 
     # Search by role or company name
     search = request.args.get('search', '')
@@ -35,9 +38,10 @@ def index():
     return render_template('internships.html', internships=internships, search=search, location=location, duration=duration)
 
 @internships_bp.route('/api/<int:id>', methods=['GET'])
-@school_scoped
+@student_required
 def get_internship(id):
-    internship = Internship.query.get_or_404(id)
+    # school_scope ensures user only sees their school's internship
+    internship = school_scope(Internship.query, Internship).filter_by(id=id).first_or_404()
     return jsonify({
         'id': internship.id,
         'company_name': internship.company_name,
@@ -52,8 +56,7 @@ def get_internship(id):
     })
 
 @internships_bp.route('/add', methods=['POST'])
-@school_scoped
-@role_minimum('admin')
+@admin_required
 def add():
     company_name = request.form.get('company_name')
     role = request.form.get('role')
@@ -73,6 +76,7 @@ def add():
             pass
 
     new_internship = Internship(
+        school_id=g.school_id,
         company_name=company_name,
         role=role,
         location=location,
@@ -89,10 +93,9 @@ def add():
     return redirect(url_for('internships.index'))
 
 @internships_bp.route('/edit/<int:id>', methods=['POST'])
-@school_scoped
-@role_minimum('admin')
+@admin_required
 def edit(id):
-    internship = Internship.query.get_or_404(id)
+    internship = school_scope(Internship.query, Internship).filter_by(id=id).first_or_404()
     
     internship.company_name = request.form.get('company_name', internship.company_name)
     internship.role = request.form.get('role', internship.role)
@@ -115,10 +118,9 @@ def edit(id):
     return redirect(url_for('internships.index'))
 
 @internships_bp.route('/delete/<int:id>', methods=['POST'])
-@school_scoped
-@role_minimum('admin')
+@admin_required
 def delete(id):
-    internship = Internship.query.get_or_404(id)
+    internship = school_scope(Internship.query, Internship).filter_by(id=id).first_or_404()
     db.session.delete(internship)
     db.session.commit()
     flash('Internship deleted successfully.', 'success')

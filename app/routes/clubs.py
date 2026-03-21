@@ -1,6 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, g
-from app.models import db, Club, ExternalEvent
-from app.middleware import school_scoped, role_minimum, owns_resource
+from ..models import db, Club, ExternalEvent
+from ..permissions import (
+    require_role, require_min_role, student_required, 
+    dean_required, admin_required, school_scope
+)
 from datetime import datetime
 
 clubs_bp = Blueprint('clubs', __name__, url_prefix='/clubs')
@@ -10,51 +13,37 @@ clubs_bp = Blueprint('clubs', __name__, url_prefix='/clubs')
 # =============================================================================
 
 @clubs_bp.route('/')
-@school_scoped
+@student_required
 def index():
-    if g.current_user.role == 'admin':
-        clubs = Club.query.order_by(Club.name).all()
-        events = ExternalEvent.query.filter(
-            ExternalEvent.date >= datetime.utcnow()
-        ).order_by(ExternalEvent.date).limit(10).all()
-    else:
-        clubs = Club.query.filter_by(school_id=g.school_id).order_by(Club.name).all()
-        events = ExternalEvent.query.filter(
-            ExternalEvent.school_id == g.school_id,
-            ExternalEvent.date >= datetime.utcnow()
-        ).order_by(ExternalEvent.date).limit(5).all()
+    clubs = school_scope(Club.query, Club).order_by(Club.name).all()
+    events = school_scope(ExternalEvent.query, ExternalEvent).filter(
+        ExternalEvent.date >= datetime.utcnow()
+    ).order_by(ExternalEvent.date).limit(10 if g.current_user.role == 'admin' else 5).all()
     return render_template('clubs/student_clubs.html', clubs=clubs, events=events)
 
+
 @clubs_bp.route('/<int:club_id>')
-@school_scoped
+@student_required
 def club_details(club_id):
-    if g.current_user.role == 'admin':
-        club = Club.query.get_or_404(club_id)
-    else:
-        club = Club.query.filter_by(id=club_id, school_id=g.school_id).first_or_404()
+    club = school_scope(Club.query, Club).filter_by(id=club_id).first_or_404()
     return render_template('clubs/club_details.html', club=club)
 
+
 @clubs_bp.route('/events')
-@school_scoped
+@student_required
 def events():
-    if g.current_user.role == 'admin':
-        events = ExternalEvent.query.filter(
-            ExternalEvent.date >= datetime.utcnow()
-        ).order_by(ExternalEvent.date).all()
-    else:
-        events = ExternalEvent.query.filter(
-            ExternalEvent.school_id == g.school_id,
-            ExternalEvent.date >= datetime.utcnow()
-        ).order_by(ExternalEvent.date).all()
+    events = school_scope(ExternalEvent.query, ExternalEvent).filter(
+        ExternalEvent.date >= datetime.utcnow()
+    ).order_by(ExternalEvent.date).all()
     return render_template('clubs/student_events.html', events=events)
+
 
 # =============================================================================
 # ADMIN ROUTES
 # =============================================================================
 
 @clubs_bp.route('/admin', methods=['GET', 'POST'])
-@school_scoped
-@role_minimum('dean')
+@dean_required
 def admin_clubs():
     if request.method == 'POST':
         name = request.form.get('name')
@@ -74,20 +63,15 @@ def admin_clubs():
         flash('Club created successfully.', 'success')
         return redirect(url_for('clubs.admin_clubs'))
         
-    if g.current_user.role == 'admin':
-        clubs = Club.query.order_by(Club.name).all()
-    else:
-        clubs = Club.query.filter_by(school_id=g.school_id).order_by(Club.name).all()
+    clubs = school_scope(Club.query, Club).order_by(Club.name).all()
     return render_template('clubs/admin_clubs.html', clubs=clubs)
 
+
 @clubs_bp.route('/admin/edit/<int:club_id>', methods=['POST'])
-@school_scoped
-@role_minimum('dean')
+@dean_required
 def edit_club(club_id):
-    if g.current_user.role == 'admin':
-        club = Club.query.get_or_404(club_id)
-    else:
-        club = Club.query.filter_by(id=club_id, school_id=g.school_id).first_or_404()
+    club = school_scope(Club.query, Club).filter_by(id=club_id).first_or_404()
+
     club.name = request.form.get('name')
     club.category = request.form.get('category')
     club.description = request.form.get('description')
@@ -98,18 +82,17 @@ def edit_club(club_id):
     return redirect(url_for('clubs.admin_clubs'))
 
 @clubs_bp.route('/admin/delete/<int:club_id>', methods=['POST'])
-@school_scoped
-@role_minimum('dean')
+@dean_required
 def delete_club(club_id):
-    club = Club.query.filter_by(id=club_id, school_id=g.school_id).first_or_404()
+    club = school_scope(Club.query, Club).filter_by(id=club_id).first_or_404()
+
     db.session.delete(club)
     db.session.commit()
     flash('Club deleted successfully.', 'success')
     return redirect(url_for('clubs.admin_clubs'))
 
 @clubs_bp.route('/admin/events', methods=['GET', 'POST'])
-@school_scoped
-@role_minimum('dean')
+@dean_required
 def admin_events():
     if request.method == 'POST':
         title = request.form.get('title')
@@ -139,14 +122,15 @@ def admin_events():
         flash('External event created successfully.', 'success')
         return redirect(url_for('clubs.admin_events'))
         
-    events = ExternalEvent.query.filter_by(school_id=g.school_id).order_by(ExternalEvent.date.desc()).all()
+    events = school_scope(ExternalEvent.query, ExternalEvent).order_by(ExternalEvent.date.desc()).all()
     return render_template('clubs/admin_events.html', events=events)
 
+
 @clubs_bp.route('/admin/events/edit/<int:event_id>', methods=['POST'])
-@school_scoped
-@role_minimum('dean')
+@dean_required
 def edit_event(event_id):
-    event = ExternalEvent.query.filter_by(id=event_id, school_id=g.school_id).first_or_404()
+    event = school_scope(ExternalEvent.query, ExternalEvent).filter_by(id=event_id).first_or_404()
+
     event.title = request.form.get('title')
     event.hosting_college = request.form.get('hosting_college')
     
@@ -166,10 +150,10 @@ def edit_event(event_id):
     return redirect(url_for('clubs.admin_events'))
 
 @clubs_bp.route('/admin/events/delete/<int:event_id>', methods=['POST'])
-@school_scoped
-@role_minimum('dean')
+@dean_required
 def delete_event(event_id):
-    event = ExternalEvent.query.filter_by(id=event_id, school_id=g.school_id).first_or_404()
+    event = school_scope(ExternalEvent.query, ExternalEvent).filter_by(id=event_id).first_or_404()
+
     db.session.delete(event)
     db.session.commit()
     flash('External event deleted successfully.', 'success')

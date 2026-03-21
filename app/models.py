@@ -537,6 +537,7 @@ class Internship(db.Model):
     __tablename__ = 'internships'
 
     id = db.Column(db.Integer, primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
     company_name = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(200), nullable=False)
     location = db.Column(db.String(100), nullable=False)
@@ -547,6 +548,12 @@ class Internship(db.Model):
     required_skills = db.Column(db.Text)
     application_link = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    school = db.relationship('School', backref=db.backref('internships', lazy='dynamic'))
+
+    __table_args__ = (
+        db.Index('ix_internship_school', 'school_id'),
+    )
 
 
 # =============================================================================

@@ -42,6 +42,36 @@ def create_app():
         PERMANENT_SESSION_LIFETIME=1800, # 30 minutes
     )
 
+    @app.before_request
+    def load_user_context():
+        from .permissions import get_current_user, school_scope
+        from .models import Message, Announcement
+        from flask import g
+        
+        user = get_current_user()
+        g.current_user = user
+        if user:
+            g.school_id = user.school_id
+            # Load notifications
+            g.unread_messages = Message.query.filter_by(recipient_id=user.id, is_read=False).order_by(Message.sent_at.desc()).limit(5).all()
+            g.unread_count = Message.query.filter_by(recipient_id=user.id, is_read=False).count()
+            
+            # Load school context announcements
+            if user.role == 'platform_owner':
+                g.recent_announcements = Announcement.query.order_by(Announcement.posted_at.desc()).limit(3).all()
+            else:
+                g.recent_announcements = school_scope(Announcement.query, Announcement).order_by(Announcement.posted_at.desc()).limit(3).all()
+        else:
+            g.school_id = None
+            g.unread_count = 0
+            g.unread_messages = []
+            g.recent_announcements = []
+
+    @app.context_processor
+    def inject_user():
+        from flask import g
+        return dict(current_user=g.current_user)
+
     @app.after_request
     def add_header(response):
         """
@@ -74,6 +104,16 @@ def create_app():
     app.register_blueprint(lost_found_bp)
     app.register_blueprint(clubs_bp)
     app.register_blueprint(upload_bp)
+
+    @app.errorhandler(403)
+    def forbidden(e):
+        from flask import render_template
+        return render_template('errors/403.html'), 403
+
+    @app.errorhandler(404)
+    def not_found(e):
+        from flask import render_template
+        return render_template('errors/404.html'), 404
 
     @app.route('/')
     def index():

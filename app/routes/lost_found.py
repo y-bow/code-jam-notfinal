@@ -1,10 +1,13 @@
 import os
 from datetime import datetime
 from werkzeug.utils import secure_filename
-from flask import Blueprint, render_template, request, redirect, url_for, flash, g, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, g, current_app, abort
 
-from app.models import db, LostFoundItem, Message
-from app.middleware import school_scoped
+from ..models import db, LostFoundItem, Message
+from ..permissions import (
+    require_role, require_min_role, student_required, 
+    dean_required, admin_required, school_scope
+)
 
 lost_found_bp = Blueprint('lost_found', __name__, url_prefix='/lost-found')
 
@@ -14,21 +17,19 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @lost_found_bp.route('/gallery', methods=['GET'])
-@school_scoped
+@student_required
 def gallery():
-    query = request.args.get('q', '')
+    query_str = request.args.get('q', '')
     category = request.args.get('category', '')
     report_type = request.args.get('type', '')
 
-    if g.current_user.role == 'admin':
-        base_query = LostFoundItem.query.filter_by(status='open')
-    else:
-        base_query = LostFoundItem.query.filter_by(school_id=g.school_id, status='open')
+    # Use school_scope for automatic multi-tenancy
+    base_query = school_scope(LostFoundItem.query, LostFoundItem).filter_by(status='open')
     
-    if query:
+    if query_str:
         base_query = base_query.filter(
-            (LostFoundItem.title.ilike(f'%{query}%')) | 
-            (LostFoundItem.location.ilike(f'%{query}%'))
+            (LostFoundItem.title.ilike(f'%{query_str}%')) | 
+            (LostFoundItem.location.ilike(f'%{query_str}%'))
         )
     if category:
         base_query = base_query.filter_by(category=category)
@@ -40,23 +41,22 @@ def gallery():
 
     return render_template('lost_found/gallery.html', 
                             items=items, 
-                            query=query, 
+                            query=query_str, 
                             selected_category=category,
                             selected_type=report_type,
                             categories=categories)
 
 @lost_found_bp.route('/my-items', methods=['GET'])
-@school_scoped
+@student_required
 def my_items():
-    items = LostFoundItem.query.filter_by(
-        school_id=g.school_id, 
+    items = school_scope(LostFoundItem.query, LostFoundItem).filter_by(
         reporter_id=g.current_user.id
     ).order_by(LostFoundItem.timestamp.desc()).all()
     
     return render_template('lost_found/my_items.html', items=items)
 
 @lost_found_bp.route('/report', methods=['GET', 'POST'])
-@school_scoped
+@student_required
 def report():
     categories = ['Electronics', 'ID Cards', 'Books', 'Clothing', 'Accessories', 'Other']
     if request.method == 'POST':
@@ -94,11 +94,10 @@ def report():
         db.session.add(new_item)
         db.session.flush() # get new_item.id
 
-        # Matching Logic inside Agent loop
+        # Matching Logic
         if report_type == 'found':
-            # look for open 'lost' items of same category
-            potential_matches = LostFoundItem.query.filter_by(
-                school_id=g.school_id, 
+            # look for open 'lost' items of same category in the SAME school
+            potential_matches = school_scope(LostFoundItem.query, LostFoundItem).filter_by(
                 report_type='lost',
                 status='open',
                 category=category
@@ -110,7 +109,6 @@ def report():
                 words_found = set(title.lower().split() + description.lower().split())
                 words_lost = set(lost_item.title.lower().split() + lost_item.description.lower().split())
                 
-                # filter common words length < 4 maybe, but for simplicity just intersecting
                 overlap = words_found.intersection(words_lost)
                 if len(overlap) >= 2: # heuristic: at least 2 common words
                     # Notification!
@@ -125,11 +123,11 @@ def report():
                     matched = True
             
             if matched:
-                flash("Item reported successfully! We notified a user whose lost item matches your description.", "success")
+                flash("Item reported successfully! We notified users whose lost items might match yours.", "success")
             else:
                 flash("Item reported successfully!", "success")
         else:
-            flash("Lost item reported successfully! You will be notified if someone finds something similar.", "success")
+            flash("Lost item reported successfully!", "success")
 
         db.session.commit()
         return redirect(url_for('lost_found.gallery'))
@@ -137,14 +135,24 @@ def report():
     return render_template('lost_found/report.html', categories=categories)
 
 @lost_found_bp.route('/resolve/<int:item_id>', methods=['POST'])
-@school_scoped
+@student_required
 def resolve(item_id):
-    item = LostFoundItem.query.get_or_404(item_id)
-    if g.current_user.role != 'admin' and (item.school_id != g.school_id or item.reporter_id != g.current_user.id):
-        flash("Unauthorized action.", "danger")
-        return redirect(url_for('lost_found.my_items'))
+    # Use school_scope to ensure admin/platform_owner can see it globally or per school
+    item = school_scope(LostFoundItem.query, LostFoundItem).filter_by(id=item_id).first_or_404()
+    
+    # Permission check: Admin/Platform Owner can resolve anything they see, 
+    # others can only resolve their own reports.
+    can_resolve = False
+    if g.current_user.role in ('admin', 'platform_owner', 'dean'):
+        can_resolve = True
+    elif item.reporter_id == g.current_user.id:
+        can_resolve = True
+        
+    if not can_resolve:
+        abort(403)
     
     item.status = 'resolved'
     db.session.commit()
     flash(f"Item '{item.title}' marked as resolved.", "success")
     return redirect(url_for('lost_found.my_items'))
+
