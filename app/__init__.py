@@ -35,6 +35,28 @@ def create_app():
     def fix_time_filter(s):
         return s.replace(" ", "") if s else s
 
+    @app.context_processor
+    def inject_globals():
+        from flask import session
+        from .models import School
+        school_id = session.get('school_id')
+        school = School.query.get(school_id) if school_id else None
+        
+        # Determine school name: if global admin (no school_id), then 'Hive' or empty
+        # If school exists, use its name. Fallback to session or 'Platform'
+        if not school_id:
+            # Platform Owner (Global Admin)
+            school_name = None
+        else:
+            school_name = school.name if school else session.get('school_name', 'Your University')
+            
+        return dict(
+            school=school,
+            school_name=school_name,
+            app_name='Hive',
+            platform_version='1.0.4'
+        )
+
     # Session Security
     app.config.update(
         SESSION_COOKIE_HTTPONLY=True,

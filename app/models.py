@@ -33,6 +33,8 @@ class School(db.Model):
     name = db.Column(db.String(200), nullable=False)
     code = db.Column(db.String(20), unique=True, nullable=False)
     domain = db.Column(db.String(100))  # e.g. 'scds.saiuniversity.edu.in'
+    logo_url = db.Column(db.String(500)) # Custom school logo
+    accent_color = db.Column(db.String(20), default='#3B82F6') # CSS hex color
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
