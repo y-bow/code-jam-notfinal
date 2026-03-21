@@ -220,7 +220,7 @@
     <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Type the email of another teacher to assign them as an assistant for this course.</p>
     <form action="{{ url_for('classroom.assign_assistant_professor', course_id=course.id) }}" method="POST"
         style="display: flex; flex-direction: column; gap: 1.5rem;">
-        <input type="email" name="email" class="glass-input" placeholder="teacher@university.edu" required
+        <input type="email" name="email" class="glass-input" placeholder="professor@university.edu" required
             style="min-width: 400px;">
         <div style="display: flex; gap: 1rem; justify-content: flex-end;">
             <button type="button" onclick="document.getElementById('paModal').close()"

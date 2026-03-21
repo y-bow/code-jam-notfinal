@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Hive | Professor Dashboard{% endblock %}
+{% block page_title %}Hello, {{ g.current_user.name }}{% endblock %}
+
+{% block content %}
+
+{% if g.current_user.must_change_password %}
+<div id="pw-suggest-banner" class="pw-suggest-banner glass-panel" role="alert">
+    <span class="material-symbols-rounded pw-banner-icon">lock</span>
+    <span class="pw-banner-text">
+        <strong>You're using a default password.</strong>
+        Update it to keep your account secure.
+    </span>
+    <a href="{{ url_for('auth.change_password') }}" class="pw-banner-btn">Change Password</a>
+    <button class="pw-banner-dismiss" id="pwDismissBtn" title="Dismiss for this session" aria-label="Dismiss">
+        <span class="material-symbols-rounded">close</span>
+    </button>
+</div>
+{% endif %}
+
+<!-- Analytics Overview -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="glass-panel stat-card" style="border-left: 4px solid var(--primary-color);">
+        <div class="stat-icon" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-color);">
+            <span class="material-symbols-rounded">groups</span>
+        </div>
+        <div class="stat-content">
+            <h4 class="stat-label">Total Students</h4>
+            <span class="stat-value">{{ stats.students }}</span>
+        </div>
+    </div>
+
+    <div class="glass-panel stat-card" style="border-left: 4px solid var(--secondary-color);">
+        <div class="stat-icon" style="background: rgba(168, 85, 247, 0.1); color: var(--secondary-color);">
+            <span class="material-symbols-rounded">book</span>
+        </div>
+        <div class="stat-content">
+            <h4 class="stat-label">Courses</h4>
+            <span class="stat-value">{{ stats.courses }}</span>
+        </div>
+    </div>
+
+    <div class="glass-panel stat-card" style="border-left: 4px solid var(--warning-color);">
+        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning-color);">
+            <span class="material-symbols-rounded">star</span>
+        </div>
+        <div class="stat-content">
+            <h4 class="stat-label">Avg Rating</h4>
+            <span class="stat-value">{{ stats.rating }}/5</span>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">{{ stats.rating_count }} reviews</div>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Main Column -->
+    <div class="main-column" style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <!-- Today's Classes -->
+        <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                    <span class="material-symbols-rounded" style="color: var(--primary-color);">schedule</span>
+                    Today's Schedule
+                </h3>
+            </div>
+
+            {% if today_classes %}
+            <div style="display: grid; gap: 1rem;">
+                {% for entry in today_classes %}
+                <div class="class-row glass-panel" style="padding: 1rem; display: flex; align-items: center; gap: 1.5rem; border: 1px solid var(--border-color); border-left: 4px solid {{ entry.color }};">
+                    <div style="font-weight: 600; min-width: 80px; color: var(--text-main);">{{ entry.startTime }}</div>
+                    <div style="flex-grow: 1;">
+                        <h4 style="margin: 0; font-size: 1rem;">{{ entry.title }}</h4>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">
+                            <span class="material-symbols-rounded" style="font-size: 0.9rem; vertical-align: middle;">room</span> {{ entry.room }}
+                            <span style="margin: 0 0.5rem;">•</span>
+                            <span class="material-symbols-rounded" style="font-size: 0.9rem; vertical-align: middle;">groups</span> {{ entry.studentCount }} Students
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 3rem 0; color: var(--text-muted);">
+                <span class="material-symbols-rounded" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">calendar_today</span>
+                <p>No classes scheduled for today.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Performance Analytics -->
+        <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg);">
+            <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 0;">
+                <span class="material-symbols-rounded" style="color: var(--secondary-color);">analytics</span>
+                Faculty Insights
+            </h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                <div class="analytics-card">
+                    <div id="grades-chart"></div>
+                </div>
+                <div class="analytics-card">
+                    <div id="attendance-chart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Side Column -->
+    <div class="side-column" style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <!-- Tasks -->
+        <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                    <span class="material-symbols-rounded" style="color: var(--warning-color);">task_alt</span>
+                    My Tasks
+                </h3>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                {% if tasks %}
+                {% for task in tasks %}
+                <div class="task-item {% if task.is_completed %}completed{% endif %}" style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem; border-radius: var(--radius-md); background: var(--bg-secondary);">
+                    <input type="checkbox" {% if task.is_completed %}checked{% endif %} disabled style="margin-top: 0.25rem; accent-color: var(--primary-color);">
+                    <div style="flex-grow: 1;">
+                        <div style="font-size: 0.9rem; color: var(--text-main);">{{ task.title }}</div>
+                        {% if task.due_date %}
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Due: {{ task.due_date.strftime('%d %b') }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p style="font-size: 0.85rem; color: var(--text-muted); text-align: center;">All caught up!</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Reviews -->
+        <div class="glass-panel" style="padding: 1.5rem; border-radius: var(--radius-lg);">
+            <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0; margin-bottom: 1.5rem;">
+                <span class="material-symbols-rounded" style="color: var(--success-color);">chat</span>
+                Recent Feedback
+            </h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for review in reviews %}
+                <div style="padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                        <span style="font-size: 0.85rem; font-weight: 600;">{{ "⭐" * review.rating }}</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">{{ review.created_at.strftime('%d %b') }}</span>
+                    </div>
+                    <p style="font-size: 0.85rem; margin: 0; color: var(--text-muted); font-style: italic;">"{{ review.comment }}"</p>
+                </div>
+                {% endfor %}
+                {% if not reviews %}
+                <p style="font-size: 0.85rem; color: var(--text-muted); text-align: center;">No reviews yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const graphs = {{ graphs|tojson|safe }};
+        
+        if (graphs.grades) {
+            const gradesData = JSON.parse(graphs.grades);
+            Plotly.newPlot('grades-chart', gradesData.data, gradesData.layout, {responsive: true, displayModeBar: false});
+        }
+        
+        if (graphs.attendance) {
+            const attData = JSON.parse(graphs.attendance);
+            Plotly.newPlot('attendance-chart', attData.data, attData.layout, {responsive: true, displayModeBar: false});
+        }
+    });
+
+    // Handle password banner dismissal
+    const pwDismissBtn = document.getElementById('pwDismissBtn');
+    if (pwDismissBtn) {
+        pwDismissBtn.addEventListener('click', () => {
+            document.getElementById('pw-suggest-banner').style.display = 'none';
+        });
+    }
+</script>
+
+<style>
+    .stat-card {
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-4px); }
+    .stat-icon {
+        padding: 1rem;
+        border-radius: 50%;
+        display: flex;
+    }
+    .stat-label { margin: 0; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+    
+    .task-item.completed { opacity: 0.6; }
+    .task-item.completed span { text-decoration: line-through; }
+    
+    @media (max-width: 1024px) {
+        .dashboard-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+{% endblock %}

@@ -62,7 +62,7 @@
                 
                 <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; padding-left: 0.5rem; display: flex; align-items: center; gap: 0.3rem;">
                     <span class="material-symbols-rounded" style="font-size: 0.9rem;">person</span>
-                    {{ entry.teacher }}
+                    {{ entry.professor }}
                 </div>
 
                 <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; padding-left: 0.5rem; display: flex; align-items: center; gap: 0.3rem;">
@@ -118,7 +118,7 @@
                     <ul style="list-style: none; padding: 0; margin-bottom: 0.5rem;">
                         {% for cls in day_data.classes %}
                         <li style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">
-                            {{ cls.title }} – {{ cls.teacher_name }}
+                            {{ cls.title }} – {{ cls.professor_name }}
                         </li>
                         {% endfor %}
                     </ul>

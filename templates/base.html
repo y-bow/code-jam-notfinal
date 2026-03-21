@@ -161,7 +161,7 @@
                     <span class="nav-label">Dean Dashboard</span>
                 </a>
                 {% elif g.current_user.role in ['professor', 'assistant_professor'] %}
-                <a href="{{ url_for('dashboard.teacher_dashboard') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.teacher_dashboard' }}">
+                <a href="{{ url_for('dashboard.professor_dashboard') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.professor_dashboard' }}">
                     <span class="nav-icon material-symbols-rounded">space_dashboard</span>
                     <span class="nav-label">Faculty Dashboard</span>
                 </a>
@@ -217,7 +217,7 @@
                 </a>
                 <a href="{{ url_for('dashboard.dean_ratings') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.dean_ratings' }}">
                     <span class="nav-icon material-symbols-rounded">star_half</span>
-                    <span class="nav-label">Teacher Ratings</span>
+                    <span class="nav-label">Professor Ratings</span>
                 </a>
                 <a href="{{ url_for('dashboard.early_warning') }}" class="nav-item {{ 'active' if request.endpoint == 'dashboard.early_warning' }}">
                     <span class="nav-icon material-symbols-rounded">warning</span>
@@ -515,7 +515,7 @@
                     <span class="info-label">Year</span>
                     <span class="info-value">{{ g.current_user.student_profile.enrollment_year }}</span>
                 </div>
-                {% elif g.current_user.role == 'teacher' and g.current_user.teacher_profile %}
+                {% elif g.current_user.role == 'professor' and g.current_user.teacher_profile %}
                 <div class="info-group">
                     <span class="info-label">Department</span>
                     <span class="info-value">{{ g.current_user.teacher_profile.department }}</span>

@@ -15,7 +15,7 @@
                 <span class="material-symbols-rounded">event</span>
                 External Events
             </a>
-            {% if g.current_user.role in ['admin', 'dean', 'superadmin'] %}
+            {% if g.current_user.role in ['admin', 'dean'] %}
             <a href="{{ url_for('clubs.admin_clubs') }}" class="btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; margin-left: 0.5rem;">
                 <span class="material-symbols-rounded">settings</span> Manage
             </a>

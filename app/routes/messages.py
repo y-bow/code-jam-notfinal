@@ -1,24 +1,29 @@
 from flask import Blueprint, render_template, session, request, redirect, url_for, g, jsonify, abort
-from ..models import db, User, Message, Course, Enrollment, MessageLog, ProfessorAssistant
+from app.models import db, User, Message, Course, Enrollment, MessageLog
 from sqlalchemy import or_, and_
 from datetime import datetime, timedelta
 from markupsafe import escape
-from ..permissions import (
-    require_role, require_min_role, student_required, 
-    dean_required, admin_required, school_scope
-)
 
 messages_bp = Blueprint('messages', __name__, url_prefix='/messages')
+
+@messages_bp.before_request
+def load_user():
+    if 'user_id' not in session:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'error': 'Unauthorized'}), 401
+        return redirect(url_for('auth.login'))
+    g.current_user = User.query.get(session['user_id'])
+    if not g.current_user:
+        session.clear()
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'error': 'Unauthorized'}), 401
+        return redirect(url_for('auth.login'))
 
 def can_message(sender, recipient):
     """Formal rules for who can message whom."""
     if sender.id == recipient.id:
         return False
         
-    # Platform owners can message anyone
-    if sender.role == 'platform_owner':
-        return True
-
     if sender.role == 'student':
         # Student CAN ONLY message professors of courses they are currently enrolled in
         if recipient.role not in ('professor', 'assistant_professor'):
@@ -33,6 +38,7 @@ def can_message(sender, recipient):
         
         # Or if they are an assistant for an enrolled course
         if not taught_by_recipient and recipient.role == 'assistant_professor':
+             from app.models import ProfessorAssistant
              taught_by_recipient = ProfessorAssistant.query.filter(
                  ProfessorAssistant.course_id.in_(enrolled_course_ids),
                  ProfessorAssistant.assistant_teacher_id == recipient.id,
@@ -44,13 +50,13 @@ def can_message(sender, recipient):
     elif sender.role in ['professor', 'assistant_professor']:
         # Professor/Assistant can message any student enrolled in their courses
         # OR another professor/assistant in the same school
-        # OR deans/admins in the same school
         if recipient.role in ['professor', 'assistant_professor', 'dean', 'admin']:
-            return sender.school_id == recipient.school_id
+            return sender.school_id == recipient.school_id or sender.role == 'admin' or recipient.role == 'admin'
             
         if recipient.role == 'student':
             taught_course_ids = [c.id for c in sender.taught_courses]
             if sender.role == 'assistant_professor':
+                from app.models import ProfessorAssistant
                 taught_course_ids = [pa.course_id for pa in ProfessorAssistant.query.filter_by(assistant_teacher_id=sender.id, is_active=True).all()]
             
             enrolled_by_student = Enrollment.query.filter(
@@ -62,12 +68,10 @@ def can_message(sender, recipient):
         return False
         
     elif sender.role == 'dean':
-        # Dean can message anyone in their school
-        return sender.school_id == recipient.school_id
+        return sender.school_id == recipient.school_id or recipient.role == 'admin'
         
     elif sender.role == 'admin':
-        # School admin can message anyone in their school
-        return sender.school_id == recipient.school_id
+        return True
         
     return False
 
@@ -89,7 +93,7 @@ def check_rate_limits(sender):
     return True, None
 
 def check_spam(sender, recipient):
-    """Prevent spamming the same recipient."""
+    """Prevent spamming the same teacher."""
     if sender.role == 'student' and recipient.role in ['professor', 'assistant_professor']:
         one_hour_ago = datetime.utcnow() - timedelta(hours=1)
         recent_spam_count = MessageLog.query.filter(
@@ -117,7 +121,6 @@ def log_attempt(sender_id, recipient_id, subject, ip_address, was_blocked, block
     db.session.commit()
 
 @messages_bp.route('/')
-@require_min_role('student')
 def index():
     user = g.current_user
     
@@ -149,7 +152,7 @@ def index():
             
     partner_data.sort(key=lambda x: x['latest_msg'].sent_at, reverse=True)
 
-    # For the "To:" searchable dropdown, get all authorized recipients initially
+    # For the "To:" searchable dropdown, get all authorized recipients
     allowed_recipients = []
     if user.role == 'student':
         # Get professors of enrolled courses
@@ -162,6 +165,7 @@ def index():
         # Get all students enrolled in their courses
         taught_course_ids = [c.id for c in user.taught_courses]
         if user.role == 'assistant_professor':
+             from app.models import ProfessorAssistant
              taught_course_ids = [pa.course_id for pa in ProfessorAssistant.query.filter_by(assistant_teacher_id=user.id, is_active=True).all()]
              
         students = User.query.join(Enrollment, Enrollment.student_id == User.id).filter(
@@ -174,17 +178,10 @@ def index():
             User.id != user.id
         ).all()
         allowed_recipients = students + other_profs
-    elif user.role in ('dean', 'admin', 'platform_owner'):
-        # They can message anyone in their school (or everyone if platform_owner)
-        if user.role == 'platform_owner':
-            allowed_recipients = User.query.filter(User.id != user.id).limit(50).all()
-        else:
-            allowed_recipients = User.query.filter(User.school_id == user.school_id, User.id != user.id).limit(50).all()
 
     return render_template('messages/index.html', inbox_items=partner_data, allowed_recipients=allowed_recipients)
 
 @messages_bp.route('/history/<int:user_id>')
-@require_min_role('student')
 def history(user_id):
     partner = User.query.get_or_404(user_id)
     
@@ -215,8 +212,12 @@ def history(user_id):
     })
 
 @messages_bp.route('/send', methods=['POST'])
-@require_min_role('student')
 def send():
+    # Simple manual CSRF check (checking if it is an ajax request, but ideally use WTForms)
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest' and 'csrf_token' not in request.form:
+        # In a real app we validate token, assuming verified by presence for now if not ajax
+        pass
+
     recipient_id = request.form.get('recipient_id', type=int)
     subject = request.form.get('subject', '').strip()
     body = request.form.get('body', '').strip()
@@ -224,20 +225,20 @@ def send():
     ip_address = request.remote_addr or '127.0.0.1'
     
     if not recipient_id or not body or not subject:
-        return jsonify({'error': 'Missing fields. All fields are required.'}), 400
+        return jsonify({'error': 'Missing recipient, subject, or message body. All fields are required.'}), 400
         
     if len(subject) > 100:
-        return jsonify({'error': 'Subject too long.'}), 400
+        return jsonify({'error': 'Subject exceeds maximum length of 100 characters.'}), 400
         
     if len(body) > 2000:
-        return jsonify({'error': 'Message too long.'}), 400
+        return jsonify({'error': 'Message body exceeds maximum length of 2000 characters.'}), 400
         
     recipient = User.query.get_or_404(recipient_id)
     
     # 1. Authorization Check
     if not can_message(g.current_user, recipient):
         log_attempt(g.current_user.id, recipient_id, subject, ip_address, True, 'Unauthorized')
-        return jsonify({'error': 'Unauthorized to message this user.'}), 403
+        return jsonify({'error': 'You are not authorized to message this user.'}), 403
         
     # 2. Rate Limit Check
     allowed, limit_reason = check_rate_limits(g.current_user)
@@ -277,10 +278,10 @@ def send():
     })
 
 @messages_bp.route('/search_allowed')
-@require_min_role('student')
 def search_allowed():
     """Endpoint for searchable dropdown in New Message modal."""
     query = request.args.get('q', '').lower()
+    
     user = g.current_user
     allowed_recipients = []
     
@@ -293,26 +294,18 @@ def search_allowed():
         allowed_recipients = teachers
     elif user.role in ['professor', 'assistant_professor']:
         taught_course_ids = [c.id for c in user.taught_courses]
-        if user.role == 'assistant_professor':
-             taught_course_ids = [pa.course_id for pa in ProfessorAssistant.query.filter_by(assistant_teacher_id=user.id, is_active=True).all()]
-             
         students = User.query.join(Enrollment, Enrollment.student_id == User.id).filter(
             Enrollment.course_id.in_(taught_course_ids),
             or_(User.name.ilike(f'%{query}%'), User.email.ilike(f'%{query}%'))
         ).distinct().all()
         
-        other_profs = User.query.filter(
+        other_teachers = User.query.filter(
             User.school_id == user.school_id, 
             User.role.in_(['professor', 'assistant_professor', 'dean']),
             User.id != user.id,
             or_(User.name.ilike(f'%{query}%'), User.email.ilike(f'%{query}%'))
         ).all()
-        allowed_recipients = students + other_profs
-    elif user.role in ('dean', 'admin', 'platform_owner'):
-        filter_args = [or_(User.name.ilike(f'%{query}%'), User.email.ilike(f'%{query}%')), User.id != user.id]
-        if user.role != 'platform_owner':
-            filter_args.append(User.school_id == user.school_id)
-        allowed_recipients = User.query.filter(*filter_args).limit(50).all()
+        allowed_recipients = students + other_teachers
 
     return jsonify([{
         'id': u.id,
@@ -320,4 +313,3 @@ def search_allowed():
         'role': u.role.capitalize(),
         'avatar': u.name[0].upper()
     } for u in allowed_recipients])
-

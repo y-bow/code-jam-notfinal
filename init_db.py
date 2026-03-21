@@ -3,8 +3,7 @@ from app.models import (
     db, User, Student, Teacher, School, Section,
     Course, Enrollment, Announcement, TimetableEntry, bcrypt,
     TeacherTodo, TeacherRating, Message, Internship, LostFoundItem,
-    Club, ExternalEvent, ProfessorAssistant, ClassRepNomination,
-    UniversityRegistration, PlatformAnnouncement
+    Club, ExternalEvent, ProfessorAssistant, ClassRepNomination
 )
 from datetime import datetime, timedelta
 
@@ -20,95 +19,169 @@ def seed_db():
         # =====================================================================
         # 1. SCHOOLS
         # =====================================================================
-        school = School(
-            name='Sai University - School of Computing and Data Science',
-            code='SCDS',
-            domain='scds.saiuniversity.edu.in',
-            logo_url='https://scds.saiuniversity.edu.in/wp-content/uploads/2021/08/SCDS-Logo-Final.png',
-            accent_color='#1E40AF'
+        apex = School(
+            name='Apex Institute of Technology',
+            code='APEX',
+            domain='apex.edu'
         )
-        db.session.add(school)
+        greenfield = School(
+            name='Greenfield University',
+            code='GU',
+            domain='greenfield.edu'
+        )
+        db.session.add_all([apex, greenfield])
         db.session.commit()
 
         # =====================================================================
         # 2. SECTIONS
         # =====================================================================
-        sec1 = Section(school_id=school.id, name='Section 1', code='SEC-1', batch_year=2025)
-        sec2 = Section(school_id=school.id, name='Section 2', code='SEC-2', batch_year=2025)
-        db.session.add_all([sec1, sec2])
+        # Apex Sections
+        apex_sec1 = Section(school_id=apex.id, name='CSE Section A', code='CSE-A', batch_year=2026)
+        apex_sec2 = Section(school_id=apex.id, name='CSE Section B', code='CSE-B', batch_year=2026)
+        
+        # Greenfield Sections
+        gu_sec1 = Section(school_id=greenfield.id, name='Biology Group 1', code='BIO-1', batch_year=2026)
+        
+        db.session.add_all([apex_sec1, apex_sec2, gu_sec1])
         db.session.commit()
 
         # =====================================================================
-        # 3. USERS (Exactly 6 Roles)
+        # 3. USERS
         # =====================================================================
         pw = bcrypt.generate_password_hash('password123').decode('utf-8')
 
-        # ROLE 7: PLATFORM OWNER (Level 100)
-        owner = User(school_id=None, email='owner@hive.lms',
-                     password_hash=pw, role='owner', name='Hive Platform Owner', must_change_password=False)
+        # GLOBAL ADMIN (Platform Owner)
+        platform_owner = User(
+            school_id=None, 
+            email='owner@hive-lms.com',
+            password_hash=pw, 
+            role='admin', 
+            name='HIVE Platform Owner', 
+            must_change_password=True
+        )
+        
+        # APEX USERS
+        apex_dean = User(
+            school_id=apex.id, 
+            email='dean@apex.edu',
+            password_hash=pw, 
+            role='dean', 
+            name='Dr. Alice Dean', 
+            must_change_password=True
+        )
+        apex_prof1 = User(
+            school_id=apex.id, 
+            email='j.smith@apex.edu',
+            password_hash=pw, 
+            role='professor', 
+            name='Prof. John Smith', 
+            must_change_password=True
+        )
+        apex_prof2 = User(
+            school_id=apex.id, 
+            email='e.brown@apex.edu',
+            password_hash=pw, 
+            role='professor', 
+            name='Prof. Emily Brown', 
+            must_change_password=True
+        )
+        apex_asst_prof = User(
+            school_id=apex.id, 
+            email='asst.lee@apex.edu',
+            password_hash=pw, 
+            role='assistant_professor', 
+            name='Asst. Prof. David Lee', 
+            must_change_password=True
+        )
+        apex_student = User(
+            school_id=apex.id, 
+            email='student.alex@apex.edu',
+            password_hash=pw, 
+            role='student', 
+            name='Alex Student', 
+            must_change_password=True
+        )
+        apex_cr = User(
+            school_id=apex.id, 
+            email='chris.rep@apex.edu',
+            password_hash=pw, 
+            role='class_rep', 
+            name='Chris Rep', 
+            must_change_password=True
+        )
 
-        # ROLE 6: ADMIN (Level 99 - Global)
-        admin = User(school_id=None, email='admin@hive.lms',
-                     password_hash=pw, role='admin', name='HIVE Global Admin', must_change_password=False)
-        
-        # ROLE 5: DEAN (Level 5)
-        dean = User(school_id=school.id, email='dean@scds.saiuniversity.edu.in',
-                    password_hash=pw, role='dean', name='Dr. Sarah Dean', must_change_password=False)
-        
-        # ROLE 4: PROFESSOR (Level 4)
-        prof_nitish = User(school_id=school.id, email='nitish.r@saiuniversity.edu.in',
-                                password_hash=pw, role='professor', name='Prof. Nitish Rana', must_change_password=False)
-        prof_megha = User(school_id=school.id, email='megha.k@saiuniversity.edu.in',
-                              password_hash=pw, role='professor', name='Prof. Megha Kapoor', must_change_password=False)
-        
-        # ROLE 3: ASSISTANT PROFESSOR (Level 3)
-        assistant_prof = User(school_id=school.id, email='assistant@saiuniversity.edu.in',
-                              password_hash=pw, role='assistant_professor', name='Asst. Prof. Alex', must_change_password=False)
-        
-        # ROLE 2: CLASS REP (Level 2)
-        class_rep = User(school_id=school.id, email='rep@scds.saiuniversity.edu.in',
-                       password_hash=pw, role='class_rep', name='Sharan (Class Rep)', must_change_password=False)
-        
-        # ROLE 1: STUDENT (Level 1)
-        student1 = User(school_id=school.id, email='vaibhav.b-29@scds.saiuniversity.edu.in',
-                       password_hash=pw, role='student', name='Vaibhav Student', must_change_password=False)
-        
-        db.session.add_all([owner, admin, dean, prof_nitish, prof_megha, assistant_prof, class_rep, student1])
+        # GREENFIELD USERS
+        gu_dean = User(
+            school_id=greenfield.id, 
+            email='dean@greenfield.edu',
+            password_hash=pw, 
+            role='dean', 
+            name='Dr. Sarah Greenfield', 
+            must_change_password=True
+        )
+        gu_prof1 = User(
+            school_id=greenfield.id, 
+            email='m.wilson@greenfield.edu',
+            password_hash=pw, 
+            role='professor', 
+            name='Prof. Mark Wilson', 
+            must_change_password=True
+        )
+        gu_student = User(
+            school_id=greenfield.id, 
+            email='sam.jones@greenfield.edu',
+            password_hash=pw, 
+            role='student', 
+            name='Sam Jones', 
+            must_change_password=True
+        )
+
+        db.session.add_all([
+            platform_owner, 
+            apex_dean, apex_prof1, apex_prof2, apex_asst_prof, apex_student, apex_cr,
+            gu_dean, gu_prof1, gu_student
+        ])
         db.session.commit()
 
         # =====================================================================
         # 4. PROFILES
         # =====================================================================
         db.session.add_all([
-            Teacher(user_id=prof_nitish.id, department='Computer Science'),
-            Teacher(user_id=prof_megha.id, department='Humanities'),
-            Teacher(user_id=assistant_prof.id, department='Computer Science'),
-            Student(user_id=class_rep.id, section_id=sec1.id, enrollment_year=2025, cgpa=9.0),
-            Student(user_id=student1.id, section_id=sec1.id, enrollment_year=2025, cgpa=8.5),
+            # Apex Profiles
+            Teacher(user_id=apex_prof1.id, department='Computer Science'),
+            Teacher(user_id=apex_prof2.id, department='Mathematics'),
+            Teacher(user_id=apex_asst_prof.id, department='Computer Science'),
+            Student(user_id=apex_student.id, section_id=apex_sec1.id, enrollment_year=2026, cgpa=8.5),
+            Student(user_id=apex_cr.id, section_id=apex_sec1.id, enrollment_year=2026, cgpa=9.2),
+            
+            # Greenfield Profiles
+            Teacher(user_id=gu_prof1.id, department='Biology'),
+            Student(user_id=gu_student.id, section_id=gu_sec1.id, enrollment_year=2026, cgpa=7.8),
         ])
         db.session.commit()
 
         # =====================================================================
-        # 5. COURSES & ASSISTANTS
+        # 5. COURSES
         # =====================================================================
-        course1 = Course(section_id=sec1.id, name='Data Structures', code='CS201', teacher_id=prof_nitish.id, credits=4)
-        course2 = Course(section_id=sec1.id, name='Indian Constitution', code='POL101', teacher_id=prof_megha.id, credits=3)
-        db.session.add_all([course1, course2])
-        db.session.commit()
-
-        # Assign Assistant to course1
-        pa_entry = ProfessorAssistant(course_id=course1.id, professor_id=prof_nitish.id, assistant_teacher_id=assistant_prof.id)
-        db.session.add(pa_entry)
+        # Apex Courses
+        ds_course = Course(section_id=apex_sec1.id, name='Data Structures', code='CS101', teacher_id=apex_prof1.id, credits=4)
+        algo_course = Course(section_id=apex_sec1.id, name='Algorithms', code='CS102', teacher_id=apex_prof1.id, credits=4)
+        math_course = Course(section_id=apex_sec1.id, name='Calculus I', code='MA101', teacher_id=apex_prof2.id, credits=3)
+        
+        # Greenfield Courses
+        bio_course = Course(section_id=gu_sec1.id, name='Molecular Biology', code='BIO201', teacher_id=gu_prof1.id, credits=4)
+        
+        db.session.add_all([ds_course, algo_course, math_course, bio_course])
         db.session.commit()
 
         # =====================================================================
         # 6. ENROLLMENTS
         # =====================================================================
         db.session.add_all([
-            Enrollment(student_id=student1.id, course_id=course1.id),
-            Enrollment(student_id=student1.id, course_id=course2.id),
-            Enrollment(student_id=class_rep.id, course_id=course1.id),
-            Enrollment(student_id=class_rep.id, course_id=course2.id),
+            Enrollment(student_id=apex_student.id, course_id=ds_course.id),
+            Enrollment(student_id=apex_student.id, course_id=math_course.id),
+            Enrollment(student_id=apex_cr.id, course_id=ds_course.id),
+            Enrollment(student_id=gu_student.id, course_id=bio_course.id),
         ])
         db.session.commit()
 
@@ -116,46 +189,20 @@ def seed_db():
         # 7. TIMETABLE
         # =====================================================================
         db.session.add_all([
-            TimetableEntry(section_id=sec1.id, course_id=course1.id, day=0, start_time='09:00 AM', end_time='10:30 AM', title='Data Structures', room='AB1-101', color='var(--success-color)', teacher='Prof. Nitish Rana', period='P1'),
-            TimetableEntry(section_id=sec1.id, course_id=course2.id, day=0, start_time='11:00 AM', end_time='12:30 PM', title='Indian Constitution', room='AB1-102', color='var(--primary-color)', teacher='Prof. Megha Kapoor', period='P2')
-        ])
-        db.session.commit()
-
-        # =====================================================================
-        # 8. UNIVERSITY REGISTRATIONS
-        # =====================================================================
-        db.session.add_all([
-            UniversityRegistration(
-                university_name='Amity University',
-                domain='amity.edu',
-                ugc_number='UGC-12345',
-                rep_name='Rajesh Kumar',
-                rep_email='rajesh@amity.edu',
-                rep_designation='Registrar',
-                status='pending'
+            TimetableEntry(
+                section_id=apex_sec1.id, course_id=ds_course.id, day=0, 
+                start_time='09:00 AM', end_time='10:30 AM', title='Data Structures', 
+                room='L-101', color='var(--primary-color)', teacher='Prof. John Smith', period='P1'
             ),
-            UniversityRegistration(
-                university_name='BITS Pilani',
-                domain='bits-pilani.ac.in',
-                ugc_number='UGC-67890',
-                rep_name='Dr. Smitha Rao',
-                rep_email='smitha@bits-pilani.ac.in',
-                rep_designation='Vice Chancellor',
-                status='pending'
+            TimetableEntry(
+                section_id=gu_sec1.id, course_id=bio_course.id, day=0, 
+                start_time='10:00 AM', end_time='11:30 AM', title='Molecular Biology', 
+                room='B-402', color='var(--success-color)', teacher='Prof. Mark Wilson', period='P1'
             )
         ])
         db.session.commit()
 
-        # =====================================================================
-        # 9. PLATFORM ANNOUNCEMENTS
-        # =====================================================================
-        db.session.add(PlatformAnnouncement(
-            title='Welcome to HIVE 2.0',
-            body='We are excited to announce the launch of our new multi-university scaling features!'
-        ))
-        db.session.commit()
-
-        print("Database seeded successfully with 7 roles!")
+        print("Database seeded successfully with two universities and fictional data!")
 
 if __name__ == '__main__':
     seed_db()

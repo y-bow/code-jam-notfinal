@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Hive | Dean - Teacher Ratings{% endblock %}
+{% block title %}Hive | Dean - Professor Ratings{% endblock %}
 {% block page_title %}Faculty Performance Overview{% endblock %}
 
 
@@ -23,7 +23,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for stat in teacher_stats %}
+                {% for stat in professor_stats %}
                 <tr>
                     <td>
                         <div style="font-weight: 600;">{{ stat.name }}</div>

@@ -32,9 +32,12 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Logs
+# logs
 *.log
 flask_session/
+
+# uploads
+static/uploads/
 
 # Distribution
 *.egg-info/

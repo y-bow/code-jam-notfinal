@@ -440,7 +440,7 @@ class TimetableEntry(db.Model):
             'endTime': self.end_time,
             'title': self.title,
             'subject': self.title,
-            'teacher': self.teacher or '',
+            'professor': self.teacher or '',
             'period': self.period or '',
             'room': self.room,
             'color': self.color,

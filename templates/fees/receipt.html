@@ -170,9 +170,9 @@
     <div class="receipt-container">
         <div class="header">
             <div class="school-info">
-                <h1>{{ school_name | default('University Finance') }}</h1>
-                <p>{{ school.domain if school else '' }}</p>
-                <p>Official Digital Receipt</p>
+                <h1>{{ student.school.name | default('Apex Institute of Technology') }}</h1>
+                <p>School of Computing and Data Science</p>
+                <p>Chennai, India</p>
             </div>
             <div class="receipt-meta">
                 <h2>FEE RECEIPT</h2>
@@ -230,7 +230,7 @@
 
         <div class="footer">
             <p>This is a computer-generated receipt and does not require a physical signature.</p>
-            <p>For any queries, please contact the finance department at finance@{{ school.domain if school and school.domain else 'university.edu' }}</p>
+            <p>For any queries, please contact the finance department at finance@apex.edu</p>
         </div>
     </div>
 

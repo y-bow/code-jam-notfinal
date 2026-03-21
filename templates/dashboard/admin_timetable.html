@@ -79,7 +79,7 @@
                 </div>
                 
                 <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
-                    <span class="material-symbols-rounded" style="font-size: 1rem;">person</span> {{ entry.teacher or 'No Teacher' }}
+                    <span class="material-symbols-rounded" style="font-size: 1rem;">person</span> {{ entry.professor or 'No Professor' }}
                 </div>
                 
                 <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; margin-top: 0.25rem;">
@@ -167,8 +167,8 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
                 <div>
-                    <label class="modal-label">Teacher</label>
-                    <input type="text" name="teacher" required class="modal-input">
+                    <label class="modal-label">Professor</label>
+                    <input type="text" name="professor" required class="modal-input">
                 </div>
                 <div>
                     <label class="modal-label">Room</label>
@@ -210,8 +210,8 @@
             </div>
             
             <div style="margin-bottom: 1.25rem;">
-                <label class="modal-label">Assigned Teacher</label>
-                <input type="text" name="teacher" id="edit_teacher" required class="modal-input">
+                <label class="modal-label">Assigned Professor</label>
+                <input type="text" name="professor" id="edit_teacher" required class="modal-input">
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
@@ -323,7 +323,7 @@ function openAddModal() {
 function openEditModal(entry) {
     document.getElementById('edit_entry_id').value = entry.id;
     document.getElementById('edit_subject').value = entry.title;
-    document.getElementById('edit_teacher').value = entry.teacher || '';
+    document.getElementById('edit_teacher').value = entry.professor || '';
     document.getElementById('edit_room').value = entry.room;
     document.getElementById('edit_period').value = entry.period || '';
     document.getElementById('edit_start_time').value = entry.startTime.replace(" ", "");

@@ -144,7 +144,7 @@ def create_app():
             if role in ('student', 'class_rep'):
                 return redirect(url_for('dashboard.student_dashboard'))
             elif role in ('professor', 'assistant_professor'):
-                return redirect(url_for('dashboard.teacher_dashboard'))
+                return redirect(url_for('dashboard.professor_dashboard'))
             elif role == 'dean':
                 return redirect(url_for('dashboard.school_analytics'))
             elif role == 'admin':

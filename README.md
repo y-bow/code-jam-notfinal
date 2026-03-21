@@ -1,10 +1,10 @@
-# LMS Prototype - Code-JAM
+# Hive — Open Source University LMS
+### The Smarter Way to Manage Higher Education
 
-A university Learning Management System (LMS) prototype built for FOSS Hack 2026. This platform features multi-tenant architecture with role-based access control for Chancellors, Teachers, and Students.
+A university Learning Management System (LMS) prototype built for FOSS Hack 2026. This platform features multi-tenant architecture with role-based access control for Deans, Professors, and Students.
 
-## Features
 - **Multi-tenancy**: Data isolated per school.
-- **Role-based Access**: Custom dashboards and permissions for students, teachers, and administrators.
+- **Role-based Access**: Custom dashboards and permissions for students, professors, and administrators.
 - **Classroom Management**: Course enrollments, assignments, and resource sharing.
 - **Timetable**: Section-specific weekly schedules.
 - **Announcements & Messaging**: Real-time communication within schools and courses.
