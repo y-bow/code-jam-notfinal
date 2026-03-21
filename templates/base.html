@@ -23,6 +23,33 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=2">
+
+    <!-- Dynamic University Branding -->
+    <style>
+        :root {
+            /* Fallback to Hive Blue or Use School Accent */
+            --primary-color: {{ school.accent_color if school else '#3B82F6' }};
+            {% if not school and g.current_user and g.current_user.role == 'admin' %}
+            /* Platform Owner Branding: Deep Amber/Gold */
+            --primary-color: #F59E0B;
+            --secondary-color: #D97706;
+            {% endif %}
+        }
+        
+        /* Role Badge Styles */
+        .role-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-rep { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
+        .badge-asst { background: rgba(107, 114, 128, 0.15); color: #9CA3AF; }
+        .badge-dean { background: rgba(59, 130, 246, 0.15); color: #3B82F6; }
+        .badge-admin { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
+    </style>
 </head>
 
 <body class="light-theme">
@@ -40,10 +67,30 @@
         <aside class="sidebar glass-panel">
             <div class="sidebar-header">
                 <div class="logo">
-                    <img src="{{ url_for('static', filename='images/light_theme.png') }}" alt="Hive Logo"
-                        class="logo-light">
-                    <img src="{{ url_for('static', filename='images/dark_theme.png') }}" alt="Hive Logo"
-                        class="logo-dark">
+                    {% if not school and g.current_user and g.current_user.role == 'admin' %}
+                        <!-- Platform Owner Header -->
+                        <div style="display: flex; gap: 0.8rem; align-items: center;">
+                            <img src="{{ url_for('static', filename='favicon.png') }}" style="width: 32px; height: 32px;" alt="Hive Logo">
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.1rem;">Hive Platform</h3>
+                                <span style="font-size: 0.7rem; color: var(--text-muted);">v{{ platform_version }}</span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- University Header -->
+                        {% if school and school.logo_url %}
+                            <img src="{{ school.logo_url }}" alt="{{ school.name }} Logo" style="max-height: 48px; object-fit: contain;">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/light_theme.png') }}" alt="Hive Logo" class="logo-light">
+                            <img src="{{ url_for('static', filename='images/dark_theme.png') }}" alt="Hive Logo" class="logo-dark">
+                        {% endif %}
+                        
+                        {% if school_name %}
+                            <div class="school-header-title" style="margin-top: 0.5rem; font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">
+                                {{ school_name }}
+                            </div>
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
 
@@ -248,13 +295,23 @@
                         </span>
                         <span class="user-role">
                             {% if g.current_user %}
-                                {% if g.current_user.role == 'assistant_professor' %}
-                                    <span style="color: var(--primary-color); font-weight: 600; font-size: 0.75rem;">Assistant</span>
+                                {% if g.current_user.role == 'class_rep' %}
+                                    <span class="role-badge badge-rep">Rep</span>
+                                {% elif g.current_user.role == 'assistant_professor' %}
+                                    <span class="role-badge badge-asst">Asst.</span>
+                                {% elif g.current_user.role == 'dean' %}
+                                    <span class="role-badge badge-dean">Dean</span>
+                                {% elif g.current_user.role == 'admin' %}
+                                    {% if not g.current_user.school_id %}
+                                        Owner
+                                    {% else %}
+                                        <span class="role-badge badge-admin">Admin</span>
+                                    {% endif %}
                                 {% else %}
-                                    {{ g.current_user.role | replace('_', ' ') | title }}
+                                    {{ g.current_user.role | title }}
                                 {% endif %}
                             {% else %}
-                            Student
+                                Student
                             {% endif %}
                         </span>
                     </div>

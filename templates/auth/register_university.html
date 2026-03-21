@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Join Hive | Register Your University{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <!-- Left Side: Branding & Features -->
+    <div class="register-info profile-details glass-panel">
+        <div class="brand-section">
+            <img src="{{ url_for('static', filename='images/dark_theme.png') }}" alt="Hive Logo" class="register-logo logo-dark">
+            <h1 class="font-heading">Scale your institution with <span class="text-gradient">Hive</span></h1>
+            <p class="text-muted">The all-in-one Learning Management System designed for modern universities.</p>
+        </div>
+
+        <div class="social-proof">
+            <div class="stat-badge">
+                <span class="material-symbols-rounded">groups</span>
+                <span>Join 50+ universities on Hive</span>
+            </div>
+        </div>
+
+        <div class="features-list">
+            <div class="feature-item">
+                <span class="material-symbols-rounded feature-icon" style="color: #3B82F6;">calendar_month</span>
+                <div class="feature-text">
+                    <strong>Timetable Management</strong>
+                    <p>Automated scheduling and conflict resolution for sections.</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <span class="material-symbols-rounded feature-icon" style="color: #10B981;">checklist</span>
+                <div class="feature-text">
+                    <strong>Attendance Tracking</strong>
+                    <p>Real-time attendance logs with early warning alerts.</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <span class="material-symbols-rounded feature-icon" style="color: #F59E0B;">bar_chart</span>
+                <div class="feature-text">
+                    <strong>Grade Management</strong>
+                    <p>Centralized grading system with automated CGPA calculation.</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <span class="material-symbols-rounded feature-icon" style="color: #8B5CF6;">cloud_upload</span>
+                <div class="feature-text">
+                    <strong>Bulk Data Upload</strong>
+                    <p>Import thousands of students and courses in seconds via CSV/Excel.</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <span class="material-symbols-rounded feature-icon" style="color: #EC4899;">code</span>
+                <div class="feature-text">
+                    <strong>Free and Open Source</strong>
+                    <p>No license fees. Full control over your data and infrastructure.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side: Registration Form -->
+    <div class="register-form-wrapper glass-panel">
+        <div class="form-header">
+            <h2>Register University</h2>
+            <p>Start your 30-day free pilot today.</p>
+        </div>
+
+        <form method="POST" class="auth-form">
+            <div class="form-group">
+                <label for="university_name">University Name</label>
+                <div class="input-wrapper">
+                    <span class="material-symbols-rounded input-icon">apartment</span>
+                    <input type="text" id="university_name" name="university_name" placeholder="e.g. Your University" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="university_code">University Code (Short)</label>
+                <div class="input-wrapper">
+                    <span class="material-symbols-rounded input-icon">short_text</span>
+                    <input type="text" id="university_code" name="university_code" placeholder="e.g. SAI-UNI" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="admin_email">Admin Email Address</label>
+                <div class="input-wrapper">
+                    <span class="material-symbols-rounded input-icon">mail</span>
+                    <input type="email" id="admin_email" name="admin_email" placeholder="dean@university.edu" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="expected_students">Expected Students</label>
+                    <div class="input-wrapper">
+                        <span class="material-symbols-rounded input-icon">person</span>
+                        <select id="expected_students" name="expected_students">
+                            <option value="<500">Less than 500</option>
+                            <option value="500-2000">500 - 2,000</option>
+                            <option value="2000-5000">2,000 - 5,000</option>
+                            <option value="5000+">5,000+</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
+                Request Access
+                <span class="material-symbols-rounded">arrow_forward</span>
+            </button>
+            
+            <p class="auth-footer" style="margin-top: 1.5rem; text-align: center;">
+                Already using Hive? <a href="{{ url_for('auth.login') }}">Log in here</a>
+            </p>
+        </form>
+    </div>
+</div>
+
+<style>
+    .register-container {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 2rem auto;
+        min-height: 80vh;
+        align-items: start;
+    }
+
+    .register-info {
+        padding: 3rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .register-logo {
+        height: 48px;
+        margin-bottom: 1.5rem;
+    }
+
+    .brand-section h1 {
+        font-size: 2.5rem;
+        line-height: 1.2;
+        margin-bottom: 1rem;
+    }
+
+    .text-gradient {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .stat-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(var(--primary-rgb), 0.1);
+        border: 1px solid rgba(var(--primary-rgb), 0.2);
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--primary-color);
+    }
+
+    .features-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .feature-item {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .feature-icon {
+        font-size: 1.5rem;
+        padding: 0.5rem;
+        background: var(--bg-main);
+        border-radius: var(--radius-sm);
+    }
+
+    .feature-text strong {
+        display: block;
+        margin-bottom: 0.2rem;
+        color: var(--text-main);
+    }
+
+    .feature-text p {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    .register-form-wrapper {
+        padding: 3rem;
+    }
+
+    .form-header {
+        margin-bottom: 2rem;
+    }
+
+    .form-header h2 {
+        font-size: 1.8rem;
+        margin: 0;
+    }
+
+    .input-wrapper select {
+        width: 100%;
+        padding: 0.8rem 1rem 0.8rem 2.8rem;
+        background: var(--bg-hover);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        color: var(--text-main);
+        font-size: 1rem;
+        appearance: none;
+    }
+
+    @media (max-width: 1024px) {
+        .register-container {
+            grid-template-columns: 1fr;
+        }
+        .register-info {
+            padding: 2rem;
+        }
+    }
+</style>
+{% endblock %}

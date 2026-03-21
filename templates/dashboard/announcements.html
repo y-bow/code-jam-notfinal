@@ -52,9 +52,10 @@
             </div>
         </div>
         {% else %}
-        <div style="text-align: center; padding: 4rem; color: var(--text-muted);">
-            <span class="material-symbols-rounded" style="font-size: 3rem; margin-bottom: 1rem;">inbox</span>
-            <p>No announcements found for your institution.</p>
+        <div class="empty-state" style="text-align: center; padding: 5rem 2rem; color: var(--text-muted); background: var(--bg-main); border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+            <span class="material-symbols-rounded" style="font-size: 4rem; margin-bottom: 1.5rem; color: var(--primary-color); opacity: 0.3;">campaign</span>
+            <p style="font-weight: 600; font-size: 1.25rem; color: var(--text-main); margin-bottom: 0.5rem;">Nothing new right now.</p>
+            <p style="font-size: 0.95rem; margin: 0; max-width: 400px; margin: 0 auto;">No announcements found for your institution. Check back later for updates from your dean or professors.</p>
         </div>
         {% endfor %}
     </div>

@@ -56,11 +56,10 @@
                 </div>
                 {% endfor %}
                 {% else %}
-                <div
-                    style="padding: 2rem; text-align: center; color: var(--text-muted); background: var(--bg-main); border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
-                    <span class="material-symbols-rounded"
-                        style="font-size: 2.5rem; margin-bottom: 0.5rem; display: block;">event_busy</span>
-                    No classes scheduled for today.
+                <div class="empty-state" style="padding: 3rem; text-align: center; color: var(--text-muted); background: var(--bg-main); border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+                    <span class="material-symbols-rounded" style="font-size: 3rem; margin-bottom: 1rem; color: var(--primary-color); opacity: 0.5;">celebration</span>
+                    <p style="font-weight: 500; font-size: 1.1rem; color: var(--text-main); margin-bottom: 0.5rem;">You're all caught up! 🎉</p>
+                    <p style="font-size: 0.9rem; margin: 0;">No classes scheduled for today.</p>
                 </div>
                 {% endif %}
             </div>

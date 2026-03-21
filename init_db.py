@@ -22,7 +22,9 @@ def seed_db():
         school = School(
             name='Sai University - School of Computing and Data Science',
             code='SCDS',
-            domain='scds.saiuniversity.edu.in'
+            domain='scds.saiuniversity.edu.in',
+            logo_url='https://scds.saiuniversity.edu.in/wp-content/uploads/2021/08/SCDS-Logo-Final.png',
+            accent_color='#1E40AF'
         )
         db.session.add(school)
         db.session.commit()

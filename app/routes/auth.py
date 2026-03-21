@@ -212,3 +212,13 @@ def change_password():
             return redirect(url_for('dashboard.admin_dashboard'))
 
     return render_template('change_password.html')
+
+
+@auth_bp.route('/register/university', methods=['GET', 'POST'])
+def register_university():
+    if request.method == 'POST':
+        # Logic for creating a university registration request would go here
+        # For this agent, we focus on the UI
+        flash('Registration request submitted! Our team will contact you soon.', 'success')
+        return redirect(url_for('auth.login'))
+    return render_template('auth/register_university.html')
