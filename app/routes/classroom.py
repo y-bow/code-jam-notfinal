@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, g, flash, redirect, url_for, abort
 from ..middleware import school_scoped, owns_resource, role_minimum
 from ..models import (
     db, User, Student, Course, Enrollment, Section, ProfessorAssistant, 
-    ClassRepNomination, Announcement, ROLE_HIERARCHY, Assignment, Attendance, Submission, TeacherRating
+    ClassRepNomination, Announcement, ROLE_HIERARCHY, Assignment, Attendance, Submission, TeacherRating, JoinCode
 )
 from datetime import datetime
 
@@ -302,3 +302,67 @@ def submit_rating(course_id):
     db.session.commit()
     flash('Thank you for your feedback!', 'success')
     return redirect(url_for('classroom.view_classroom', course_id=course_id))
+
+
+@classroom_bp.route('/join', methods=['POST'])
+@school_scoped
+@role_minimum('student')
+def join_class():
+    code_text = request.form.get('code', '').strip().upper()
+    user = g.current_user
+
+    if not code_text or len(code_text) != 6:
+        flash('Invalid code format. Code must be 6 characters.', 'danger')
+        return redirect(url_for('dashboard.student_dashboard'))
+
+    # Validation: Code exists in JoinCode table
+    join_code = JoinCode.query.filter_by(code=code_text).first()
+
+    if not join_code:
+        flash('Invalid or expired code.', 'danger')
+        return redirect(url_for('dashboard.student_dashboard'))
+
+    # Validation: is_active == True
+    if not join_code.is_active:
+        flash('Invalid or expired code.', 'danger')
+        return redirect(url_for('dashboard.student_dashboard'))
+
+    # Validation: expires_at > now
+    if join_code.expires_at < datetime.utcnow():
+        flash('Invalid or expired code.', 'danger')
+        return redirect(url_for('dashboard.student_dashboard'))
+
+    # Validation: use_count < max_uses (if max_uses set)
+    if join_code.max_uses and join_code.use_count >= join_code.max_uses:
+        flash('Invalid or expired code.', 'danger')
+        return redirect(url_for('dashboard.student_dashboard'))
+
+    # Validation: Student's school_id matches code's school_id
+    if user.school_id != join_code.school_id:
+        flash('This class is from a different university.', 'danger')
+        return redirect(url_for('dashboard.student_dashboard'))
+
+    # Check if already enrolled
+    existing_enrollment = Enrollment.query.filter_by(
+        student_id=user.id, course_id=join_code.course_id
+    ).first()
+    if existing_enrollment:
+        flash('You are already enrolled in this class.', 'warning')
+        return redirect(url_for('classroom.view_classroom', course_id=join_code.course_id))
+
+    # On success: Create Enrollment record
+    new_enrollment = Enrollment(
+        student_id=user.id,
+        course_id=join_code.course_id,
+        status='active'
+    )
+    db.session.add(new_enrollment)
+
+    # Increment JoinCode.use_count
+    join_code.use_count += 1
+    
+    db.session.commit()
+
+    # Redirect to classroom
+    flash(f"Successfully joined {join_code.course.name}!", 'success')
+    return redirect(url_for('classroom.view_classroom', course_id=join_code.course_id))

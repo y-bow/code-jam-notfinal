@@ -2,6 +2,10 @@ import os
 from flask import Flask, redirect, url_for, session
 from dotenv import load_dotenv
 from .models import db, bcrypt
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
 
 load_dotenv()
 
@@ -25,6 +29,7 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     bcrypt.init_app(app)
+    limiter.init_app(app)
 
     @app.template_filter('fix_time')
     def fix_time_filter(s):

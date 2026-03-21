@@ -31,6 +31,7 @@
         {% endwith %}
 
         <form method="POST" action="{{ url_for('auth.login') }}" class="login-form">
+            <!-- ... existing form content ... -->
             <div class="input-group">
                 <input type="email" id="email" name="email" required placeholder=" ">
                 <label for="email">College Email</label>
@@ -62,6 +63,15 @@
                 <span class="material-symbols-rounded">arrow_forward</span>
             </button>
         </form>
+
+        <div class="auth-footer" style="margin-top: 2rem; text-align: center; display: flex; flex-direction: column; gap: 0.75rem;">
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+                <a href="{{ url_for('auth.request_reset') }}" style="color: var(--primary-color); text-decoration: none;">Forgot Password?</a>
+            </p>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+                Don't have an account? <a href="{{ url_for('auth.register') }}" style="color: var(--primary-color); font-weight: 600; text-decoration: none;">Register</a>
+            </p>
+        </div>
     </div>
 </div>
 

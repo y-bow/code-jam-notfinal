@@ -15,9 +15,10 @@ ROLE_HIERARCHY = {
     'professor': 4,
     'dean': 5,
     'admin': 99,
+    'platform_owner': 100,
 }
 
-VALID_ROLES = {'student', 'class_rep', 'assistant_professor', 'professor', 'dean', 'admin'}
+VALID_ROLES = {'student', 'class_rep', 'assistant_professor', 'professor', 'dean', 'admin', 'platform_owner'}
 
 
 # =============================================================================
@@ -85,6 +86,7 @@ class User(db.Model):
     role = db.Column(db.String(20), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     is_active = db.Column(db.Boolean, default=True)
+    is_suspended = db.Column(db.Boolean, default=False)
     must_change_password = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -110,9 +112,9 @@ class Student(db.Model):
     __tablename__ = 'students'
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
     section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), nullable=False)
     enrollment_year = db.Column(db.Integer, nullable=False)
-    roll_number = db.Column(db.String(50), nullable=False)
     major = db.Column(db.String(100))
     sgpa = db.Column(db.Float, default=0.0)
     cgpa = db.Column(db.Float, default=0.0)
@@ -122,6 +124,7 @@ class Student(db.Model):
 
     __table_args__ = (
         db.Index('ix_student_section', 'section_id'),
+        db.UniqueConstraint('user_id', 'school_id', name='uq_student_user_school'),
     )
 
 
@@ -651,35 +654,22 @@ class ClassRepNomination(db.Model):
     section = db.relationship('Section')
 
 
-# =============================================================================
-# DATA UPLOAD & LOGGING
-# =============================================================================
-
-class UploadedFile(db.Model):
-    """Tracks files uploaded for bulk processing."""
-    __tablename__ = 'uploaded_files'
+class JoinCode(db.Model):
+    """6-character codes for students to join classes."""
+    __tablename__ = 'join_codes'
 
     id = db.Column(db.Integer, primary_key=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
     school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
-    uploader_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    filename = db.Column(db.String(255), nullable=False)
-    filepath = db.Column(db.String(500), nullable=False)
-    file_type = db.Column(db.String(50), nullable=False) # student, course, timetable, attendance, grade
-    status = db.Column(db.String(20), default='pending') # pending, processing, completed, failed
-    row_count = db.Column(db.Integer, default=0)
-    success_count = db.Column(db.Integer, default=0)
-    error_count = db.Column(db.Integer, default=0)
+    code = db.Column(db.String(6), unique=True, nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    max_uses = db.Column(db.Integer) # NULL = unlimited
+    use_count = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    logs = db.relationship('UploadLog', backref='upload', lazy='dynamic', cascade='all, delete-orphan')
+    course = db.relationship('Course', backref=db.backref('join_codes', cascade='all, delete-orphan'))
+    school = db.relationship('School')
 
-class UploadLog(db.Model):
-    """Row-level error logging for bulk uploads."""
-    __tablename__ = 'upload_logs'
-
-    id = db.Column(db.Integer, primary_key=True)
-    upload_id = db.Column(db.Integer, db.ForeignKey('uploaded_files.id'), nullable=False)
-    row_number = db.Column(db.Integer)
-    error_message = db.Column(db.Text, nullable=False)
-    row_data = db.Column(db.Text) # JSON representation of the row that failed
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    def __repr__(self):
+        return f'<JoinCode {self.code} for Course {self.course_id}>'
