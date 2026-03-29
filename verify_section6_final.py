@@ -1,0 +1,22 @@
+from app import create_app
+from app.models import db, User, Student, Section
+
+app = create_app()
+
+def verify():
+    with app.app_context():
+        section = Section.query.filter_by(name='Section 6').first()
+        if not section:
+            print("Section 6 not found!")
+            return
+            
+        students = Student.query.filter_by(section_id=section.id).all()
+        print(f"Total students in Section 6: {len(students)}")
+        
+        last_student = Student.query.filter_by(section_id=section.id).order_by(Student.user_id.desc()).first()
+        if last_student:
+            user = User.query.get(last_student.user_id)
+            print(f"Last student added: {user.name} ({user.email}) to School ID: {user.school_id}")
+
+if __name__ == "__main__":
+    verify()
