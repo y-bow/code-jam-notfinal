@@ -26,9 +26,9 @@ def insert_students():
         pw_hash = bcrypt.generate_password_hash("hive@1234").decode('utf-8')
 
         student_data = [
-            ("Mormineni Jishnu Teja", "jishnuteja.m-29@scds.saiuniversity.edu.in"),
-            ("Otiddy Sai Praharsa Reddy", "praharsareddy.o-29@scds.saiuniversity.edu.in"),
-            ("Kadiveti Niwas", "nivas.k-29@scds.saiuniversity.edu.in"),
+            ("Moravineni Jishnu Teja", "jishnuteja.m-29@scds.saiuniversity.edu.in"),
+            ("Oreddy Sai Praharsa Reddy", "praharsareddy.o-29@scds.saiuniversity.edu.in"),
+            ("Kadiveti Nivas", "nivas.k-29@scds.saiuniversity.edu.in"),
             ("Rachuri Harsha Vardhan", "harshavardhan.r-29@scds.saiuniversity.edu.in"),
             ("Polisetty Venkata Surya Jathin", "venkatasuryajathin.p-29@scds.saiuniversity.edu.in"),
             ("Seepareddy Amarnath Reddy", "amarnathreddy.s-29@scds.saiuniversity.edu.in"),
@@ -41,14 +41,14 @@ def insert_students():
             ("Pudota Akhil", "akhil.p-29@scds.saiuniversity.edu.in"),
             ("Vulli Geeta", "geetha.v-29@scds.saiuniversity.edu.in"),
             ("Chaganti Avinash", "avinash.c-29@scds.saiuniversity.edu.in"),
-            ("Dasari Sai Sadhvik", "saisadhvik.d-29@scds.saiuniversity.edu.in"),
+            ("Dasam Sai Sadhvik", "saisadhvik.d-29@scds.saiuniversity.edu.in"),
             ("Dandu Mohith Varma", "mohithvarma.d-29@scds.saiuniversity.edu.in"),
             ("Marrikanti Venkata Dhanush", "venkatadhanush.m-29@scds.saiuniversity.edu.in"),
             ("Angina Pradeep Kumar", "pradeepkumar.a-29@scds.saiuniversity.edu.in"),
             ("Velpula Sai Sravan", "saisravan.v-29@scds.saiuniversity.edu.in"),
             ("Marrigunta Sai Charan", "saicharan.m-29@scds.saiuniversity.edu.in"),
             ("Boddu Mani Sampreeth Reddy", "manisampreeth.b-29@scds.saiuniversity.edu.in"),
-            ("Maniswarreddy Boddu", "maniswarreddy.b-29@scds.saiuniversity.edu.in"),
+            ("Maniswar Reddy Boddu", "maniswarreddy.b-29@scds.saiuniversity.edu.in"),
             ("Bodi Hari Babu", "bodihari.b-29@scds.saiuniversity.edu.in"),
             ("Chandra Padmaja", "padmaja.c-29@scds.saiuniversity.edu.in"),
             ("Shaik Khaja Nawaz", "khajanawaz.s-29@scds.saiuniversity.edu.in"),
@@ -69,7 +69,7 @@ def insert_students():
             ("Maddela Nanda Kishore", "nandakishore.m-29@scds.saiuniversity.edu.in"),
             ("Bommaka Harshitha", "harshitha.b-29@scds.saiuniversity.edu.in"),
             ("Pagadala Venkata Prabhu Likith", "prabhulikith.p-29@scds.saiuniversity.edu.in"),
-            ("Bombethula Mohan Vamsi Yadav", "mohanvamsiyadav.b-29@scds.saiuniversity.edu.in"),
+            ("Bombothula Mohan Vamsi Yadav", "mohanvamsiyadav.b-29@scds.saiuniversity.edu.in"),
             ("Turupusima Chavva Harshitha Reddy", "harshithareddy.t-29@scds.saiuniversity.edu.in"),
             ("Sandrapalli Jahnavi", "jahnavi.s-29@scds.saiuniversity.edu.in"),
             ("Banu Prakash Ramapuram", "prakash.b-29@scds.saiuniversity.edu.in"),
@@ -90,7 +90,7 @@ def insert_students():
             ("Yeturi Rakesh", "rakesh.y-29@scds.saiuniversity.edu.in"),
             ("Zaahin Bhattacharyya", "zaahin.b-29@scds.saiuniversity.edu.in"),
             ("Pera Charan Kumar Reddy", "charankumarreddy.p-29@scds.saiuniversity.edu.in"),
-            ("Padarthi Mohan Sabarish", "mohansabarish.p-29@scds.saiuniversity.edu.in"),
+            ("Padarthi Mohan Shabariash", "mohansabarish.p-29@scds.saiuniversity.edu.in"),
             ("Pikkili Dharma Sai Kumar", "dharmasaikumar.p-29@scds.saiuniversity.edu.in"),
             ("Pasupuleti Mognesh", "mognesh.p-29@scds.saiuniversity.edu.in"),
             ("Chenna Reddy Gari Manoj Reddy", "garimanojreddy.c-29@scds.saiuniversity.edu.in"),
@@ -110,7 +110,7 @@ def insert_students():
             ("Alahari Venkata Sai Santhosh", "saisanthosh.a-29@scds.saiuniversity.edu.in"),
             ("Mullagoori Arjun", "arjun.m-29@scds.saiuniversity.edu.in"),
             ("Lukkani Deepak", "deepak.l-29@scds.saiuniversity.edu.in"),
-            ("Patnaik Manas Tej", "manastej.p-29@scds.saiuniversity.edu.in")
+            ("Patnam Manas Tej", "manastej.p-29@scds.saiuniversity.edu.in")
         ]
 
         added_count = 0
