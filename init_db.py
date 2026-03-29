@@ -278,6 +278,197 @@ SECTION_3_STUDENTS = [
     ("Narbavee V",                           "narbavee.v-29@scds.saiuniversity.edu.in"),
 ]
 
+SECTION_5_STUDENTS = [
+    ("Vasili Praharsha", "praharsha.v-29@scds.saiuniversity.edu.in", 8),
+    ("Syed Mansoor", "mansoor.s-29@scds.saiuniversity.edu.in", 8),
+    ("Nellimarla mohan thanush karthikeya sai", "mohanthanush.n-29@scds.saiuniversity.edu.in", 8),
+    ("Nandyala Lakshmi Vijayanand Reddy", "vijayanand.n-29@scds.saiuniversity.edu.in", 8),
+    ("Lakkireddy Iswarya", "iswarya.l-29@scds.saiuniversity.edu.in", 8),
+    ("Shaik Arsheen", "arsheen.s-29@scds.saiuniversity.edu.in", 8),
+    ("Kuraku Sri Balaji", "sribalaji.k-29@scds.saiuniversity.edu.in", 8),
+    ("Gandikota Shaavanth", "shaavanth.g-29@scds.saiuniversity.edu.in", 8),
+    ("Yeluri Srikanth Reddy", "srikanth.r-29@scds.saiuniversity.edu.in", 8),
+    ("Pandi Ravi Kumar", "ravikumar.p-29@scds.saiuniversity.edu.in", 8),
+]
+
+SECTION_4_STUDENTS = [
+    # Batch 1
+    ("Mohamed Nibras S", "mohamednibras.s-29@scds.saiuniversity.edu.in"),
+    ("Pokala Sunvith Kumar Reddy", "sunvithkumar.p-29@scds.saiuniversity.edu.in"),
+    ("Palleti Ram Siddartha Reddy", "siddarthareddy.p-29@scds.saiuniversity.edu.in"),
+    ("Belum Vishal Reddy", "vishal.b-29@scds.saiuniversity.edu.in"),
+    ("Ambu Navya Reddy", "navya.a-29@scds.saiuniversity.edu.in"),
+    ("Basireddy Chandra Sekhar Reddy", "chandrasekhar.b-29@scds.saiuniversity.edu.in"),
+    ("Kommuru Venkata Sailendra Kumar", "sailendrakumar.k-29@scds.saiuniversity.edu.in"),
+    ("Sharan Pranav", "sharanpranav.a-29@scds.saiuniversity.edu.in"),
+    ("Avula Uma Maheswara Reddy", "umamaheswara.a-29@scds.saiuniversity.edu.in"),
+    ("Avula Manogna", "manogna.a-29@scds.saiuniversity.edu.in"),
+    ("Thanda Hanuma Karthikeya", "hanumakarthikeya.t-29@scds.saiuniversity.edu.in"),
+    ("Jasmitha N R V", "jasmitha.n-29@scds.saiuniversity.edu.in"),
+    ("Pandeti Sai Srinivas Raju", "saisrinivasraju.p-29@scds.saiuniversity.edu.in"),
+    ("Raghupathi Harsha Nandini", "harshadini.r-29@scds.saiuniversity.edu.in"),
+    ("Kotha Shanmukha Venkata Sai", "shanmukhaverkatasai.k-29@scds.saiuniversity.edu.in"),
+    ("Madduri Kapil Sravan Kumar", "sravankumar.m-29@scds.saiuniversity.edu.in"),
+    ("Ishwarya J S", "ishwarya.j-29@scds.saiuniversity.edu.in"),
+    ("Edukulla Sai Prashanth", "saiprashanth.e-29@scds.saiuniversity.edu.in"),
+    ("Sottu Sivaharsha", "sivaharsha.s-29@scds.saiuniversity.edu.in"),
+    ("Metta Sujith", "sujith.m-29@scds.saiuniversity.edu.in"),
+    ("Muttina Sai Santhosh", "saisanthosh.m-29@scds.saiuniversity.edu.in"),
+    ("Kurapati Nishanth Kumar Reddy", "nishanthkumar.k-29@scds.saiuniversity.edu.in"),
+    ("Bommuveera Bhargav Kumar Reddy", "bhargavkumarreddy.b-29@scds.saiuniversity.edu.in"),
+    ("Ravuru Yaswanth Reddy", "yaswanthreddy.r-29@scds.saiuniversity.edu.in"),
+    ("Shaik Sameer", "sameer.s-29@scds.saiuniversity.edu.in"),
+    ("Pati Venkata Virat Nani Siddhik", "viratnanisiddhik.p-29@scds.saiuniversity.edu.in"),
+    ("Vasam Chandana", "chandana.v-29@scds.saiuniversity.edu.in"),
+    ("Lakkakula Charan Teja", "charanteja.l-29@scds.saiuniversity.edu.in"),
+    # Batch 2
+    ("Sirimavilla Vijaya Lakshmi", "vijayalakshmi.s-29@scds.saiuniversity.edu.in"),
+    ("Bonthala Venkata Lakshmi Hema Varshini", "lakshmihemavarshini.b-29@scds.saiuniversity.edu.in"),
+    ("Kamepalli Harichandra Prasad", "harichandra.k-29@scds.saiuniversity.edu.in"),
+    ("Guntur Gokula Sai Balaji Vinay Kumar", "vinaykumar.g-29@scds.saiuniversity.edu.in"),
+    ("Vayila Tirumala", "tirumala.v-29@scds.saiuniversity.edu.in"),
+    ("Nunna Spandana", "spandana.n-29@scds.saiuniversity.edu.in"),
+    ("Nunna Venkata Santhosh", "venkatasanthosh.n-29@scds.saiuniversity.edu.in"),
+    ("Pasuluru Kummara Adil Kumar", "kumaraadilkumar.p-29@scds.saiuniversity.edu.in"),
+    ("Thummala Madhulika", "madhulika.t-29@scds.saiuniversity.edu.in"),
+    ("Yanamala Venkata Jeswanth Reddy", "jeswanthreddy.y-29@scds.saiuniversity.edu.in"),
+    ("Akkala Jasvanth Reddy", "jasvanthreddy.a-29@scds.saiuniversity.edu.in"),
+    ("Khyathi Teja Kethari", "tejakethari.k-29@scds.saiuniversity.edu.in"),
+    ("Peddiveeti Venkata Harish", "venkataharish.p-29@scds.saiuniversity.edu.in"),
+    ("V Viveka Vardhini", "vivekavardhini.v-29@scds.saiuniversity.edu.in"),
+    ("Chilakala Poorna Chandra Reddy", "poornachandra.c-29@scds.saiuniversity.edu.in"),
+    ("Nagineni Geetha", "geetha.n-29@scds.saiuniversity.edu.in"),
+    ("Nuka Bhanu Prakash Reddy", "bhanuprakashreddy.n-29@scds.saiuniversity.edu.in"),
+    ("Mudireddy Uma Maheswar Reddy", "umamaheswar.m-29@scds.saiuniversity.edu.in"),
+    ("Amari Rishitha Sri", "rishithasri.a-29@scds.saiuniversity.edu.in"),
+    ("Burreddy Mourya Karthik Reddy", "mouryakarthikreddy.b-29@scds.saiuniversity.edu.in"),
+    ("Yatagiri Ajay Kumar", "ajaykumar.y-29@scds.saiuniversity.edu.in"),
+    ("V Sanjay Shekar", "sanjayshekar.v-29@scds.saiuniversity.edu.in"),
+    ("Siddula Karthikeya Reddy", "karthikeyareddy.s-29@scds.saiuniversity.edu.in"),
+    ("Pabbisetty Abhilesh Sai", "abhileshsai.p-29@scds.saiuniversity.edu.in"),
+    ("Tellapati Jaswanth", "jaswanth.t1-29@scds.saiuniversity.edu.in"),
+    ("Bathala Sumanth", "sumanth.b-29@scds.saiuniversity.edu.in"),
+    ("Rendeddula Sivanjith Reddy", "sivanjith.r-29@scds.saiuniversity.edu.in"),
+    ("Vanama Hansika Pranavi", "hansikapranavi.v-29@scds.saiuniversity.edu.in"),
+    ("Shaik Mohammad Hafeez", "hafeez.s-29@scds.saiuniversity.edu.in"),
+    # Batch 3
+    ("Yadla Shashank Venkat Sai", "venkatasai.y-29@scds.saiuniversity.edu.in"),
+    ("Vidudala Abhinay Kumar", "abhinaykumar.v-29@scds.saiuniversity.edu.in"),
+    ("Mangali Jai Shubhakanth", "jaishubhakanth.m-29@scds.saiuniversity.edu.in"),
+    ("Koduru Guru Vignesh", "guruvignesh.k-29@scds.saiuniversity.edu.in"),
+    ("Kuntumalla Madan Kumar", "madankumar.k-29@scds.saiuniversity.edu.in"),
+    ("Bollineni Avinash", "avinash.b-29@scds.saiuniversity.edu.in"),
+    ("Avula Laasya", "laasya.a-29@scds.saiuniversity.edu.in"),
+    ("Balireddygari Deekshitha", "deekshitha.b-29@scds.saiuniversity.edu.in"),
+    ("Jogiparthi Venkata Audi Siva Rama Teja", "audisiva.j-29@scds.saiuniversity.edu.in"),
+    ("Valluri Dhushyanth Kumar", "dhushyanthkumar.v-29@scds.saiuniversity.edu.in"),
+    ("Bokkasam Naga Saranya", "saranya.b-29@scds.saiuniversity.edu.in"),
+    ("Erisetty Jetin", "jetin.e-29@scds.saiuniversity.edu.in"),
+    ("Jammala Venkata Sai Tagore", "saitagore.j-29@scds.saiuniversity.edu.in"),
+    ("Nossam Ramya Sruthi", "ramyasruthi.n-29@scds.saiuniversity.edu.in"),
+    ("Patan Imran Khan", "imrankhan.p-29@scds.saiuniversity.edu.in"),
+    ("Punugunta Venkata Mokshith", "mokshith.p-29@scds.saiuniversity.edu.in"),
+    ("Shaik Mahammad Sharif", "sharif.s-29@scds.saiuniversity.edu.in"),
+    ("Somu Naga Sharanya", "nagasharanya.s-29@scds.saiuniversity.edu.in"),
+    ("Padarthi Venkata Naga Sai Nikhil", "nagasainikhil.p-29@scds.saiuniversity.edu.in"),
+    ("Shaik Khadar Ujwal Thoufidh", "ujwalthoufidh.s-29@scds.saiuniversity.edu.in"),
+    ("Kothapally Vikram Rathod", "vikramrathod.k-29@scds.saiuniversity.edu.in"),
+    ("Malli Ram", "ram.m-29@scds.saiuniversity.edu.in"),
+    ("Boppana Pavan Sai", "pavansai.b-29@scds.saiuniversity.edu.in"),
+    ("Pachabatla Sukhesh", "sukhesh.p-29@scds.saiuniversity.edu.in"),
+    ("Kancherla Vinay", "vinay.k-29@scds.saiuniversity.edu.in"),
+    ("Vuyyala Sri Chakradhar", "srichakradhar.v-29@scds.saiuniversity.edu.in"),
+    ("Saijayni M S", "saijayni.m-29@scds.saiuniversity.edu.in")
+]
+
+SECTION_6_STUDENTS = [
+    # Batch 1
+    ("Doggireddy Saiharshith Reddy", "saiharshithreddy.d-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Palli Keerthana", "keerthana.p-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Gundra Sweenija Reddy", "sweenijareddy.g-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Padarthi Vishnu Vardhan Reddy", "vishnuvardhanreddy.p-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Pannem Uday Kumar", "udaykumar.p-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Maddala Mahesh Kumar Reddy", "maheshkumarreddy.m-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Kavali Madhu Sekhar Reddy", "madhusekharreddy.k-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Thudimella Venkata Likith", "venkatalikith.t-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Thiruvathuru Harsha Vardhan Rayulu", "harshavardhan.t-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Kolli Jeshvitha Reddy", "jeshvithreddy.k-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Syed Sameer Ahamed", "sameerahamed.s-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Buchupalle Siva Mohan Reddy", "sivamohanreddy.b-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Yanamala Goutham Reddy", "gowthamreddy.y-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Bochhu Nitya Sri", "nityasri.b-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Padarthi Thrigun Surya Saran Sreekar", "suryasaransreekar.p-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Veduruparthi Satya Bhaskara Varun", "satyabhaskaravarun.v-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Mahidhar Naidu Kommi", "mahidhar.k-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Dandamudi Rama Nikhita", "ramnikhita.d-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Tulluri Navadeep", "navadeep.t-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Jakkireddy Syam Sundar Pavan Kumar Reddy", "syamsundhar.j-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Lukkani Dheeraj", "dheeraj.l-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Edara Yashwanth Chowdary", "yashwanthchowdary.e-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Mettukuru Santhosh Reddy", "santhoshreddy.m-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Lakku Venkateswarlu", "venkateswarlu.l-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Pulipati Gowtham", "gowtham.p-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Tallu Venkata Mohan Reddy", "mohanreddy.t-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Nellore Sanjana", "sanjana.n-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Yeddula Manoj Kumar Reddy", "manojkumarreddy.y-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("M Sai Charan", "saicharan.m2-29@scds.saiuniversity.edu.in", "SCDS"),
+    # Batch 2
+    ("Netibottu Shaik Mahammad Hujefa", "mahammadhujefa.n-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Nodagala Devarshini Lakshmi Akshaya", "devarshinilakshmiakshaya.n-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Malli Lakshman", "lakshman.m-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Nakka Parimala", "parimala.n-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Bakka Mohith Venkata Ganesh Reddy", "ganeshreddy.b-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Jorige Kalyan Ram", "kalyanram.j-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Maramreddy Shiva Nandheswara Reddy", "shivanandheswarareddy.m-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Sura Bhavana", "bhavana.s-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Nare Sandhya", "sandhya.n-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Chinna Nagappagari Mounika", "mounika.c-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Padarthi Sahithi", "sahithi.p-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Baira Spoorthi", "spoorthi.b-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Malireddy Mineesh", "mineesh.m-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Boodati Jayanth", "jayanth.b-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Palagiri Jeswith Venkata Sai", "jeswithvenkatasai.p-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Tippuluri Safiya", "safiya.t-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Madarapu Jaswanth", "jaswanth.m-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Baddigam Venkateswara Reddy", "venkateswarareddy.b-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Dandela Sri Charan Kumar Reddy", "charankumar.d-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Anamala Hemanth Kumar", "hemanthkumar.a-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Katha Venkata Nishanth Reddy", "venkatanishanthreddy.k-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Santimalla Nihitha", "nihitha.s-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Thalliboyina Sashank", "sashank.t-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Pabolu Vyshnavi Anantha Lakshmi", "vyshnaviananthalakshmi.p-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Gummalla Venkata Santosh Reddy", "santhoshreddy.g-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Sangala Sai Teja", "saiteja.s-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Koppula Venkata Sai Kishore", "venkatasaikishore.k-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Byrugani Ragavarshini", "ragavarshini.b-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Janga Muni Bhargav Reddy", "bhargavreddy.j-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Podalakuru Bindu Lovely", "bindulovely.p-29@scds.saiuniversity.edu.in", "SCDS"),
+    # Batch 3
+    ("Baira Kushi", "kushi.b-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Kanam Chandu", "chandu.k-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Bakkisetty Tarun", "tarun.b-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Podapati Sasidhar", "sasidhar.p-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Rayi Manvitha Rai", "manvitharaj.r-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Tankasala Geethika", "geethika.t-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Bovilla Meganadh Reddy", "meghanadhreddy.b-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Abhiram Thandra", "abhiram.t-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Vasili Hemal Ankeswar", "hemalankeswar.v-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Ravipati Kouhik Sri Ram", "kowshiksriram.r-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Kesamsetty Shanmukha Lakshmi", "shanmukhalakshmi.k-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Ravipati Rajesh", "rajesh.r-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Maddala Haricharan Reddy", "haricharanreddy.m-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Peddireddy Siva Kumar Reddy", "sivakumarreddy.p-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Chamarthi Karthik Varma", "karthikvarma.c-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Sannareddy Mohitha Reddy", "mohitha.s-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Konakalla Sri Purna Akshith", "puranakshith.k-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Kandrati Tejomai", "tejoamai.k-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Battula Bharath Kumar Reddy", "barathkumar.r-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Meha E", "meha.e-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Thugu Harshavardhan Reddy", "harshavardhan.t1-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("J L Dhanush", "dhanush.j-29@scds.saiuniversity.edu.in", "SCDS"),
+    ("Tadikela Sandeep Kumar", "sandeepkumar.t-29@soai.saiuniversity.edu.in", "SOAI")
+]
+
 # =====================================================================
 # SEED FUNCTIONS
 # =====================================================================
@@ -292,10 +483,11 @@ def seed_school():
     # Adding global universities if needed
     sas = School(name='School of Arts and Sciences', code='SAS', domain='sas.apex.edu.in')
     sol = School(name='School of Law', code='SOL', domain='sol.apex.edu.in')
+    soai = School(name='School of AI', code='SOAI', domain='soai.saiuniversity.edu.in')
     
-    db.session.add_all([scds, sas, sol])
+    db.session.add_all([scds, sas, sol, soai])
     db.session.commit()
-    return scds
+    return scds, soai
 
 def seed_staff(school):
     print("Seeding staff...")
@@ -383,6 +575,23 @@ def seed_section_3(school):
     db.session.commit()
     return sec
 
+def seed_section_5(school):
+    print("Seeding Section 5 students...")
+    sec = Section(school_id=school.id, name='Section 5', code='SCDS-CS-S5', batch_year=2025)
+    db.session.add(sec)
+    db.session.commit()
+    
+    pw = bcrypt.generate_password_hash('hive@1234').decode('utf-8')
+    for name, email, lab_sec in SECTION_5_STUDENTS:
+        user = User(school_id=school.id, email=email,
+                    password_hash=pw, role='student', name=name, must_change_password=True)
+        db.session.add(user)
+        db.session.flush()
+        
+        student = Student(user_id=user.id, section_id=sec.id, enrollment_year=2025, major='Computer Science', lab_section=lab_sec)
+        db.session.add(student)
+    db.session.commit()
+
 def seed_timetable(school, section_3, teacher_user):
     print("Seeding courses and timetable...")
     
@@ -447,13 +656,55 @@ def seed_timetable(school, section_3, teacher_user):
         db.session.add(entry)
     db.session.commit()
 
+def seed_section_4(school):
+    print("Seeding Section 4 students...")
+    sec = Section(school_id=school.id, name='Section 4', code='SCDS-CS-S4', batch_year=2025)
+    db.session.add(sec)
+    db.session.commit()
+    
+    pw = bcrypt.generate_password_hash('hive@1234').decode('utf-8')
+    for name, email in SECTION_4_STUDENTS:
+        user = User(school_id=school.id, email=email,
+                    password_hash=pw, role='student', name=name, must_change_password=True)
+        db.session.add(user)
+        db.session.flush()
+        
+        student = Student(user_id=user.id, section_id=sec.id, enrollment_year=2025, major='Computer Science')
+        db.session.add(student)
+    db.session.commit()
+
+def seed_section_6(scds_school, soai_school):
+    print("Seeding Section 6 students...")
+    sec = Section(school_id=scds_school.id, name='Section 6', code='SCDS-CS-S6', batch_year=2025)
+    db.session.add(sec)
+    db.session.commit()
+    
+    pw = bcrypt.generate_password_hash('hive@1234').decode('utf-8')
+    for name, email, school_code in SECTION_6_STUDENTS:
+        target_school = scds_school if school_code == "SCDS" else soai_school
+        if not target_school:
+            print(f"Warning: School {school_code} not found for student {name}.")
+            continue
+            
+        user = User(school_id=target_school.id, email=email,
+                    password_hash=pw, role='student', name=name, must_change_password=True)
+        db.session.add(user)
+        db.session.flush()
+        
+        student = Student(user_id=user.id, section_id=sec.id, enrollment_year=2025, major='Computer Science')
+        db.session.add(student)
+    db.session.commit()
+
 def seed_all():
-    school = seed_school()
-    prof = seed_staff(school)
-    seed_section_1(school)
-    seed_section_2(school)
-    sec3 = seed_section_3(school)
-    seed_timetable(school, sec3, prof)
+    scds_school, soai_school = seed_school()
+    prof = seed_staff(scds_school)
+    seed_section_1(scds_school)
+    seed_section_2(scds_school)
+    secin3 = seed_section_3(scds_school)
+    seed_section_4(scds_school)
+    seed_section_5(scds_school)
+    seed_section_6(scds_school, soai_school)
+    seed_timetable(scds_school, secin3, prof)
     print("All data seeded successfully.")
 
 if __name__ == "__main__":
@@ -462,4 +713,4 @@ if __name__ == "__main__":
         db.metadata.drop_all(bind=db.engine)
         db.create_all()
         seed_all()
-        print("Database seeded successfully.")
+        print("Database initialized successfully.")
