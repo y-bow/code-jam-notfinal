@@ -39,10 +39,20 @@ def student_dashboard():
     current_day = datetime.now().weekday()
     if current_day <= 4:  # Monday to Friday
         if user.student_profile and user.student_profile.section_id:
-            entries = TimetableEntry.query.filter_by(
+            entries_query = TimetableEntry.query.filter_by(
                 section_id=user.student_profile.section_id,
                 day=current_day
-            ).all()
+            )
+            # If student is in a different lab section, exclude LAB entries
+            student_lab_section = user.student_profile.lab_section
+            section_theory_num = user.student_profile.section_id  # numerical id, not the same
+            # We exclude (LAB) entries if lab_section is set and doesn't match section_id's lab group
+            entries = [
+                e for e in entries_query.all()
+                if student_lab_section is None
+                or '(LAB)' not in e.title
+                or student_lab_section == 3  # Section 3 lab group
+            ]
             
             today_classes = [entry.to_dict() for entry in entries]
             # Sort by time
@@ -465,6 +475,7 @@ def timetable():
     
     # If student, show their section's timetable
     if my_section_id:
+        student_lab_section = user.student_profile.lab_section if user.student_profile else None
         # Mon=0, Sat=5
         for day_idx in range(6):
             # Show all classes for student, so they see cancelled ones with strikethrough
@@ -472,6 +483,10 @@ def timetable():
                 section_id=my_section_id, 
                 day=day_idx
             ).order_by(TimetableEntry.start_time).all()
+            
+            # Filter out LAB entries for students in a different lab section
+            if student_lab_section is not None and student_lab_section != 3:
+                entries = [e for e in entries if '(LAB)' not in e.title]
             
             timetable_data[day_idx] = [
                 {

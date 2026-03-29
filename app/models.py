@@ -116,6 +116,7 @@ class Student(db.Model):
     major = db.Column(db.String(100))
     sgpa = db.Column(db.Float, default=0.0)
     cgpa = db.Column(db.Float, default=0.0)
+    lab_section = db.Column(db.Integer, nullable=True)  # e.g. 3, 8 — which lab group this student is in
 
     user = db.relationship('User', backref=db.backref('student_profile', uselist=False))
     section = db.relationship('Section', backref=db.backref('students', lazy='dynamic'))

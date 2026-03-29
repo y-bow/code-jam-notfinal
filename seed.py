@@ -121,8 +121,8 @@ def seed_users(scds_school, sections):
 
     # 2. Placeholder Users
     placeholders = [
-        ("Superadmin", "superadmin@hive.lms", "superadmin", None, None),
-        ("Admin", "admin@hive.lms", "admin", None, None),
+        ("Superadmin", "superadmin@saiuniversity.edu.in", "superadmin", None, None),
+        ("Admin", "admin@saiuniversity.edu.in", "admin", None, None),
         ("Dean", "dean@scds.saiuniversity.edu.in", "dean", scds_school.id, None),
         ("Professor", "professor@scds.saiuniversity.edu.in", "professor", scds_school.id, None),
         ("Assistant Professor", "assistant@scds.saiuniversity.edu.in", "assistant_professor", scds_school.id, None),
