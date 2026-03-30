@@ -93,7 +93,7 @@ To test the multi-tenant and role-based features, you can use the following defa
 | **Global Admin**| `admin@saiuniversity.edu.in`             | Full system management        |
 | **Dean**        | `dean@scds.saiuniversity.edu.in`         | School-wide analytics view      |
 | **Professor**   | `professor@scds.saiuniversity.edu.in`    | Course & student management      |
-| **Student**     | `sripadagayathri.l-29@scds.saiuniversity.edu.in` | Personalized student dashboard |
+| **Student**     | `ruddhima.p-29@scds.saiuniversity.edu.in` | Personalized student dashboard |
 
 > [!NOTE]
 > **CAPTCHA Bypass**: For development and testing environments, the backend CAPTCHA check is currently disabled. You can enter any character string in the CAPTCHA field on the login page to proceed.
